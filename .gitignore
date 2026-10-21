@@ -1,0 +1,54 @@
+# Data, intermediates and outputs live in the project folder outside this repo;
+# these patterns are a safety net in case a file is saved here by mistake
+
+# Script printouts
+logs/
+
+# Python
+__pycache__/
+*.pyc
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
+# GIS data
+*.gdb/
+*.tif
+*.tif.*
+*.tfw
+*.ovr
+*.img
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.sbn
+*.sbx
+*.shp.xml
+*.lock
+*.gpkg
+*.zip
+
+# Tables and documents that may hold downloaded data or copyrighted text
+*.csv
+*.xlsx
+*.xls
+*.txt
+*.pdf
+
+# Exception: small source tables transcribed from web pages are kept in git
+!code/inputs/*.csv
+!code/inputs/*.txt
+
+# ArcGIS Pro projects
+*.aprx
+*.atbx
+
+# Exception: the replication package ships its estimation data and comparison tables
+!replication/data/*.csv
+!replication/data/frames/*.csv
+!replication/output/*.csv
+!requirements.txt

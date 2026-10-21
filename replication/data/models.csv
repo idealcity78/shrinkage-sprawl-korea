@@ -1,0 +1,130 @@
+id,script,formula,cov_type,cluster,nobs
+shrink_sprawl_001,shrink_sprawl,new_rate_pre ~ gp + neg + gp:neg + lpop10 + C(group == '수도권'),HC1,,161
+shrink_sprawl_002,shrink_sprawl,leap_share_pre ~ gp + neg + gp:neg + lpop10 + C(group == '수도권'),HC1,,157
+shrink_sprawl_003,shrink_sprawl,d_lpcu_pre ~ gp + neg + gp:neg + lpop10 + C(group == '수도권'),HC1,,161
+shrink_sprawl_004,shrink_sprawl,new_rate_post ~ gp + neg + gp:neg + lpop10 + C(group == '수도권'),HC1,,161
+shrink_sprawl_005,shrink_sprawl,leap_share_post ~ gp + neg + gp:neg + lpop10 + C(group == '수도권'),HC1,,161
+shrink_sprawl_006,shrink_sprawl,g_old_0010 ~ new_rate_pre + g_pop_0010 + lpop10 + C(region),HC1,,121
+shrink_sprawl_007,shrink_sprawl,g_old_0010 ~ new_rate_pre + g_pop_0010 + lpop10 + C(region),HC1,,85
+shrink_sprawl_008,shrink_sprawl,g_old_0010 ~ new_rate_pre + g_pop_0010 + lpop10 + C(region),HC1,,36
+shrink_sprawl_009,shrink_sprawl,g_old_0010 ~ new_rate_pre + g_pop_0010 + lpop10,HC1,,40
+shrink_sprawl_010,shrink_sprawl,g_old_0010 ~ leap_share_pre + g_pop_0010 + lpop10 + C(region),HC1,,118
+shrink_sprawl_011,shrink_sprawl,g_old_0010 ~ leap_share_pre + g_pop_0010 + lpop10 + C(region),HC1,,83
+shrink_sprawl_012,shrink_sprawl,g_old_0010 ~ leap_share_pre + g_pop_0010 + lpop10 + C(region),HC1,,35
+shrink_sprawl_013,shrink_sprawl,g_old_0010 ~ leap_share_pre + g_pop_0010 + lpop10,HC1,,39
+shrink_sprawl_014,shrink_sprawl,g_old_1524 ~ new_rate_post + g_pop_1524 + lpop10 + C(region),HC1,,121
+shrink_sprawl_015,shrink_sprawl,g_old_1524 ~ new_rate_post + g_pop_1524 + lpop10 + C(region),HC1,,85
+shrink_sprawl_016,shrink_sprawl,g_old_1524 ~ new_rate_post + g_pop_1524 + lpop10 + C(region),HC1,,36
+shrink_sprawl_017,shrink_sprawl,g_old_1524 ~ new_rate_post + g_pop_1524 + lpop10,HC1,,40
+shrink_sprawl_018,shrink_sprawl,g_old_1524 ~ out_share_1524 + g_pop_1524 + lpop10 + C(region),HC1,,121
+shrink_sprawl_019,shrink_sprawl,g_old_1524 ~ out_share_1524 + g_pop_1524 + lpop10 + C(region),HC1,,85
+shrink_sprawl_020,shrink_sprawl,g_old_1524 ~ out_share_1524 + g_pop_1524 + lpop10 + C(region),HC1,,36
+shrink_sprawl_021,shrink_sprawl,g_old_1524 ~ out_share_1524 + g_pop_1524 + lpop10,HC1,,40
+shrink_sprawl_022,shrink_sprawl,new_rate_post ~ gp + neg + gp:neg + lpop10 + C(group == '수도권'),HC1,,161
+shrink_sprawl_023,shrink_sprawl,d_lpcu_rp_post ~ gp + neg + gp:neg + lpop10 + C(group == '수도권'),HC1,,161
+shrink_sprawl_024,shrink_sprawl,leap_share_post ~ gp + neg + gp:neg + lpop10 + C(group == '수도권'),HC1,,161
+supply_demand_001,supply_demand,s_house ~ g_hh_lag + C(rp),cluster,cluster_id,488
+supply_demand_002,supply_demand,s_house ~ g_hh_lag + shrink_lag + C(rp),cluster,cluster_id,488
+supply_demand_003,supply_demand,s_house ~ g_hh_lag + g_hh + shrink_lag + C(rp),cluster,cluster_id,488
+supply_demand_004,supply_demand,g_hh ~ s_house + C(SG_ID) + C(rp),cluster,cluster_id,610
+supply_demand_005,supply_demand,g_pop ~ s_house + C(SG_ID) + C(rp),cluster,cluster_id,610
+supply_demand_006,supply_demand,g_hh ~ s_house + C(SG_ID) + C(rp),cluster,cluster_id,488
+supply_demand_007,supply_demand,g_pop ~ s_house + C(SG_ID) + C(rp),cluster,cluster_id,488
+supply_demand_008,supply_demand,g_hh ~ s_house + C(SG_ID) + C(rp),cluster,cluster_id,430
+supply_demand_009,supply_demand,g_hh ~ s_house + C(SG_ID) + C(rp),cluster,cluster_id,55
+supply_demand_010,supply_demand,g_hh ~ s_house + C(SG_ID) + C(rp),cluster,cluster_id,125
+supply_demand_011,supply_demand,g_hh_lead ~ s_house + g_hh + C(rp),cluster,cluster_id,488
+supply_demand_012,supply_demand,g_hh_lead ~ s_house + g_hh + C(SG_ID) + C(rp),cluster,cluster_id,488
+supply_demand_013,supply_demand,g_pop_lead ~ s_house + g_pop + C(rp),cluster,cluster_id,488
+supply_demand_014,supply_demand,g_pop_lead ~ s_house + g_pop + C(SG_ID) + C(rp),cluster,cluster_id,488
+supply_demand_015,supply_demand,s_house_lead ~ g_hh + s_house + C(rp),cluster,cluster_id,488
+supply_demand_016,supply_demand,s_house_lead ~ g_hh + s_house + C(SG_ID) + C(rp),cluster,cluster_id,488
+supply_demand_017,supply_demand,sg_in ~ s_house + C(SG_ID) + C(rp),cluster,cluster_id,610
+supply_demand_018,supply_demand,sg_net ~ s_house + C(SG_ID) + C(rp),cluster,cluster_id,610
+supply_demand_019,supply_demand,sg_in_lead ~ s_house + sg_in + C(SG_ID) + C(rp),cluster,cluster_id,488
+supply_demand_020,supply_demand,sg_net_lead ~ s_house + sg_net + C(SG_ID) + C(rp),cluster,cluster_id,488
+ic_unmet_001,ic_unmet,g_manuf ~ ic_0612 + ic_0105 + ic_pre + pre_manuf + lpop00 + C(region),HC1,,122
+ic_unmet_002,ic_unmet,g_manuf ~ ic_1624 + ic_0612 + ic_0105 + ic_pre + pre_manuf + lpop00 + C(region),HC1,,122
+ic_unmet_003,ic_unmet,g05_manuf ~ ic_1624 + ic_pre + pre_manuf + lpop00 + C(region),HC1,,122
+ic_unmet_004,ic_unmet,g_emp ~ ic_0612 + ic_0105 + ic_pre + pre_emp + lpop00 + C(region),HC1,,122
+ic_unmet_005,ic_unmet,g_emp ~ ic_1624 + ic_0612 + ic_0105 + ic_pre + pre_emp + lpop00 + C(region),HC1,,122
+ic_unmet_006,ic_unmet,g05_emp ~ ic_1624 + ic_pre + pre_emp + lpop00 + C(region),HC1,,122
+ic_unmet_007,ic_unmet,g_pop ~ ic_0612 + ic_0105 + ic_pre + pre_pop + lpop00 + C(region),HC1,,122
+ic_unmet_008,ic_unmet,g_pop ~ ic_1624 + ic_0612 + ic_0105 + ic_pre + pre_pop + lpop00 + C(region),HC1,,122
+ic_unmet_009,ic_unmet,g05_pop ~ ic_1624 + ic_pre + pre_pop + lpop00 + C(region),HC1,,122
+ic_unmet_010,ic_unmet,g_hh ~ ic_0612 + ic_0105 + ic_pre + pre_hh + lpop00 + C(region),HC1,,122
+ic_unmet_011,ic_unmet,g_hh ~ ic_1624 + ic_0612 + ic_0105 + ic_pre + pre_hh + lpop00 + C(region),HC1,,122
+ic_unmet_012,ic_unmet,g05_hh ~ ic_1624 + ic_pre + pre_hh + lpop00 + C(region),HC1,,122
+ic_unmet_013,ic_unmet,ic_0612 ~ pre_manuf + lpop00 + C(region),HC1,,122
+ic_unmet_014,ic_unmet,ic_0612 ~ pre_pop + lpop00 + C(region),HC1,,122
+ic_unmet_015,ic_unmet,ic_0612 ~ pre_hh + lpop00 + C(region),HC1,,122
+ic_unmet_016,ic_unmet,d_manuf ~ km2_0612 + km2_0105 + pre_manuf + lpop00 + C(region),HC1,,122
+vacancy_001,vacancy,d_vac ~ s + C(sigun) + C(ry),cluster,cluster_id,1220
+vacancy_002,vacancy,d_vac_old ~ s + C(sigun) + C(ry),cluster,cluster_id,1220
+vacancy_003,vacancy,d_vac_new5 ~ s + C(sigun) + C(ry),cluster,cluster_id,1220
+vacancy_004,vacancy,d_vac ~ s + C(sigun) + C(ry),cluster,cluster_id,860
+vacancy_005,vacancy,d_vac_old ~ s + C(sigun) + C(ry),cluster,cluster_id,860
+vacancy_006,vacancy,d_vac_new5 ~ s + C(sigun) + C(ry),cluster,cluster_id,860
+vacancy_007,vacancy,d_vac ~ s + C(sigun) + C(ry),cluster,cluster_id,110
+vacancy_008,vacancy,d_vac_old ~ s + C(sigun) + C(ry),cluster,cluster_id,110
+vacancy_009,vacancy,d_vac_new5 ~ s + C(sigun) + C(ry),cluster,cluster_id,110
+vacancy_010,vacancy,d_vac ~ s + C(sigun) + C(ry),cluster,cluster_id,250
+vacancy_011,vacancy,d_vac_old ~ s + C(sigun) + C(ry),cluster,cluster_id,250
+vacancy_012,vacancy,d_vac_new5 ~ s + C(sigun) + C(ry),cluster,cluster_id,250
+vacancy_013,vacancy,d_vac ~ s + C(sigun) + C(ry),cluster,cluster_id,395
+vacancy_014,vacancy,d_vac_old ~ s + C(sigun) + C(ry),cluster,cluster_id,395
+vacancy_015,vacancy,d_vac_new5 ~ s + C(sigun) + C(ry),cluster,cluster_id,395
+vacancy_016,vacancy,d_vac_old ~ s + d_hh + C(sigun) + C(ry),cluster,cluster_id,610
+plan_pop_001,plan_pop,plan_g ~ trend_g + C(region),cluster,cluster_id,289
+plan_pop_002,plan_pop,reserve_share ~ excess_pct + C(region),cluster,cluster_id,270
+plan_pop_003,plan_pop,new_urb ~ plan_excess + g_reg + C(region),HC1,,87
+plan_pop_004,plan_pop,new_urb ~ reserve_share + g_reg + C(region),HC1,,87
+plan_pop_005,plan_pop,plan_g ~ post + trend_g + C(region),cluster,cluster_id,272
+plan_event_001,plan_event,zone ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1904
+plan_event_002,plan_event,zone ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1360
+plan_event_003,plan_event,zone ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,544
+plan_event_004,plan_event,zone_res ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1904
+plan_event_005,plan_event,zone_res ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1360
+plan_event_006,plan_event,zone_res ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,544
+plan_event_007,plan_event,devp ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1903
+plan_event_008,plan_event,devp ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1359
+plan_event_009,plan_event,devp ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,544
+plan_event_010,plan_event,zone ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1904
+plan_event_011,plan_event,zone ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1360
+plan_event_012,plan_event,zone ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,544
+plan_event_013,plan_event,zone_res ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1904
+plan_event_014,plan_event,zone_res ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1360
+plan_event_015,plan_event,zone_res ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,544
+plan_event_016,plan_event,devp ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1903
+plan_event_017,plan_event,devp ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1359
+plan_event_018,plan_event,devp ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,544
+plan_event_019,plan_event,zone ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1904
+plan_event_020,plan_event,zone ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1360
+plan_event_021,plan_event,zone ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,544
+plan_event_022,plan_event,zone_res ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1904
+plan_event_023,plan_event,zone_res ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1360
+plan_event_024,plan_event,zone_res ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,544
+plan_event_025,plan_event,devp ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1903
+plan_event_026,plan_event,devp ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1359
+plan_event_027,plan_event,devp ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,544
+plan_event_028,plan_event,zone ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1904
+plan_event_029,plan_event,zone ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1360
+plan_event_030,plan_event,zone ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,544
+plan_event_031,plan_event,zone_res ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1904
+plan_event_032,plan_event,zone_res ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1360
+plan_event_033,plan_event,zone_res ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,544
+plan_event_034,plan_event,devp ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1903
+plan_event_035,plan_event,devp ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1359
+plan_event_036,plan_event,devp ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,544
+plan_event_037,plan_event,zone ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1904
+plan_event_038,plan_event,zone ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1360
+plan_event_039,plan_event,zone ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,544
+plan_event_040,plan_event,zone_res ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1904
+plan_event_041,plan_event,zone_res ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1360
+plan_event_042,plan_event,zone_res ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,544
+plan_event_043,plan_event,devp ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1903
+plan_event_044,plan_event,devp ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,1359
+plan_event_045,plan_event,devp ~ Em4 + Em3 + Em2 + E0 + E1 + E2 + E3 + E4 + E5 + E6 + C(sigun) + C(ry),cluster,cluster_id,544
+zoning_route_001,zoning_route,"out_A ~ C(group, Treatment('성장')) + lnew + C(region)",HC1,,118
+zoning_route_002,zoning_route,"out_A ~ C(group, Treatment('성장')) + lnew + avail_urb + old_inA + gun + C(region)",HC1,,118
+zoning_route_003,zoning_route,out_A ~ reserve_share09 + lnew + C(region),HC1,,84
