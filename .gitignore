@@ -48,7 +48,8 @@ __pycache__/
 *.atbx
 
 # Exception: the replication package ships its estimation data and comparison tables
-!replication/data/*.csv
-!replication/data/frames/*.csv
+!replication/data/*/*.csv
+!replication/data/*/frames/*.csv
+!replication/data/*/perm/*.csv
 !replication/output/*.csv
 !requirements.txt

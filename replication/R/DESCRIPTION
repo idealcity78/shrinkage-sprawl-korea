@@ -1,4 +1,4 @@
-Package: paper1replication
-Title: R re-estimation of the regressions of paper 1
+Package: shrinkagesprawlreplication
+Title: R re-estimation of the regressions of papers 1 and 2
 Version: 1.0.0
 Imports: fixest, data.table

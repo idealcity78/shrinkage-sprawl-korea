@@ -1,0 +1,14 @@
+script,y,coef,p_perm
+zone_event_study,out_zone,6.230467634143348,0.0
+zone_event_study,out_new,-0.086901525357571,0.922
+zone_event_study,out_rest,-2.2336818110260377,0.17
+zone_event_study,out_outside,3.229592283453221,0.582
+zone_event_study,out_capital,1.8120876739907248,0.295
+zone_event_study,in_outside,2.5711457027407776,0.686
+zone_event_study,net_old,-4.207400557870406,0.152
+zone_event_study,sg_in,24.75000876165087,0.0
+zone_event_study,sg_out,18.788373329187408,0.002
+zone_event_study,sg_net,5.961635432463469,0.066
+emp_supply,l_emp_old,0.007,0.825
+emp_supply,l_comm_old,0.026,0.468
+emp_supply,l_comm_rel,-0.146,0.0

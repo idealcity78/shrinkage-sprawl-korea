@@ -8,33 +8,47 @@ building does:
 - **Paper 2.** Old-core migration paths: does new housing outside the historic core drain it? (code in
   `code/04_partB`, `code/05_flows`).
 
-## Quick replication of the regressions (paper 1)
+## Quick replication of the regressions
 
-The folder `replication/` reproduces every regression of paper 1 (129 models: Tables 2–4, Figures 2–3,
-Supplementary Tables S4–S10) without the raw data or ArcGIS.
+The folder `replication/` re-estimates every regression of both papers in R, without the raw data or ArcGIS:
+
+- **Paper 1:** 129 models (Tables 2–4, Figures 2–3, Supplementary Tables S4–S10).
+- **Paper 2:** 198 models (Tables 3–5 and the robustness checks of Sections 5.3–5.4), plus its two permutation tests.
 
 ```
 replication/
 ├─ data/
-│  ├─ frames/{model id}.csv     estimation data of each model (unit-level aggregates)
-│  ├─ models.csv                formula, standard-error type and N of each model
-│  ├─ python_estimates.csv      estimates reported in the paper (Python, statsmodels)
+│  ├─ paper1/, paper2/
+│  │  ├─ frames/{model id}.csv  estimation data of each model (unit-level aggregates)
+│  │  ├─ models.csv             formula, standard-error type, weights and N of each model
+│  │  ├─ python_estimates.csv   estimates reported in the paper (Python, statsmodels)
+│  │  └─ perm/                  paper 2: control panel, the 1,000 placebo draws, reported permutation p
 │  └─ CODEBOOK.md               variable definitions
-├─ R/01_replicate_paper1.R      independent re-estimation in R (fixest), renv.lock
+├─ R/01_replicate_paper1.R      independent re-estimation in R (fixest)
+├─ R/02_replicate_paper2.R      the same for paper 2, and the permutation tests
+├─ R/replicate_lib.R            shared functions; renv.lock gives package versions
 ├─ output/                      R estimates and the comparison with the Python estimates
-└─ export_model_frames.py       writes data/ from the full pipeline (needs the raw data)
+└─ export_model_frames.py       writes data/ from the full pipeline (needs the raw data): paper1 | paper2
 ```
 
 With R 4.4 and the packages in `replication/R/renv.lock` (`fixest`, `data.table`):
 
 ```
 Rscript replication/R/01_replicate_paper1.R
+Rscript replication/R/02_replicate_paper2.R
 ```
 
-The script writes `replication/output/paper1_r_vs_python.md`. In the current version, all 687 estimated terms agree with
-the published estimates (coefficients, standard errors and N; largest difference 1.6e-11). Reported standard errors are
-heteroskedasticity-robust (HC1) or clustered by unit, keep singleton observations and count fixed-effect dummies as
-parameters. The comparison file also gives fixest's default standard errors, which are equal or smaller.
+The scripts write `replication/output/paper1_r_vs_python.md` and `paper2_r_vs_python.md`. In the current version every
+estimated term agrees with the published estimates (coefficients, standard errors and N):
+
+- paper 1: 687 terms, largest difference 1.6e-11;
+- paper 2: 877 terms, largest difference 2.8e-8.
+
+The permutation p of all 13 outcomes of paper 2 is the same in R, using the placebo draws made in Python.
+
+Reported standard errors are clustered by unit or heteroskedasticity-robust (HC1). They keep singleton observations and
+count fixed-effect dummies as parameters. The comparison files also give fixest's default standard errors, which are
+equal or smaller.
 
 ## Full pipeline
 
@@ -57,11 +71,12 @@ industrial-complex files). Raw data go to `data_raw/`, intermediate files to `da
 | 1 | `code/01_landcover` | `unzip_l2.py`, `merge_l2.py`, `unzip_l3.py` |
 | 2 | `code/02_grid` | `sigun.py`, `grid_lc_share.py`, `grid_sgis.py`, `check_sgis.py`, `supply_zones.py`, `grid_zoning.py`, `grid_industry.py` |
 | 3 | `code/05_flows` | `build_mdis_db.py`, `check_mdis_db.py`, `dong_xwalk.py`, `dong_class.py`, `flows_old_core_mdis.py`, `zone_pop.py` |
-| 4 | `code/03_partA` (paper 1) | `regpop.py`, `sigun_panel.py`, `supply_demand.py`, `shrink_sprawl.py`, `../04_partB/emp_supply.py`, `ic_unmet.py`, `vacancy.py`, `plan_pop.py`, `plan_event.py`, `zoning_route.py` |
-| 5 | paper 1 outputs | `paper1_tables.py`, `paper1_supplement_tables.py`, `paper1_figures.py`, `check_paper1_numbers.py` |
-| 6 | `code/04_partB` (paper 2) | `supply_panel.py`, `old_core_housing.py`, `flows_supply_panel.py`, `flows_age.py`, `same_dong_bound.py`, `same_dong_bound_vital.py`, `zone_event_study.py`, `supply_decomp.py`, then `paper2_tables.py`, `paper2_figures.py`, `paper2_numbers_check.py` |
+| 4 | `code/04_partB` (shared panels) | `supply_panel.py`, `flows_supply_panel.py`, `zone_event_study.py`, `emp_supply.py` (its `emp_sigun_year.csv` is also used by paper 1) |
+| 5 | `code/03_partA` (paper 1) | `regpop.py`, `sigun_panel.py`, `supply_demand.py`, `shrink_sprawl.py`, `ic_unmet.py`, `vacancy.py`, `plan_pop.py`, `plan_event.py`, `zoning_route.py` |
+| 6 | `code/04_partB` (paper 2) | `old_core_housing.py`, `flows_age.py`, `same_dong_bound.py`, `same_dong_bound_vital.py`, `partB_did.py`, `supply_decomp.py` |
+| 7 | outputs | paper 1: `paper1_tables.py`, `paper1_supplement_tables.py`, `paper1_figures.py`, `check_paper1_numbers.py`; paper 2: `paper2_tables.py`, `paper2_figures.py`, `paper2_numbers_check.py` |
 
-Model scripts accept the argument `models` to skip rebuilding grids from raw data. `check_paper1_numbers.py` and
+Paper 1 model scripts accept the argument `models` to skip rebuilding grids from raw data. `check_paper1_numbers.py` and
 `paper2_numbers_check.py` re-read every number of the manuscripts from the output files (the manuscripts themselves are not part of the public repository).
 
 ## Data
