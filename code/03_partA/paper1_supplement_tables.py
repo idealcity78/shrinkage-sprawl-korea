@@ -363,7 +363,7 @@ def s8():
             continue
         if q[0] in G:
             g, q = q[0], q[1:]
-        rows.append([EN[g], q[0].replace("-", "–")] + q[1:])
+        rows.append([EN[g], q[0].replace("-", "–")] + q[1:-1] + [f"{float(q[-1]):.1f}"])   # share of plans: one decimal
     m = pd.read_csv(os.path.join(A, "plan_pop_models.csv"))
     ln = lambda r: int(r.n)
     pt = [pick(m, block="plan_on_trend", term=t) for t in ("trend_g", "Intercept", "pred_zero_trend")]

@@ -20,6 +20,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 A = os.path.join(paths.OUTPUTS, "partA")
 DOCS = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "docs")
 SUP = os.path.join("..", "paper1", "supplement_tables.md")
+TAB = os.path.join("..", "paper1", "tables.md")
 DRAFT = os.path.join(DOCS, sys.argv[1] if len(sys.argv) > 1 else "paper1_results_draft.md")
 
 # (claim, value as written in the draft, file, regex capturing the source value, scale applied to the source value)
@@ -74,8 +75,8 @@ C = [
     ("post-2006 designations, growing (km2)", "136.7", "ic_unmet.txt", r"성장\s+176\.0\s+([\d.]+)", 1),
     ("sale rate shrinking (%)", "90.2", "ic_unmet.txt", r"감소\s+265\.0\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+([\d.]+)", 1),
     ("sale rate growing (%)", "96.1", "ic_unmet.txt", r"성장\s+176\.0\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+([\d.]+)", 1),
-    ("manufacturing workers/km2 shrinking", "512", "ic_unmet.txt", r"감소\s+265\.0(?:\s+[\d.]+){7}\s+([\d.]+)", 1),
-    ("manufacturing workers/km2 growing", "672", "ic_unmet.txt", r"성장\s+176\.0(?:\s+[\d.]+){7}\s+([\d.]+)", 1),
+    ("manufacturing workers/km2 shrinking", "511.5", SUP, r"\| Shrinking \(after 2006\) \|(?: [^|]+ \|){8} ([\d.,]+) \|", 1),
+    ("manufacturing workers/km2 growing", "672.2", SUP, r"\| Growing \(after 2006\) \|(?: [^|]+ \|){8} ([\d.,]+) \|", 1),
     ("2006-12 designation -> later manufacturing growth", "1.132", "ic_unmet.txt", r"제조업 종사자  2006-12 지정 \+([\d.]+)", 1),
     ("placebo 2016-24 designation -> 2005-15 growth", "0.947", "ic_unmet.txt", r"제조업 종사자[^\n]*2005-15 성장 \+([\d.]+)", 1),
     ("prior manufacturing growth -> designation", "0.089", "ic_unmet.txt", r"pre_manuf \+([\d.]+)", 1),
@@ -104,15 +105,16 @@ C = [
     ("realised shrinking", "0.76", "plan_pop.txt", r"감소\s+172\s+[\d.]+\s+-[\d.]+\s+-([\d.]+)", 1),
     ("attainment shrinking", "0.66", "plan_pop.txt", r"감소\s+172(?:\s+-?[\d.]+){4}\s+([\d.]+)", 1),
     ("attainment capital region", "0.82", "plan_pop.txt", r"수도권\s+159(?:\s+-?[\d.]+){4}\s+([\d.]+)", 1),
-    ("slope planned on trend", "0.25", "plan_pop.txt", r"기울기 ([\d.]+)\*", 1),
-    ("its s.e.", "0.13", "plan_pop.txt", r"기울기 [\d.]+\*+ \(se ([\d.]+)\)", 1),
-    ("planned growth at zero trend, mean over regions", "3.30", "plan_pop.txt", r"표본 권역 평균\) ([\d.]+)", 1),
-    ("its s.e.", "0.28", "plan_pop.txt", r"표본 권역 평균\) [\d.]+ \(se ([\d.]+)\)", 1),
-    ("reserve per added resident, shrinking (m2)", "384", "plan_pop.txt", r"감소\s+[\d.]+\s+[\d.]+\s+([\d.]+)\n정체\s+17", 1),
-    ("reserve per added resident, capital (m2)", "82", "plan_pop.txt", r"수도권\s+11\.3\s+[\d.]+\s+([\d.]+)", 1),
-    ("cap effect (%p/yr)", "2.13", "plan_pop.txt", r"2019년 이후 수립\(추세·권역 통제\): -([\d.]+)", 1),
-    ("its s.e.", "0.60", "plan_pop.txt", r"2019년 이후 수립.*?\(se ([\d.]+)\)", 1),
-    ("2019-25 shrinking plans projecting growth (%)", "90", "plan_pop.txt", r"2019-25\s+48\s+[\d.]+\s+-[\d.]+\s+([\d.]+)", 1),
+    ("slope planned on trend", "0.248", SUP, r"\| Prior 5-year trend \(1 pp\) \| ([\d.]+) \(", 1),
+    ("its s.e.", "0.125", SUP, r"\| Prior 5-year trend \(1 pp\) \| [\d.]+ \(([\d.]+)\)", 1),
+    ("planned growth at zero trend, mean over regions", "3.298", SUP, r"\| Prediction at zero trend, mean over regions \| ([\d.]+) \(", 1),
+    ("its s.e.", "0.279", SUP, r"\| Prediction at zero trend, mean over regions \| [\d.]+ \(([\d.]+)\)", 1),
+    ("reserve per added resident, shrinking (m2)", "384.4", TAB, r"\*\*Table 5\.\*\*[\s\S]*?\| Shrinking \|(?: [^|]+ \|){5} ([\d.]+) \|", 1),
+    ("reserve per added resident, capital (m2)", "82.0", TAB, r"\*\*Table 5\.\*\*[\s\S]*?\| Capital region \|(?: [^|]+ \|){5} ([\d.]+) \|", 1),
+    ("cap effect (%p/yr)", "2.131", SUP, r"\| Adopted 2019 or later \| -([\d.]+) \(", 1),
+    ("its s.e.", "0.595", SUP, r"\| Adopted 2019 or later \| -[\d.]+ \(([\d.]+)\)", 1),
+    ("2019-25 shrinking plans projecting growth (%)", "89.6", SUP, r"\| Shrinking \| 2019–25 \| \d+ \|(?: [^|]+ \|){2} ([\d.]+) \|", 1),
+    ("2019-25 shrinking plans, count", "48", SUP, r"\| Shrinking \| 2019–25 \| (\d+) \|", 1),
     ("2019-25 shrinking planned growth", "0.95", "plan_pop.txt", r"2019-25\s+48\s+([\d.]+)", 1),
     ("2019-25 shrinking trend", "1.15", "plan_pop.txt", r"2019-25\s+48\s+[\d.]+\s+-([\d.]+)", 1),
     ("2009 plan overstatement, shrinking (%)", "44", "plan_pop.txt", r"감소 시군 2009 계획 초과 중앙값 (\d+)%", 1),
@@ -125,8 +127,8 @@ C = [
     ("new plans 2009-25", "176", "plan_event.txt", r"새 계획 시행 (\d+)건", 1),
     ("reserve-enlarging plans", "70", "plan_event.txt", r"시가화예정용지 증가 (\d+)건", 1),
     ("population-raising plans", "32", "plan_event.txt", r"계획인구 증가 (\d+)건", 1),
-    ("reserve-enlarging plan -> zoning, cumulative", "2.39", "plan_event.txt", r"\[예정용지를 늘린 새 계획\(0/1\) → 용도지역\(주거·상업·공업\) 증가, 전체\].*?누적 -([\d.]+)", 1),
-    ("its s.e.", "3.42", "plan_event.txt", r"\[예정용지를 늘린 새 계획\(0/1\) → 용도지역\(주거·상업·공업\) 증가, 전체\].*?\(se ([\d.]+)\)", 1),
+    ("reserve-enlarging plan -> zoning, cumulative", "2.388", SUP, r"Panel B\. New plan enlarging the reserve\.[\s\S]*?\| Urban-use zoning \| All \|(?: [^|]+ \|){10} -([\d.]+) \(", 1),
+    ("its s.e.", "3.415", SUP, r"Panel B\. New plan enlarging the reserve\.[\s\S]*?\| Urban-use zoning \| All \|(?: [^|]+ \|){10} -[\d.]+ \(([\d.]+)\)", 1),
     ("pre-period joint p (zoning)", "0.57", "plan_event.txt", r"\[예정용지를 늘린 새 계획\(0/1\) → 용도지역\(주거·상업·공업\) 증가, 전체\].*?결합검정 p=([\d.]+)", 1),
     ("continuous reserve -> zoning cumulative", "0.002", "plan_event.txt", r"\[예정용지 증가 1%p → 용도지역\(주거·상업·공업\) 증가, 전체\].*?누적 ([\d.]+)", 1),
     ("its s.e.", "0.004", "plan_event.txt", r"\[예정용지 증가 1%p → 용도지역\(주거·상업·공업\) 증가, 전체\].*?\(se ([\d.]+)\)", 1),
@@ -210,7 +212,7 @@ DERIVED = [
     ("density decline shrinking (%)", "43", lambda v: round((1 - v["3,871"] / v["6,794"]) * 100)),
     ("density decline capital (%)", "28", lambda v: round((1 - v["15,456"] / v["21,572"]) * 100)),
     ("study si/gun = 85 + 11 + 25 + 8 + 32 (group counts, shrink_sprawl.txt)", "161", lambda v: 85 + 11 + 25 + 8 + 32),
-    ("cap effect rounded in section 3 (2.13 -> 2.1)", "2.1", lambda v: round(v["2.13"], 1)),
+    ("2019-25 shrinking plans projecting growth, count (89.6% of 48)", "43", lambda v: round(v["89.6"] / 100 * v["48"])),
     ("upper bound of continuous effect, % of 6-yr zoning flow (about 3)", "3",
      lambda v: round((0.002 + 1.96 * 0.004) * 19.8 / (1.27 * 6) * 100)),
 ]
@@ -221,24 +223,40 @@ def num(s):
 
 
 def table_values():
-    """Every number printed in Tables 1-4 and S2-S11 (absolute values)."""
+    """Every number printed in Tables 1-5 and S2-S12 (absolute values, and with their digits)."""
     t = ""
     for fn in ("tables.md", "supplement_tables.md"):
         t += open(os.path.join(A, "..", "paper1", fn), encoding="utf-8").read()
-    vals = set()
+    vals = Vals()
     for x in re.findall(r"-?[\d,]*\d(?:\.\d+)?", t):
         try:
             vals.add(abs(float(x.replace(",", ""))))
+            vals.exact.add((abs(float(x.replace(",", ""))), len(x.split(".")[1]) if "." in x else 0))
         except ValueError:
             pass
     return vals
 
 
 def in_tables(val, vals):
-    """The value as written, allowing the table to show more decimals or the text to scale by 1,000 (per dwelling)."""
+    """Where the value as written is printed: 'yes' if a table shows it with the same digits, 'per 1,000' if the text
+    rescales a per-dwelling coefficient (0.225 -> 225 per 1,000), 'rounded' if a table shows it only with more digits
+    (not allowed: the text uses the digits of the table), 'text only' otherwise."""
     v = num(val)
     d = len(val.split(".")[1]) if "." in val else 0
-    return any(abs(round(x, d) - v) < 1e-9 or abs(round(x * 1000, d) - v) < 1e-9 for x in vals)
+    if (v, d) in vals.exact:
+        return "yes"
+    if any(abs(round(x * 1000, d) - v) < 1e-9 for x in vals):
+        return "per 1,000"
+    if any(abs(round(x, d) - v) < 1e-9 for x in vals):
+        return "rounded"
+    return "text only"
+
+
+class Vals(set):
+    """Table values; .exact holds (value, number of decimals) as printed."""
+    def __init__(self):
+        super().__init__()
+        self.exact = set()
 
 
 def section_words(text, head):
@@ -264,15 +282,18 @@ def main():
             d = len(val.split(".")[1]) if "." in val else 0
             src = f"{x:,.{d}f}" if "," in val else f"{x:.{d}f}"
             ok = abs(round(x, d) - num(val)) < 1e-9
-        in_draft = val in draft
+            if f.endswith(".md") and scale == 1:          # read from a printed table: same digits required
+                ok = ok and m.group(1).lstrip("-") == val.lstrip("-")
+        in_draft = re.search(rf"(?<![\d.]){re.escape(val)}(?!\d)", draft) is not None
         bad += (not ok) + (not in_draft)
         seen[val] = num(val)
-        rows.append((i, claim, val, f, src, "OK" if ok else "MISMATCH", "yes" if in_draft else "NO",
-                     "yes" if in_tables(val, tv) else "text only"))
+        where = in_tables(val, tv)
+        bad += where == "rounded"
+        rows.append((i, claim, val, f, src, "OK" if ok else "MISMATCH", "yes" if in_draft else "NO", where))
     for claim, val, fn in DERIVED:
         x = fn(seen)
         ok = abs(x - num(val)) < 1e-9
-        in_draft = val in draft
+        in_draft = re.search(rf"(?<![\d.]){re.escape(val)}(?!\d)", draft) is not None
         bad += (not ok) + (not in_draft)
         rows.append((len(rows) + 1, claim + " [derived]", val, "computed from rows above", str(x),
                      "OK" if ok else "MISMATCH", "yes" if in_draft else "NO", "derived"))
@@ -282,7 +303,8 @@ def main():
              f"초록 {w_abs}단어(한도 250), 투고 사유서 {w_rat}단어(한도 300).", "",
              "출처 파일은 `outputs/partA/`. 부호는 본문 서술에 맞춰 절댓값으로 대조함(예: −0.028은 0.028). "
              "\"밖 비중\"은 100 − 주거·상업·공업 비중으로 환산.", "",
-             "\"표에 있음\"은 값이 표 1–4 또는 보충표 S2–S11에 인쇄되어 독자가 확인할 수 있는지를 뜻함.", "",
+             "\"표에 있음\"은 값이 표 1–5 또는 보충표 S2–S12에 같은 자릿수로 인쇄되어 있는지를 뜻함(per 1,000 = 호당 계수를 "
+             "천 호당으로 환산한 값). 본문은 표의 자릿수를 그대로 쓰며, 표보다 짧게 반올림한 값(rounded)은 오류로 센다.", "",
              "| # | 내용 | 원고 값 | 출처 파일 | 출처에서 다시 읽은 값 | 대조 | 원고에 있음 | 표에 있음 |",
              "|---|---|---|---|---|---|---|---|"]
     lines += [f"| {r[0]} | {r[1]} | {r[2]} | `{r[3]}` | {r[4]} | {r[5]} | {r[6]} | {r[7]} |" for r in rows]
@@ -292,7 +314,7 @@ def main():
         fh.write("\n".join(lines) + "\n")
     print(f"checked {len(rows)}, problems {bad}; abstract {w_abs} words, rationale {w_rat} words")
     for r in rows:
-        if r[5] != "OK" or r[6] != "yes":
+        if r[5] != "OK" or r[6] != "yes" or r[7] == "rounded":
             print("  ", r)
     print("text only (not printed in any table):", [(r[0], r[2]) for r in rows if r[7] == "text only"])
     sys.exit(1 if bad else 0)
