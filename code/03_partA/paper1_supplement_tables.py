@@ -1,4 +1,6 @@
-"""Supplementary tables S2-S11 of paper 1, built from the output files (no typed-in numbers).
+"""Supplementary tables S2-S12 of paper 1, built from the output files (no typed-in numbers).
+
+Different models never share a panel: each panel holds one model (or one model across samples or outcomes).
 
   S2  grid population / registered population by group and year (census -> register-census break)
   S3  sprawl indicators by group, both periods (shrink_sprawl.txt block 1)
@@ -11,6 +13,7 @@
   S10 zoning routes: new urban land, new dwellings and available land by zone; concentration ratios; KOSIS comparison
       (zoning_route.txt)
   S11 innovation and enterprise new towns excluded from the old core (newcity_zones.csv)
+  S12 nationwide events in the study period absorbed by the region x period (year) fixed effects (text only)
 Output: outputs/paper1/supplement_tables.md
 Run with ArcGIS Pro Python:  propy.bat code\\03_partA\\paper1_supplement_tables.py
 """
@@ -166,36 +169,112 @@ def s4():
               "standard error. Source: `shrink_sprawl_models.csv`, blocks elasticity_full_pre and elasticity_full_rp_post.")
 
 
+def pick(m, **kw):
+    """The one row of a model table matching every column=value given."""
+    d = m
+    for k, v in kw.items():
+        d = d[d[k] == v]
+    if len(d) != 1:
+        raise ValueError(f"expected one row for {kw}, found {len(d)}")
+    return d.iloc[0]
+
+
+def cell(r):
+    return cs(r.coef, r.se, r.p)
+
+
+def supply_panels(m):
+    """Lead/reverse and in-migration panels, shared by Table 3 of the paper and Table S5."""
+    lead = [["Next-period household growth", "Housing growth", "g_hh_lead"],
+            ["Next-period population growth", "Housing growth", "g_pop_lead"],
+            ["Next-period housing growth", "Household growth", "s_house_lead"]]
+    rows_l = []
+    for y, x, key in lead:
+        r0, r1 = pick(m, block="lead", model=key + "|noFE"), pick(m, block="lead", model=key + "|FE")
+        rows_l.append([y, x, cell(r0), cell(r1), int(r1.n)])
+    rows_m = []
+    for lab, key in [("Net in-migration", "sg_net"), ("Gross in-migration", "sg_in")]:
+        r0, r1 = pick(m, block="inmig", model=key), pick(m, block="inmig", model=key + "_lead")
+        rows_m.append([lab, cell(r0), cell(r1)])
+    rows_m.append(["N (si/gun-periods)", int(r0.n), int(r1.n)])
+    return (md(["Outcome", "Regressor", "Without si/gun FE", "With si/gun FE", "N (si/gun-periods)"], rows_l),
+            md(["Outcome (per 1,000 residents a year)", "Same period", "Next period"], rows_m))
+
+
+LEAD_NOTE = ("si/gun × five-year periods; each model also controls for the current-period value of the outcome variable "
+             "(e.g. household growth in t when the outcome is household growth in t+1); region × period fixed effects in "
+             "both columns; standard errors clustered by si/gun.")
+INMIG_NOTE = ("moves from outside the si/gun (MDIS) per 1,000 residents a year on annual housing growth (1 pp); si/gun and "
+              "region × period fixed effects; the next-period model also controls for the same-period outcome; standard "
+              "errors clustered by si/gun.")
+
+
+IC_Y = {"manuf": "Manufacturing employment", "emp": "All employment", "pop": "Population", "hh": "Households"}
+IC_NOTE = ("OLS with HC1 s.e.; all models control for log population 2000 and region. Growth and placebo models also "
+           "control for the outcome's growth 2000–05 and the area designated before 2001; the 2010–24 models include the "
+           "areas designated in 2001–05 and 2006–12 together (and, in the placebo, 2016–24).")
+
+
+def ic_panels(m, ys=tuple(IC_Y), full=True):
+    """Designation-growth models with outcomes as columns: growth and placebo rows, and the reverse model."""
+    spec = [("growth", "ic_0612", "Growth 2010–24", "Designated 2006–12")]
+    if full:
+        spec.append(("growth", "ic_0105", "Growth 2010–24", "Designated 2001–05"))
+    spec += [("placebo_0515", "ic_1624", "Placebo: growth 2005–15", "Designated 2016–24"),
+             ("placebo_1024", "ic_1624", "Placebo: growth 2010–24", "Designated 2016–24")]
+    has = lambda b, y, t: ((m.block == b) & (m.y == y) & (m.term == t)).any()
+    rows = [[lab, reg] + [cell(pick(m, block=b, y=y, term=t)) if has(b, y, t) else "" for y in ys] for b, t, lab, reg in spec]
+    rev = [["Reverse: designation 2006–12", "Prior growth 2000–05 of the outcome"]
+           + [cell(pick(m, block="reverse", y=y, term=f"pre_{y}")) if has("reverse", y, f"pre_{y}") else "" for y in ys]]
+    return rows, rev
+
+
 def s5():
     m = pd.read_csv(os.path.join(A, "supply_demand_models.csv"))
-    lab = {("drivers", "g_hh_lag"): "Housing growth on prior household growth", ("drivers", "shrink_lag"): "Housing growth on prior population decline (0/1)",
-           ("drivers", "g_hh"): "Housing growth on same-period household growth",
-           ("absorb", "g_hh"): "Same-period household growth on housing growth (si/gun FE)", ("absorb", "g_pop"): "Same-period population growth on housing growth (si/gun FE)",
-           ("absorb_group", "g_hh"): "Same-period household growth on housing growth, by group",
-           ("lead", "s_house"): "Next-period growth on housing growth", ("lead", "g_hh"): "Next-period housing growth on household growth",
-           ("inmig", "s_house"): "Net/gross in-migration from outside the si/gun on housing growth"}
     d0 = re.search(r"주택 증가율 ([\d.]+)%/년, 가구 증가율 ([\d.]+)%/년; 비감소 ([\d.]+), ([\d.]+)", read("supply_demand.txt"))
     desc = [["Population decline", d0.group(1), d0.group(2)], ["No population decline", d0.group(3), d0.group(4)]]
-    rows = []
-    for _, r in m.iterrows():
-        rows.append([lab.get((r.block, r.term), r.block), str(r.model).replace("직전 수요만", "prior demand only").replace("+감소 시군", "+ prior decline")
-                     .replace("+같은 기간 가구", "+ same-period households").replace("전 기간", "all periods").replace("2010-15 제외", "excl. 2010–15")
-                     .replace("감소", "shrinking").replace("정체", "stagnant").replace("성장", "growing").replace("|noFE", ", no si/gun FE").replace("|FE", ", si/gun FE"),
-                     r.term, cs(r.coef, r.se, r.p), int(r.n)])
-    return ("**Table S5.** Housing supply, household growth and in-migration: all panel models, non-capital provincial si/gun.\n\n"
-            + md(["Model", "Specification / outcome", "Term", "Coefficient (s.e.)", "N"], rows)
-            + "\n\nsi/gun × five-year periods (2000–05, 2005–10, 2010–15, 2015–19, 2019–24); region × period fixed effects in all models; "
-              "standard errors clustered by si/gun. Lead models use four periods (488 observations). Source: `supply_demand_models.csv`."
-            + "\n\nPanel B. Mean annual growth in the five-year period following one with and without registered-population "
-              "decline (%/yr), non-capital provincial si/gun.\n\n" + md(["Previous period", "Housing stock", "Households"], desc)
-            + "\n\nAnnual growth g = 100 × [(x_t1/x_t0)^(1/n) − 1] of gridded dwellings and households. Source: `supply_demand.txt`, block 2.")
+    # Panel B: what drives housing supply, three nested specifications as columns
+    specs = ["직전 수요만", "+감소 시군", "+같은 기간 가구"]
+    rows_b = []
+    for t, lab in [("g_hh_lag", "Prior-period household growth"), ("shrink_lag", "Prior-period population decline (0/1)"),
+                   ("g_hh", "Same-period household growth")]:
+        rows_b.append([lab] + [cell(pick(m, block="drivers", model=s, term=t)) if ((m.block == "drivers") & (m.model == s) & (m.term == t)).any()
+                               else "" for s in specs])
+    rows_b.append(["N (si/gun-periods)"] + [int(pick(m, block="drivers", model=s, term="g_hh_lag").n) for s in specs])
+    # Panel C: same-period growth on housing growth with si/gun fixed effects, by sample
+    cols = [("absorb", "전 기간"), ("absorb", "2010-15 제외"), ("absorb_group", "감소"), ("absorb_group", "정체"), ("absorb_group", "성장")]
+    rows_c = []
+    for y, lab in [("g_hh", "Household growth"), ("g_pop", "Population growth")]:
+        rows_c.append([lab] + [cell(pick(m, block=b, model=s, term=y)) if ((m.block == b) & (m.model == s) & (m.term == y)).any()
+                               else "" for b, s in cols])
+    rows_c.append(["N (si/gun-periods)"] + [int(pick(m, block=b, model=s, term="g_hh").n) for b, s in cols])
+    pl, pm = supply_panels(m)
+    return ("**Table S5.** Housing supply, household growth and in-migration, non-capital provincial si/gun, five-year periods.\n\n"
+            + "Panel A. Mean annual growth in the five-year period following one with and without registered-population "
+              "decline (%/yr).\n\n" + md(["Previous period", "Housing stock", "Households"], desc)
+            + "\n\nPanel B. What drives housing supply: annual housing growth (%) on demand (region × period fixed effects, "
+              "no si/gun fixed effects).\n\n"
+            + md(["Regressor", "(1) Prior demand only", "(2) + prior decline", "(3) + same-period households"], rows_b)
+            + "\n\nPanel C. Same-period growth (%/yr) on annual housing growth (1 pp), si/gun and region × period fixed effects.\n\n"
+            + md(["Outcome", "All periods", "Excl. 2010–15", "Shrinking", "Stagnant", "Growing"], rows_c)
+            + "\n\nPanel D. Lead and reverse regressions (equations 6–7).\n\n" + pl
+            + "\n\nPanel E. In-migration from outside the si/gun and housing growth.\n\n" + pm
+            + "\n\nPeriods 2000–05, 2005–10, 2010–15, 2015–19 and 2019–24; models with a prior or next period use four periods. "
+              "Annual growth g = 100 × [(x_t1/x_t0)^(1/n) − 1] of gridded dwellings and households. Standard errors clustered by "
+              f"si/gun in Panels B–C. Panel D: {LEAD_NOTE} Panel E: {INMIG_NOTE} Blank cells: term not in the model. "
+              "Source: `supply_demand.txt`, block 2; `supply_demand_models.csv`.")
 
 
 def s6():
     m = pd.read_csv(os.path.join(A, "vacancy_models.csv"))
     yl = {"d_vac": "All vacancies", "d_vac_old": "Pre-2000 dwellings", "d_vac_new5": "Built in last 5 years"}
-    rows = [[EN.get(r["sample"], r["sample"]) + (" (household change controlled, 2020–24)" if r.block == "location_hh" else ""),
-             yl[r.y], cs(r.coef, r.se, r.p), int(r.n)] for _, r in m.iterrows()]
+    main_, hh = m[m.block != "location_hh"], m[m.block == "location_hh"]
+    rows = []
+    for smp in dict.fromkeys(main_["sample"]):
+        d = main_[main_["sample"] == smp].set_index("y")
+        rows.append([EN.get(smp, smp)] + [cs(d.at[y, "coef"], d.at[y, "se"], d.at[y, "p"]) if y in d.index else "" for y in yl]
+                    + [int(d.n.iloc[0])])
+    rows_h = [[EN.get(r["sample"], r["sample"]), yl[r.y], cs(r.coef, r.se, r.p), int(r.n)] for _, r in hh.iterrows()]
     v = read("vacancy.txt")
     lv = v[v.index("1. 빈집 비율"):v.index("   (2005·2010")]
     hdr = lv.splitlines()[1].split()
@@ -216,12 +295,17 @@ def s6():
     us = dict(re.findall(r"(\S+) ([\d.]+)", us))
     rows4 = [[EN[g], lt[g], us[g]] for g in G]
     return ("**Table S6.** Vacancy panel (2016–2025), all outcomes, and vacancy rates.\n\n"
-            + md(["Sample", "Vacancy outcome", "Coefficient (s.e.)", "N (si/gun-years)"], rows)
-            + "\n\nPanel B. Vacancy rate (vacant ÷ dwellings, group totals, %).\n\n" + md(["Group"] + hdr, rows2)
+            + "Panel A. Change in vacant dwellings per 1,000 dwellings on net additions per 1,000 dwellings (equation 8), by "
+              "construction cohort of the vacant dwellings; si/gun and region × year fixed effects, s.e. clustered by si/gun.\n\n"
+            + md(["Sample"] + list(yl.values()) + ["N (si/gun-years)"], rows)
+            + "\n\nPanel B. Robustness: equation 8 with annual household change per 1,000 dwellings as a control, 2020–24 "
+              "(years with annual household counts).\n\n"
+            + md(["Sample", "Vacancy outcome", "Coefficient (s.e.)", "N (si/gun-years)"], rows_h)
+            + "\n\nPanel C. Vacancy rate (vacant ÷ dwellings, group totals, %).\n\n" + md(["Group"] + hdr, rows2)
             + "\n\n2005 and 2010: field census, denominator SGIS grid dwellings; 2015 onward: register-based census."
-            + "\n\nPanel C. Vacant dwellings built before 2000: share of all vacancies (%) and number per 1,000 dwellings.\n\n"
+            + "\n\nPanel D. Vacant dwellings built before 2000: share of all vacancies (%) and number per 1,000 dwellings.\n\n"
             + md(["Group", "Share 2015", "Per 1,000 2015", "Share 2019", "Per 1,000 2019", "Share 2024", "Per 1,000 2024"], rows3)
-            + "\n\nPanel D. Long-term vacancy and unsold new housing.\n\n"
+            + "\n\nPanel E. Long-term vacancy and unsold new housing.\n\n"
             + md(["Group", "Vacant 12 months or longer, share of vacancies 2010 (%)",
                   "si/gun with unsold dwellings above 10 per 1,000 in any year 2007–2025 (%)"], rows4)
             + "\n\nSource: `vacancy_models.csv`, `vacancy.txt`.")
@@ -247,19 +331,17 @@ def s7():
         if p and p[0] in ("감소", "정체", "성장"):
             rows2.append([f"{EN[p[0]]} ({sec})", p[1][:-2]] + p[2:])
     m = pd.read_csv(os.path.join(A, "ic_unmet_models.csv"))
-    yl = {"manuf": "Manufacturing employment", "emp": "All employment", "pop": "Population", "hh": "Households"}
-    bl = {"growth": "Growth 2010–24", "placebo_1024": "Placebo: 2010–24 growth", "placebo_0515": "Placebo: 2005–15 growth",
-          "reverse": "Reverse: designation 2006–12 on 2000–05 growth"}
-    tl = {"ic_0612": "Designated 2006–12", "ic_0105": "Designated 2001–05", "ic_1624": "Designated 2016–24", "pre_manuf": "Prior manufacturing growth",
-          "pre_pop": "Prior population growth", "pre_hh": "Prior household growth"}
-    m = m[m.block.isin(bl) & m.y.isin(yl)]
-    rows3 = [[bl[r.block], yl[r.y], tl[r.term], cs(r.coef, r.se, r.p), int(r.n)] for _, r in m.iterrows()]
+    rows3, rows4 = ic_panels(m, full=True)
     tot = re.search(r"산업단지 (\d+)개, 지정 면적 (\d+) km2", c)
     return ("**Table S7.** Industrial complexes in non-capital provincial si/gun (area-weighted).\n\nPanel A. By designation window.\n\n"
             + md(cols, rows) + "\n\nPanel B. By group.\n\n" + md(["Group (designation)"] + cols[1:], rows2)
-            + "\n\nPanel C. Designation and growth, cross-section of 122 si/gun (designated area as % of 2009 urban land; outcome log growth ×100; "
-              "controls: outcome growth 2000–05, log population 2000, region; HC1 s.e.).\n\n"
-            + md(["Model", "Outcome", "Regressor", "Coefficient (s.e.)", "N"], rows3)
+            + "\n\nPanel C. Designation and later growth, cross-section of 122 si/gun: log growth ×100 of each column's outcome "
+              "on designated area (% of 2009 urban land).\n\n"
+            + md(["Model", "Regressor"] + list(IC_Y.values()), rows3)
+            + "\n\nPanel D. Reverse model: area designated in 2006–12 (% of 2009 urban land) on the outcome's prior growth "
+              "2000–05 (log ×100), 122 si/gun.\n\n"
+            + md(["Model", "Regressor"] + list(IC_Y.values()), rows4)
+            + f"\n\n{IC_NOTE} Blank cells: not estimated."
             + f"\n\nAll windows: {tot.group(1)} complexes, {tot.group(2)} km² designated. Area-weighted shares: urbanised 2019 and "
               "industrial land 2022 are the shares of designated area that are urban land in the 2019 large-class land-cover map "
               "and industrial use in the 2022 middle-class map; urban in 1999 is the share urban in the late-1990s map, which "
@@ -283,18 +365,20 @@ def s8():
             g, q = q[0], q[1:]
         rows.append([EN[g], q[0].replace("-", "–")] + q[1:])
     m = pd.read_csv(os.path.join(A, "plan_pop_models.csv"))
-    bl = {"plan_on_trend": "Planned growth on prior trend (non-capital provincial, adopted 2000+, region FE, si/gun-clustered s.e.)",
-          "urban_on_plan_plan_excess": "Urban land growth 2009–19 on 2009 plan (region FE, HC1)",
-          "urban_on_plan_reserve_share": "Urban land growth 2009–19 on 2009 plan (region FE, HC1)",
-          "reserve_on_excess": "Reserve share on planned increase (region FE)", "urban_on_plan": "Urban land growth 2009–19 on 2009 plan (region FE, HC1)",
-          "cap_2019": "Planned growth: adopted 2019+ vs earlier (trend and region controlled)"}
-    tl = {"Intercept": "Constant (reference region, zero trend)", "pred_zero_trend": "Prediction at zero trend, mean over regions",
-          "g_reg": "Realised population change 2009–19 (%)",
-          "trend_g": "Prior 5-year trend", "excess_pct": "Planned increase (%)", "plan_excess": "2009 overstatement (%)",
-          "reserve_share09": "2009 reserve ÷ urbanised land (%)", "reserve_share": "2009 reserve ÷ urbanised land (%)", "post": "Adopted 2019 or later"}
-    rows2 = [[bl[r.block], tl.get(r.term, r.term) + (" (with overstatement)" if r.block == "urban_on_plan_plan_excess" else
-                                                     " (with reserve share)" if r.block == "urban_on_plan_reserve_share" else ""),
-              cs(r.coef, r.se, r.p), int(r.n)] for _, r in m.iterrows()]
+    ln = lambda r: int(r.n)
+    pt = [pick(m, block="plan_on_trend", term=t) for t in ("trend_g", "Intercept", "pred_zero_trend")]
+    rows_c = [["Prior 5-year trend (1 pp)", cell(pt[0])],
+              ["Constant (zero trend, reference region)", cell(pt[1])],
+              ["Prediction at zero trend, mean over regions", cell(pt[2])],
+              ["N (plans)", ln(pt[0])]]
+    cp = pick(m, block="cap_2019", term="post")
+    rows_d = [["Adopted 2019 or later", cell(cp)], ["N (plans)", ln(cp)]]
+    re_ = pick(m, block="reserve_on_excess", term="excess_pct")
+    rows_e = [["Planned increase (% of population at adoption)", cell(re_)], ["N (plans)", ln(re_)]]
+    ox, rs = pick(m, block="urban_on_plan", term="plan_excess"), pick(m, block="urban_on_plan", term="reserve_share")
+    gx, gr = pick(m, block="urban_on_plan_plan_excess", term="g_reg"), pick(m, block="urban_on_plan_reserve_share", term="g_reg")
+    rows_f = [["2009 overstatement (%)", cell(ox), ""], ["2009 reserve ÷ urbanised land (%)", "", cell(rs)],
+              ["Realised population change 2009–19 (%)", cell(gx), cell(gr)], ["N (si/gun)", ln(ox), ln(rs)]]
     sc = re.search(r"계획\(시군 × 수립일\) (\d+)개, 시군 (\d+)개", p)
     rows0 = [["Plan vintages (si/gun × adoption date), 2005–2025 tables", sc.group(1)], ["si/gun with a master plan", sc.group(2)]]
     for g_ in ("감소", "정체"):
@@ -309,7 +393,16 @@ def s8():
             + "Panel A. Plan vintages and the growth premise.\n\n" + md(["Quantity", "Value"], rows0)
             + "\n\nPanel B. Planned growth by adoption era (medians).\n\n"
             + md(["Group", "Adopted", "Plan vintages", "Planned growth (%/yr)", "Prior trend (%/yr)", "Share projecting growth (%)"], rows)
-            + "\n\nPanel C. Plan models.\n\n" + md(["Model", "Regressor", "Coefficient (s.e.)", "N"], rows2)
+            + "\n\nPanel C. Planned growth (%/yr) on the prior 5-year trend (%/yr): non-capital provincial plans adopted "
+              "since 2000, region fixed effects, s.e. clustered by si/gun.\n\n" + md(["Term", "Coefficient (s.e.)"], rows_c)
+            + "\n\nPanel D. The 2017–2018 cap: planned growth (%/yr) on adoption in 2019 or later, controlling for the prior "
+              "trend and region; non-capital provincial plans adopted 2005–2025, s.e. clustered by si/gun.\n\n"
+            + md(["Term", "Coefficient (s.e.)"], rows_d)
+            + "\n\nPanel E. Reserve share (reserve ÷ urbanised land in the plan, %) on the planned increase: non-capital "
+              "provincial plans adopted since 2000, region fixed effects, s.e. clustered by si/gun.\n\n"
+            + md(["Term", "Coefficient (s.e.)"], rows_e)
+            + "\n\nPanel F. Urban land growth 2009–19 (%) on the plan in force in 2009: non-capital provincial si/gun, region "
+              "fixed effects, HC1 s.e.\n\n" + md(["Term", "(1) Overstatement", "(2) Reserve share"], rows_f)
             + "\n\nPlanned growth = 100 × [(P/R_y0)^(1/(T−y0)) − 1], prior trend = 100 × [(R_y0/R_y0−5)^(1/5) − 1], with P the planned "
               "population, T the target year and R registered population (equations 2–3). Overstatement = 100 × (P/R_y0 − 1). "
               "The constant of the plan-on-trend model is the planned growth at zero trend in the reference region; the "
@@ -341,7 +434,7 @@ def s9():
                 rows.append([yn[y], sn[smp]] + cells + [cs(cum.coef, cum.se, cum.p), f"{pre.p:.2f}", int(cum.n)])
         ks = sorted(int(x) for x in c[~c.k.isin(["cum0_5", "pre_F_p"])].k.unique())
         head = ["Outcome", "Sample"] + [("≤" if kk == ks[0] else "≥" if kk == ks[-1] else "") + f"{kk:+d}" for kk in ks] + ["Cumulative 0–5 (s.e.)", "Pre-trend F p", "N"]
-        out.append(f"Panel: {tn[tr]}\n\n" + md(head, rows))
+        out.append(f"Panel {chr(65 + len(out))}. {tn[tr]}.\n\n" + md(head, rows))
     pe = read("plan_event.txt")
     ev = re.search(r"시군 (\d+)개, 새 계획 시행 (\d+)건\(2009~2025\), 그중 시가화예정용지 증가 (\d+)건, 계획인구 증가 (\d+)건", pe)
     mi = re.search(r"예정용지 \+([\d.]+)% \(기준 용도지역 대비\), 계획인구 \+([\d.]+)%", pe)
@@ -383,7 +476,7 @@ def s10():
             q = l.split()
             if q and q[0] in G:
                 rows.append([EN[q[0]]] + q[1:] + ([f"{100 - float(q[1]):.1f}"] if outside else []))
-        keep.append(f"Panel: {title}\n\n" + md(["Group"] + [colmap.get(h, h) for h in hdr]
+        keep.append(f"Panel {chr(65 + len(keep))}. {title}.\n\n" + md(["Group"] + [colmap.get(h, h) for h in hdr]
                                                  + (["Outside res./com./ind. (%)"] if outside else []), rows))
     mm = z[z.index("모형 (비수도권"):]
     g1 = re.search(r"감소 \(성장 대비\): \+([\d.]+)(\**) \(se ([\d.]+)\)", mm)
@@ -398,7 +491,7 @@ def s10():
          f"available urban share, 1 pp {c1.group(4)}{c1.group(5)}; county {c1.group(6)}{c1.group(7)}", c1.group(8)],
         ["2009 reserve ÷ urbanised land, 10 pp (instead of group)", "", "", f"{rs.group(1)} ({rs.group(3)}){rs.group(2)}", rs.group(4)]])
     return ("**Table S10.** Where new urban land formed: 2026 zoning routes.\n\n" + "\n\n".join(keep)
-            + "\n\nPanel: Off-plan share of new urban land (%, outside residential, commercial and industrial zones), non-capital "
+            + f"\n\nPanel {chr(65 + len(keep))}. Off-plan share of new urban land (%, outside residential, commercial and industrial zones), non-capital "
               "provincial si/gun with at least 5 ha of new urban land, OLS with HC1 s.e.\n\n" + reg + "\n\nSource: `zoning_route.txt`.")
 
 
@@ -432,9 +525,47 @@ def s11():
               "districts, are not excluded. Source: `newcity_zones.csv`.")
 
 
+def s12():
+    """Nationwide events in the study period: what the region x period (year) fixed effects absorb. Dates checked
+    against the cited official sources on 2026-10-24; no estimates."""
+    rows = [
+        ["1 Jan 2003", "National Land Planning and Utilization Act (Act No. 6655) in force; land outside urban areas "
+         "becomes management areas, to be subdivided into planned, production and conservation management",
+         "Zoning outside urban areas, the main off-plan route", "Before all windows; zoning observed in 2026 (Table S10)",
+         "National Law Information Center"],
+        ["Oct 2008 – Feb 2009", "Global financial crisis; base rate cut from 5.25 to 2.00 percent",
+         "Housing starts, sales and unsold new housing", "Housing period 2005–10; unsold series from 2007",
+         "Bank of Korea, base-rate history"],
+        ["2012 – Dec 2019", "153 public institutions move from the capital region, mostly to the 10 innovation cities "
+         "(relocation plan 2005)", "Housing, population and jobs in the host si/gun only (not absorbed)",
+         "Housing periods 2010–15, 2015–19; vacancy 2016–19; event-study years 2012–19; districts excluded from the old core (Table S11)",
+         "MOLIT press release, 25 Dec 2019; MOLIT Innovation City Development Office"],
+        ["1 Sep 2014", "Housing-market measures: repeal of the Housing Site Development Promotion Act announced; LH "
+         "designation of large public housing sites halted until 2017", "Supply of large new housing estates",
+         "Housing periods 2010–15, 2015–19; event-study years 2014–17", "MOLIT, measures of 1 Sep 2014"],
+        ["1 Nov 2015", "Census becomes register-based (full-count items from administrative registers)",
+         "Gridded population, households and dwellings; vacancy", "Break between 2010 and 2015 (Table S2); housing period 2010–15",
+         "Statistics Korea"],
+        ["2017, 2018", "Master-plan directives No. 900 and No. 1133 cap the target-year population at 105 percent of projections",
+         "Planned population of later plans", "Plans adopted 2019–25 (Table S8, Panels B and D)", "MOLIT directives"],
+        ["20 Jan 2020 –", "COVID-19 (first domestic case); base rate cut to 0.50 percent in May 2020",
+         "Moves and housing demand", "Housing period 2019–24; vacancy and event-study years 2020–22",
+         "KDCA; Bank of Korea, base-rate history"],
+        ["Aug 2021 – Jan 2023", "Base rate raised from 0.50 to 3.50 percent", "Housing demand, sales and unsold new housing",
+         "Housing period 2019–24; vacancy and event-study years 2021–25", "Bank of Korea, base-rate history"],
+        ["18 Oct 2021", "89 si/gun/gu designated population-decline areas, with a dedicated local fund",
+         "Funding for declining places", "Vacancy and event-study years 2022–25", "MOIS press release, 18 Oct 2021"]]
+    return ("**Table S12.** Nationwide events during the study period.\n\n"
+            + md(["Date", "Event", "What it changes", "Periods of the models in which it falls", "Source"], rows)
+            + "\n\nThe housing panels (Tables 3, S5) include region × period fixed effects and the vacancy panel and event "
+              "study (Tables 4, S6, S9) region × year fixed effects. These absorb any event common to the si/gun of one "
+              "region in one period, so the events above enter the estimates only through differences between si/gun of the "
+              "same region. The relocation of public institutions affected only the host si/gun and is therefore not absorbed.")
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
-    t = "\n\n".join([s2(), s3(), s4(), s5(), s6(), s7(), s8(), s9(), s10(), s11()]) + "\n"
+    t = "\n\n".join([s2(), s3(), s4(), s5(), s6(), s7(), s8(), s9(), s10(), s11(), s12()]) + "\n"
     with open(os.path.join(OUT, "supplement_tables.md"), "w", encoding="utf-8") as f:
         f.write(t)
     print(t[:6000])
