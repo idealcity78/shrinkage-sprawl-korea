@@ -25,6 +25,7 @@ import sys
 import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
+from scipy.stats import norm
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CODE = os.path.dirname(HERE)
@@ -94,6 +95,18 @@ def stars(p):
 
 def fmt(m, v):
     return f"{m.params[v]:+.3f} ({m.bse[v]:.3f}){stars(m.pvalues[v])}"
+
+
+def all_terms(block, y, m, lp, mean_lp):
+    """Every term of an elasticity model, plus the prediction at zero growth and mean log population (non-capital,
+    N = 0) with its delta-method standard error: a + delta * mean(ln P)."""
+    cap = "C(group == '수도권')[T.True]"
+    out = [[block, y, v, m.params[v], m.bse[v], m.pvalues[v], int(m.nobs)] for v in ("Intercept", "gp", "gp:neg", "neg", lp, cap)]
+    V = m.cov_params()
+    pred = m.params["Intercept"] + m.params[lp] * mean_lp
+    se = float(np.sqrt(V.at["Intercept", "Intercept"] + mean_lp ** 2 * V.at[lp, lp] + 2 * mean_lp * V.at["Intercept", lp]))
+    p = 2 * (1 - norm.cdf(abs(pred / se)))
+    return out + [[block, y, "pred_zero_growth", pred, se, p, int(m.nobs)]]
 
 
 def main():
@@ -180,6 +193,7 @@ def main():
                 f"{fmt(m, 'gp')}, 감소 시군 기울기 차이 {fmt(m, 'gp:neg')}, 감소 시군 절편 차이 {fmt(m, 'neg')}")
             rows += [["elasticity_" + tag, y, v, m.params[v], m.bse[v], m.pvalues[v], int(m.nobs)]
                      for v in ("gp", "neg", "gp:neg")]
+            rows += all_terms("elasticity_full_" + tag, y, m, lp, g_[lp].mean())
     say("   2015-24 인구가 준 시군의 2009-19 신규 시가지 비율 중앙값 "
         f"{t[t.shrink == 1].new_rate_post.median():.1f}% (시군 {t.shrink.sum()}), 그중 시가지가 늘어난 시군 "
         f"{(t[t.shrink == 1].g_urb_post > 0).mean() * 100:.0f}%"
@@ -199,6 +213,8 @@ def main():
             m = smf.ols(f"{yv} ~ {x} + {gp} + lpop10{reg}", data=g_).fit(cov_type="HC1")
             say(f"   {yv} ~ {x:15s} {lab:10s} (n={int(m.nobs)}): {fmt(m, x)}")
             rows.append(["coexist", x, lab, m.params[x], m.bse[x], m.pvalues[x], int(m.nobs)])
+            rows += [["coexist_full", x, lab + "|" + v, m.params[v], m.bse[v], m.pvalues[v], int(m.nobs)]
+                     for v in ("Intercept", x, gp, "lpop10")]
     say("\n   시가지는 늘고 기성시가지 인구는 준 시군 비율 (%), 그중 시군 인구도 준 시군 (%)")
     tb = {}
     for lab, ex, em, pdn in [("1999-2010", "g_urb_pre", "g_old_0010", "g_pop_0010"),
@@ -247,6 +263,7 @@ def main():
             f"인구 증가 1%p {fmt(m, 'gp')}, 감소 시군 기울기 차이 {fmt(m, 'gp:neg')}, 감소 시군 절편 차이 {fmt(m, 'neg')}")
         rows += [["elasticity_rp_post", y, v, m.params[v], m.bse[v], m.pvalues[v], int(m.nobs)]
                  for v in ("gp", "neg", "gp:neg")]
+        rows += all_terms("elasticity_full_rp_post", y, m, "lpop10", g_.lpop10.mean())
     t["grp_rp"] = np.where(t.group.isin(["광역시", "수도권"]), t.group,
                            np.where(t.g_rp_0019 < -5, "감소", np.where(t.g_rp_0019 <= 5, "정체", "성장")))
     say("   집단 분류 비교 (행: 격자 인구 2000-19 기준, 열: 주민등록인구 2000-19 기준)")

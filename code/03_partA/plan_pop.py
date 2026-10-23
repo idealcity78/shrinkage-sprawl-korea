@@ -29,6 +29,7 @@ import sys
 import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
+from scipy.stats import norm
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import paths
@@ -155,6 +156,16 @@ def main():
         f"{m.params.Intercept:.2f}{stars(m.pvalues.Intercept)}, n={int(m.nobs)}")
     mrows.append(dict(block="plan_on_trend", term="trend_g", coef=m.params.trend_g, se=m.bse.trend_g,
                       p=m.pvalues.trend_g, n=m.nobs))
+    mrows.append(dict(block="plan_on_trend", term="Intercept", coef=m.params.Intercept, se=m.bse.Intercept,
+                      p=m.pvalues.Intercept, n=m.nobs))
+    # prediction at zero trend averaged over the plans' regions (the intercept alone is the reference region)
+    X0 = m.model.exog.copy()
+    X0[:, m.model.exog_names.index("trend_g")] = 0
+    a = X0.mean(axis=0)
+    pr, pse = float(a @ m.params.values), float(np.sqrt(a @ m.cov_params().values @ a))
+    say(f"   추세 0일 때 계획 성장(표본 권역 평균) {pr:.2f} (se {pse:.2f})")
+    mrows.append(dict(block="plan_on_trend", term="pred_zero_trend", coef=pr, se=pse,
+                      p=2 * (1 - norm.cdf(abs(pr / pse))), n=m.nobs))
     for grp in ["감소", "정체", "성장"]:
         e = d[d.group == grp]
         if len(e) > 10:
@@ -189,6 +200,8 @@ def main():
         say(f"   신규 시가지 증가율(%) ~ {lab}: {m.params[t]:.3f}{stars(m.pvalues[t])} (se {m.bse[t]:.3f}); "
             f"실제 인구 변화 {m.params.g_reg:.3f}{stars(m.pvalues.g_reg)}, n={int(m.nobs)}")
         mrows.append(dict(block="urban_on_plan", term=t, coef=m.params[t], se=m.bse[t], p=m.pvalues[t], n=m.nobs))
+        mrows.append(dict(block="urban_on_plan_" + t, term="g_reg", coef=m.params.g_reg, se=m.bse.g_reg,
+                          p=m.pvalues.g_reg, n=m.nobs))
     say(f"   감소 시군 2009 계획 초과 중앙값 {d[d.group == '감소'].plan_excess.median():.0f}%, "
         f"성장 시군 {d[d.group == '성장'].plan_excess.median():.0f}%")
 

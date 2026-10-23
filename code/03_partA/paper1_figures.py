@@ -1,12 +1,14 @@
 """Figures for paper 1 (supply, sprawl and planning; Economic Geography). English labels.
 
-  fig1_map.png        시군 maps: registered population change 2009-19 (%) and urban land change 2009-19 (%)
+  fig1_groups.png     study units: the 161 시군 by group (registered population change 2000-19), with the eight
+                      non-capital regions and the capital region outlined (shrink_sprawl_sigun.csv: group, region)
+  fig2_map.png        시군 maps: registered population change 2009-19 (%) and urban land change 2009-19 (%)
                       (shrink_sprawl_sigun.csv: g_rp_0919, g_urb_post), with the shrinking-and-expanding 시군 outlined
-  fig2_plan_trend.png planned annual growth against the prior five-year trend, plan vintages adopted 2000+
+  fig3_plan_trend.png planned annual growth against the prior five-year trend, plan vintages adopted 2000+
                       (plan_vintages.csv), non-capital 도 시군 by group
-  fig3_event.png      event-study coefficients, k = -3..5 (plan_event_coefs.csv): new plan / plan enlarging the
+  fig4_event.png      event-study coefficients, k = -3..5 (plan_event_coefs.csv): new plan / plan enlarging the
                       reserve -> urban-use zoning and land-form-change permits, full sample
-  fig4_routes.png     new urban land 2009-19 by 2026 zoning route, by group (zoning_route_sigun.csv)
+  fig5_routes.png     new urban land 2009-19 by 2026 zoning route, by group (zoning_route_sigun.csv)
 
 Every value plotted is read from the output files named above; nothing is typed in.
 Output: outputs/paper1/
@@ -56,6 +58,77 @@ def polygons():
     return out
 
 
+def rings_of(g):
+    rings = []
+    for part in g:
+        ring = []
+        for p in part:
+            if p is None:
+                if ring:
+                    rings.append(np.array(ring))
+                ring = []
+            else:
+                ring.append((p.X, p.Y))
+        if ring:
+            rings.append(np.array(ring))
+    return rings
+
+
+def region_outlines(t):
+    """Dissolve the 시군 polygons by analysis region (eight non-capital regions and the capital region)."""
+    import arcpy
+    arcpy.env.overwriteOutput = True
+    shp = os.path.join(paths.L1, "sigun_1208_2022_tm.shp")
+    tmp = arcpy.management.CopyFeatures(shp, r"memory\sigun_tmp")
+    arcpy.management.AddField(tmp, "region", "TEXT", field_length=20)
+    reg = dict(zip(t.sigun, t.region))
+    with arcpy.da.UpdateCursor(tmp, ["sigun", "region"]) as cur:
+        for name, _ in cur:
+            cur.updateRow([name, reg.get(name, "")])
+    # a 50 m buffer closes the slivers between neighbouring 시군 so that the dissolve leaves no interior edges
+    dis = arcpy.analysis.Buffer(tmp, r"memory\region_tmp", "50 Meters", dissolve_option="LIST", dissolve_field="region")
+    out = {}
+    with arcpy.da.SearchCursor(dis, ["region", "SHAPE@"]) as cur:
+        for name, g in cur:
+            if name:
+                out[name] = rings_of(g)
+    return out
+
+
+def fig1_groups():
+    t = pd.read_csv(os.path.join(A, "shrink_sprawl_sigun.csv"))
+    polys = polygons()
+    regs = region_outlines(t)
+    fill = {"감소": "#d6604d", "정체": "#f4a582", "성장": "#4393c3", "광역시": "#8c8c8c", "수도권": "#d9d9d9"}
+    fig, ax = plt.subplots(figsize=(4.6, 5.4))
+    for g in GROUPS:
+        verts = [ring for name in t[t.group == g].sigun for ring in polys.get(name, [])]
+        ax.add_collection(PolyCollection(verts, facecolors=fill[g], edgecolors="white", linewidths=0.2))
+    verts = [ring for rr in regs.values() for ring in rr]
+    ax.add_collection(PolyCollection(verts, facecolors="none", edgecolors="black", linewidths=0.6))
+    en = {"강원": "Gangwon", "충북": "Chungbuk", "충남": "Chungnam", "전북": "Jeonbuk", "전남": "Jeonnam",
+          "경북": "Gyeongbuk", "경남": "Gyeongnam", "제주": "Jeju", "수도권": "Capital region"}
+    for name, rr in regs.items():
+        big = max(rr, key=len)
+        x, y = big.mean(axis=0)
+        ax.text(x, y, en.get(name, name), fontsize=6.5, ha="center", va="center",
+                bbox=dict(facecolor="white", edgecolor="none", alpha=0.7, pad=0.6))
+    ax.autoscale_view()
+    ax.set_aspect("equal")
+    ax.axis("off")
+    n = t.group.value_counts()
+    handles = [plt.Rectangle((0, 0), 1, 1, facecolor=fill[g], edgecolor="grey", linewidth=0.3) for g in GROUPS]
+    labels = [f"{GROUPS[g]} ({n.get(g, 0)})" for g in GROUPS]
+    ax.legend(handles, labels, frameon=False, fontsize=7, loc="lower right",
+              title="Group (si/gun)", title_fontsize=7)
+    fig.text(0.01, 0.01, "Groups of non-capital provincial si/gun by registered population change 2000-19: "
+             "shrinking < -5%, stagnant -5 to +5%, growing > +5%.\nBold lines: analysis regions (each metropolitan "
+             "city is grouped with the surrounding province).", fontsize=6)
+    fig.savefig(os.path.join(OUT, "fig1_groups.png"), dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    return n.reindex(list(GROUPS)).to_dict()
+
+
 def fig1():
     t = pd.read_csv(os.path.join(A, "shrink_sprawl_sigun.csv"))
     polys = polygons()
@@ -84,7 +157,7 @@ def fig1():
     n_dec = int(((t.g_rp_0919 < 0) & t.group.isin(["감소", "정체", "성장"])).sum())
     fig.text(0.01, 0.01, f"Outlined: population fell and urban land grew, 2009-19 "
              f"({n_both} of {n_dec} non-capital provincial si/gun with falling population).", fontsize=7)
-    fig.savefig(os.path.join(OUT, "fig1_map.png"), dpi=300, bbox_inches="tight")
+    fig.savefig(os.path.join(OUT, "fig2_map.png"), dpi=300, bbox_inches="tight")
     plt.close(fig)
     return n_both, n_dec
 
@@ -106,7 +179,7 @@ def fig2():
     ax.set_ylabel("Planned population growth to target year (%/yr)")
     ax.legend(frameon=False, fontsize=7, loc="upper left")
     ax.text(5.8, 5.2, "planned = trend", fontsize=7, ha="right", rotation=35)
-    fig.savefig(os.path.join(OUT, "fig2_plan_trend.png"), dpi=300, bbox_inches="tight")
+    fig.savefig(os.path.join(OUT, "fig3_plan_trend.png"), dpi=300, bbox_inches="tight")
     plt.close(fig)
     return len(v)
 
@@ -134,7 +207,7 @@ def fig3():
         ax.set_xlabel("Years since the new plan took effect")
     axes[1].legend(frameon=False, fontsize=7, loc="lower left")
     fig.tight_layout()
-    fig.savefig(os.path.join(OUT, "fig3_event.png"), dpi=300, bbox_inches="tight")
+    fig.savefig(os.path.join(OUT, "fig4_event.png"), dpi=300, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -157,13 +230,14 @@ def fig4():
     ax.invert_yaxis()
     ax.set_xlabel("Share of new urban land 2009-19 (%)")
     ax.legend(frameon=False, fontsize=6.5, ncol=2, loc="upper center", bbox_to_anchor=(0.45, -0.25))
-    fig.savefig(os.path.join(OUT, "fig4_routes.png"), dpi=300, bbox_inches="tight")
+    fig.savefig(os.path.join(OUT, "fig5_routes.png"), dpi=300, bbox_inches="tight")
     plt.close(fig)
     return sh
 
 
 def main():
     os.makedirs(OUT, exist_ok=True)
+    print("fig1 groups:", fig1_groups())
     n_both, n_dec = fig1()
     n2 = fig2()
     fig3()

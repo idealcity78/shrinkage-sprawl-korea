@@ -106,7 +106,8 @@ C = [
     ("attainment capital region", "0.82", "plan_pop.txt", r"수도권\s+159(?:\s+-?[\d.]+){4}\s+([\d.]+)", 1),
     ("slope planned on trend", "0.25", "plan_pop.txt", r"기울기 ([\d.]+)\*", 1),
     ("its s.e.", "0.13", "plan_pop.txt", r"기울기 [\d.]+\*+ \(se ([\d.]+)\)", 1),
-    ("planned growth at zero trend", "4.48", "plan_pop.txt", r"계획 성장\) ([\d.]+)", 1),
+    ("planned growth at zero trend, mean over regions", "3.30", "plan_pop.txt", r"표본 권역 평균\) ([\d.]+)", 1),
+    ("its s.e.", "0.28", "plan_pop.txt", r"표본 권역 평균\) [\d.]+ \(se ([\d.]+)\)", 1),
     ("reserve per added resident, shrinking (m2)", "384", "plan_pop.txt", r"감소\s+[\d.]+\s+[\d.]+\s+([\d.]+)\n정체\s+17", 1),
     ("reserve per added resident, capital (m2)", "82", "plan_pop.txt", r"수도권\s+11\.3\s+[\d.]+\s+([\d.]+)", 1),
     ("cap effect (%p/yr)", "2.13", "plan_pop.txt", r"2019년 이후 수립\(추세·권역 통제\): -([\d.]+)", 1),
@@ -168,15 +169,20 @@ C = [
     ("event-study si/gun", "119", "plan_event.txt", r"시군 (\d+)개, 새 계획", 1),
     ("same-period household growth on housing growth, all periods", "1.035", SUP, r"\| all periods \| g_hh \| ([\d.]+)", 1),
     ("same, excluding 2010-15", "0.994", SUP, r"\| excl\. 2010–15 \| g_hh \| ([\d.]+)", 1),
-    ("new-urban rate at zero growth 1999-2009 (%)", "18.35", SUP, r"New urban land rate \(%\) \| ([\d.]+) \| 0\.387", 1),
-    ("slope 1999-2009", "0.387", SUP, r"New urban land rate \(%\) \| 18\.35 \| ([\d.]+)", 1),
+    ("new-urban rate at zero growth 1999-2009 (%)", "18.35", SUP, r"census population 2000–2010\) \| New urban land rate \(%\) \| ([\d.]+) \(", 1),
+    ("its s.e.", "4.37", SUP, r"census population 2000–2010\) \| New urban land rate \(%\) \| [\d.]+ \(([\d.]+)\)", 1),
+    ("slope 1999-2009", "0.387", SUP, r"census population 2000–2010\) \| New urban land rate \(%\) \| [^|]+\| [^|]+\| ([\d.]+)", 1),
+    ("s.e. of the 2009-19 prediction at zero growth", "2.27", SUP, r"registered population 2009–2019\) \| New urban land rate \(%\) \| 24\.89 \(([\d.]+)\)", 1),
+    ("s.e. of the old-core coefficient", "0.077", SUP, r"New dwellings outside the old core 2015–24 \(%\) \| Non-capital provincial \| -0\.251 \(([\d.]+)\)", 1),
+    ("housing growth after periods without decline (%/yr)", "1.50", SUP, r"\| No population decline \| ([\d.]+) \|", 1),
+    ("household growth after periods without decline (%/yr)", "1.55", SUP, r"\| No population decline \| [\d.]+ \| ([\d.]+) \|", 1),
     ("housing growth after prior decline", "0.351", SUP, r"\| \+ prior decline \| shrink_lag \| -([\d.]+)", 1),
     ("same, same-period households controlled", "0.019", SUP, r"\| \+ same-period households \| shrink_lag \| -([\d.]+)", 1),
     ("its s.e.", "0.057", SUP, r"\| \+ same-period households \| shrink_lag \| -[\d.]+ \(([\d.]+)\)", 1),
     ("urbanised 2019, complexes designated 2001-05 (%)", "58.1", SUP, r"\| 2001–05 \| \d+ \| [\d.]+ \| ([\d.]+) \|", 1),
     ("urbanised 2019, complexes designated 2011-15 (%)", "17.8", SUP, r"\| 2011–15 \| \d+ \| [\d.]+ \| ([\d.]+) \|", 1),
-    ("urban before designation, shrinking before 2006 (%)", "21.8", SUP, r"\| Shrinking \(before 2006\)(?: \| [\d.,]+){4} \| ([\d.]+) \|", 1),
-    ("urban before designation, shrinking after 2006 (%)", "3.1", SUP, r"\| Shrinking \(after 2006\)(?: \| [\d.,]+){4} \| ([\d.]+) \|", 1),
+    ("urban in late-1990s map, shrinking, designated before 2006 (%)", "21.8", SUP, r"\| Shrinking \(before 2006\)(?: \| [\d.,]+){4} \| ([\d.]+) \|", 1),
+    ("urban in late-1990s map, shrinking, designated after 2006 (%)", "3.1", SUP, r"\| Shrinking \(after 2006\)(?: \| [\d.,]+){4} \| ([\d.]+) \|", 1),
     ("placebo, all employment, designated 2016-24", "0.751", SUP, r"\| Placebo: 2010–24 growth \| All employment \| Designated 2016–24 \| ([\d.]+)", 1),
     ("all employment, designated 2006-12", "0.432", SUP, r"\| Growth 2010–24 \| All employment \| Designated 2006–12 \| ([\d.]+)", 1),
     ("2010 long-term vacancy share, shrinking (%)", "50.0", "vacancy.txt", r"12개월 이상 빈 주택 비중 \(%\): 감소 ([\d.]+)", 1),
@@ -211,6 +217,27 @@ def num(s):
     return float(s.replace(",", ""))
 
 
+def table_values():
+    """Every number printed in Tables 1-4 and S2-S11 (absolute values)."""
+    t = ""
+    for fn in ("tables.md", "supplement_tables.md"):
+        t += open(os.path.join(A, "..", "paper1", fn), encoding="utf-8").read()
+    vals = set()
+    for x in re.findall(r"-?[\d,]*\d(?:\.\d+)?", t):
+        try:
+            vals.add(abs(float(x.replace(",", ""))))
+        except ValueError:
+            pass
+    return vals
+
+
+def in_tables(val, vals):
+    """The value as written, allowing the table to show more decimals or the text to scale by 1,000 (per dwelling)."""
+    v = num(val)
+    d = len(val.split(".")[1]) if "." in val else 0
+    return any(abs(round(x, d) - v) < 1e-9 or abs(round(x * 1000, d) - v) < 1e-9 for x in vals)
+
+
 def section_words(text, head):
     m = re.search(rf"## {head}.*?\n(.*?)(?=\n---|\n## )", text, re.S)
     if not m:
@@ -222,6 +249,7 @@ def section_words(text, head):
 def main():
     draft = open(DRAFT, encoding="utf-8").read()
     cache, rows, bad, seen = {}, [], 0, {}
+    tv = table_values()
     for i, (claim, val, f, rx, scale) in enumerate(C, 1):
         text = cache.setdefault(f, open(os.path.join(A, f), encoding="utf-8").read())
         m = re.search(rx, text, re.S)
@@ -236,22 +264,25 @@ def main():
         in_draft = val in draft
         bad += (not ok) + (not in_draft)
         seen[val] = num(val)
-        rows.append((i, claim, val, f, src, "OK" if ok else "MISMATCH", "yes" if in_draft else "NO"))
+        rows.append((i, claim, val, f, src, "OK" if ok else "MISMATCH", "yes" if in_draft else "NO",
+                     "yes" if in_tables(val, tv) else "text only"))
     for claim, val, fn in DERIVED:
         x = fn(seen)
         ok = abs(x - num(val)) < 1e-9
         in_draft = val in draft
         bad += (not ok) + (not in_draft)
         rows.append((len(rows) + 1, claim + " [derived]", val, "computed from rows above", str(x),
-                     "OK" if ok else "MISMATCH", "yes" if in_draft else "NO"))
+                     "OK" if ok else "MISMATCH", "yes" if in_draft else "NO", "derived"))
     w_abs, w_rat = section_words(draft, "Abstract"), section_words(draft, "Submission rationale")
     lines = ["# 논문 1 수치 대조표 (자동 생성: `code/03_partA/check_paper1_numbers.py`)", "",
              f"대상 `docs/paper1_results_draft.md`. 수치 {len(rows)}개, 불일치·미기재 {bad}건. "
              f"초록 {w_abs}단어(한도 250), 투고 사유서 {w_rat}단어(한도 300).", "",
              "출처 파일은 `outputs/partA/`. 부호는 본문 서술에 맞춰 절댓값으로 대조함(예: −0.028은 0.028). "
              "\"밖 비중\"은 100 − 주거·상업·공업 비중으로 환산.", "",
-             "| # | 내용 | 원고 값 | 출처 파일 | 출처에서 다시 읽은 값 | 대조 | 원고에 있음 |", "|---|---|---|---|---|---|---|"]
-    lines += [f"| {r[0]} | {r[1]} | {r[2]} | `{r[3]}` | {r[4]} | {r[5]} | {r[6]} |" for r in rows]
+             "\"표에 있음\"은 값이 표 1–4 또는 보충표 S2–S11에 인쇄되어 독자가 확인할 수 있는지를 뜻함.", "",
+             "| # | 내용 | 원고 값 | 출처 파일 | 출처에서 다시 읽은 값 | 대조 | 원고에 있음 | 표에 있음 |",
+             "|---|---|---|---|---|---|---|---|"]
+    lines += [f"| {r[0]} | {r[1]} | {r[2]} | `{r[3]}` | {r[4]} | {r[5]} | {r[6]} | {r[7]} |" for r in rows]
     lines[2] = lines[2].replace("`docs/paper1_results_draft.md`", f"`docs/{os.path.basename(DRAFT)}`")
     out = "paper1_numbers_check.md" if DRAFT.endswith("paper1_results_draft.md") else "paper1_manuscript_numbers_check.md"
     with open(os.path.join(DOCS, out), "w", encoding="utf-8") as fh:
@@ -260,6 +291,7 @@ def main():
     for r in rows:
         if r[5] != "OK" or r[6] != "yes":
             print("  ", r)
+    print("text only (not printed in any table):", [(r[0], r[2]) for r in rows if r[7] == "text only"])
     sys.exit(1 if bad else 0)
 
 

@@ -44,14 +44,15 @@ def table1():
     n = dict(zip(G, grab(s, r"시군 집단: 감소 (\d+), 정체 (\d+), 성장 (\d+), 광역시 (\d+), 수도권 (\d+)", 5)))
     pop = dict(zip(G, grab(s, r"/ 2009-19 감소 (-?[\d.]+), 정체 (-?[\d.]+), 성장 (-?[\d.]+), 광역시 (-?[\d.]+), 수도권 (-?[\d.]+)", 5)))
     urb = re.findall(r"([\d.]+) \(", grab(s, r"(시가지 증가 %[^\n]+)"))
+    pc0 = dict(zip(G, grab(s, r"x100 중앙값: 1999-2009 감소 (-?[\d.]+), 정체 (-?[\d.]+), 성장 (-?[\d.]+), 광역시 (-?[\d.]+), 수도권 (-?[\d.]+)", 5)))
     pc = dict(zip(G, grab(s, r"/ 2009-2019 감소 ([\d.]+), 정체 ([\d.]+), 성장 ([\d.]+), 광역시 ([\d.]+), 수도권 ([\d.]+)", 5)))
     dens = {g: grab(s, rf"{g} ([\d,]+ -> [\d,]+ -> [\d,]+)") for g in G}
     both = {g: grab(s, rf"\n{g}\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+([\d.]+)\n") for g in G}
     pop = {g: ("0.0" if v == "-0.0" else v) for g, v in pop.items()}   # rounding artefact
-    rows = [[EN[g], n[g], pop[g], urb[i], pc[g], dens[g].replace(" -> ", " → "), both[g]] for i, g in enumerate(G)]
+    rows = [[EN[g], n[g], pop[g], urb[i], pc0[g], pc[g], dens[g].replace(" -> ", " → "), both[g]] for i, g in enumerate(G)]
     return ("**Table 1.** Shrinkage sprawl by group, si/gun medians unless noted.\n\n" + md(
         ["Group", "si/gun", "Registered pop. change 2009–19 (%)", "Urban land change 2009–19 (%)",
-         "Δ log urban land per resident ×100, 2009–19", "Residents per urban km², 2000/1999 → 2009 → 2019 (group total)",
+         "Δ log urban land per resident ×100, 1999–2009", "Δ log urban land per resident ×100, 2009–19", "Residents per urban km², 2000/1999 → 2009 → 2019 (group total)",
          "Expansion + core decline + pop. decline, 2009–24 (% of si/gun)"], rows)
         + "\n\nSources: land cover (large class), SGIS 100 m grid, registered population (KOSIS DT_1B040A3).")
 
