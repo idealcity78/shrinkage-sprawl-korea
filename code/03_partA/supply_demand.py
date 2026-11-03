@@ -7,7 +7,8 @@ Per 시군 and period (2000-05, 2005-10, 2010-15, 2015-19, 2019-24), from the SG
   s_house, g_hh, g_pop  annual growth rates (%/yr) of units, households and residents
 Groups by resident registration population 2000 -> 2019 (KOSIS, regpop.py; the grid population has a census ->
 register-census break of +4-6 % between 2010 and 2015): 감소 (< -5 %), 정체 (-5 % to +5 %), 성장 (> +5 %); 수도권 시군
-kept as a high-demand benchmark (비수도권 = the 9 도, 광역시 and 세종 split as 광역시).
+kept as a high-demand benchmark (비수도권 = the 9 도, 광역시 and 세종 split as 광역시). 군위군 is a 경북 군 on the
+2022 boundaries (it joined 대구 in July 2023), so it is kept in 경북 although the 집계구 codes place it in 대구.
 
 Questions
   1. supply beyond demand   how much of the added housing is matched by added households, by group; share of
@@ -92,6 +93,7 @@ def panel():
     lv = lv[lv["pop"] > 0]
     w = lv.pivot_table(index="SG_ID", columns="year", values=["pop", "hh", "house"])
     info = lv.groupby("SG_ID")[["sigun", "capital", "sido"]].first()
+    info.loc[info.sigun == "군위군", "sido"] = "37"
     rows = []
     for t0, t1 in PERIODS:
         n = t1 - t0

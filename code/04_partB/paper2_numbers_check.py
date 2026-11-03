@@ -252,7 +252,7 @@ vl = lines(V)
 iv = next(k for k, l in enumerate(vl) if "빈집 가운데 2000년 전에 지은 주택 비중" in l)
 vrow = next(l.split() for l in vl[iv + 1:] if l.startswith("감소"))
 add(132, "pre-2000 share of vacant, shrinking, max 2015-24 (%)", "80.8%", V, f"{max(num(vrow[1]), num(vrow[3]), num(vrow[5])):.1f}%")
-add(133, "pre-2000 share of vacant, shrinking, min 2015-24 (%)", "73.0%", V, f"{min(num(vrow[1]), num(vrow[3]), num(vrow[5])):.1f}%")
+add(133, "pre-2000 share of vacant, shrinking, min 2015-24 (%)", "73.1%", V, f"{min(num(vrow[1]), num(vrow[3]), num(vrow[5])):.1f}%")
 F5 = open(O + "paper2/fig5_case_cities.txt", encoding="utf-8").read()
 for cid, (city, val) in zip((134, 135, 136), [("진주시", "28.7%"), ("전주시", "26.3%"), ("나주시", "4.9%")]):
     add(cid, f"Figure 5 share of new-town in-movers from own old core, {city}", val, "outputs/paper2/fig5_case_cities.txt",
@@ -262,7 +262,7 @@ for cid, (city, val) in zip((134, 135, 136), [("진주시", "28.7%"), ("전주�
 H = pd.read_csv(O + "partB/old_core_housing.csv")
 hq = lambda y, t, c: H[(H.year == y) & (H.scope == "비수도권 도 시군") & (H.type == t)][c].iloc[0]
 for cid, (y, t, c, val) in zip(range(137, 143), [(2024, "old core", "pre2000", "72.5%"), (2024, "new", "pre2000", "4.8%"),
-                                                  (2022, "old core", "le60", "42.9%"), (2022, "new", "le60", "32.2%"),
+                                                  (2022, "old core", "le60", "42.9%"), (2022, "new", "le60", "32.3%"),
                                                   (2022, "old core", "gt85", "19.9%"), (2022, "new", "gt85", "14.9%")]):
     add(cid, f"{t} census blocks, {c} {y} (%)", val, "outputs/partB/old_core_housing.csv", f"{hq(y, t, c):.1f}%")
 

@@ -88,7 +88,7 @@ def table2():
     return ("**Table 3.** Does supply lead growth? Non-capital provincial si/gun.\n\n"
             + "Panel A. Lead and reverse regressions (equations 6–7), five-year periods.\n\n" + pl
             + "\n\nPanel B. In-migration from outside the si/gun on housing growth.\n\n" + pm
-            + "\n\nPanel C. Industrial-complex designation and growth, cross-section of 122 si/gun (outcome log growth ×100; "
+            + "\n\nPanel C. Industrial-complex designation and growth, cross-section of 123 si/gun (outcome log growth ×100; "
               "designated area as % of 2009 urban land).\n\n" + md(["Model", "Regressor"] + [IC_Y[y] for y in ys], rows + rev)
             + "\n\nPanels A–B: si/gun × five-year periods, region × period fixed effects (with si/gun fixed effects where "
               "stated, and in Panel B), s.e. clustered by si/gun; next-period models control for the current value of the "

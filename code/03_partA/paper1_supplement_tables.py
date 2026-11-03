@@ -344,11 +344,11 @@ def s7():
     tot = re.search(r"산업단지 (\d+)개, 지정 면적 (\d+) km2", c)
     return ("**Table S7.** Industrial complexes in non-capital provincial si/gun (area-weighted).\n\nPanel A. By designation window.\n\n"
             + md(cols, rows) + "\n\nPanel B. By group.\n\n" + md(["Group (designation)"] + cols[1:], rows2)
-            + "\n\nPanel C. Designation and later growth, cross-section of 122 si/gun: log growth ×100 of each column's outcome "
+            + "\n\nPanel C. Designation and later growth, cross-section of 123 si/gun: log growth ×100 of each column's outcome "
               "on designated area (% of 2009 urban land).\n\n"
             + md(["Model", "Regressor"] + list(IC_Y.values()), rows3)
             + "\n\nPanel D. Reverse model: area designated in 2006–12 (% of 2009 urban land) on the outcome's prior growth "
-              "2000–05 (log ×100), 122 si/gun.\n\n"
+              "2000–05 (log ×100), 123 si/gun.\n\n"
             + md(["Model", "Regressor"] + list(IC_Y.values()), rows4)
             + f"\n\n{IC_NOTE} Blank cells: not estimated."
             + f"\n\nAll windows: {tot.group(1)} complexes, {tot.group(2)} km² designated. Area-weighted shares: urbanised 2019 and "
