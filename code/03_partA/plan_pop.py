@@ -119,7 +119,7 @@ def main():
         print(s)
         lines.append(s)
 
-    rp = pd.read_csv(os.path.join(OUT, "regpop_sigun.csv")).set_index(["sigun", "year"]).regpop
+    rp = pd.read_csv(os.path.join(OUT, "regpop_sigun.csv")).set_index(["sigun", "year"]).regpop_plan   # the plan city's population (안양 without 군포)
     ss = pd.read_csv(os.path.join(OUT, "shrink_sprawl_sigun.csv"))
     info = ss[["sigun", "group", "region"]].drop_duplicates("sigun")
     w = load()

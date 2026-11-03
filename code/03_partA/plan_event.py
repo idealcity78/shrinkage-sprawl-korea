@@ -103,7 +103,7 @@ def main():
 
     ss = pd.read_csv(os.path.join(OUT, "shrink_sprawl_sigun.csv"))
     info = ss[["sigun", "group", "region"]].drop_duplicates("sigun").set_index("sigun")
-    rp = pd.read_csv(os.path.join(OUT, "regpop_sigun.csv")).set_index(["sigun", "year"]).regpop
+    rp = pd.read_csv(os.path.join(OUT, "regpop_sigun.csv")).set_index(["sigun", "year"]).regpop_plan   # the plan city's population (안양 without 군포)
     o, t = outcomes(), treatments()
     sig = sorted(set(info.index[info.group.isin(["감소", "정체", "성장"])]) - LEAVE_OUT)
     idx = pd.MultiIndex.from_product([sig, range(2000, 2031)], names=["sigun", "year"])

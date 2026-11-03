@@ -81,24 +81,24 @@ shrink_sprawl_021,(Intercept),-27.3213424604951,15.6817897884994,40,15.681789788
 shrink_sprawl_021,out_share_1524,-0.0662291559798813,0.0538316215330027,40,0.0538316215330027,40,g_old_1524 ~ out_share_1524 + g_pop_1524 + lpop10
 shrink_sprawl_021,g_pop_1524,0.18384644780277,0.0651935935616934,40,0.0651935935616934,40,g_old_1524 ~ out_share_1524 + g_pop_1524 + lpop10
 shrink_sprawl_021,lpop10,1.40233333188957,0.933522883666742,40,0.933522883666742,40,g_old_1524 ~ out_share_1524 + g_pop_1524 + lpop10
-shrink_sprawl_022,(Intercept),21.2446558085644,17.4898407225698,161,17.4898407225698,161,new_rate_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_022,gp,0.256281552454658,0.0523509414808871,161,0.0523509414808871,161,new_rate_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_022,neg,-0.83162101200324,4.0621377461856,161,4.0621377461856,161,new_rate_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_022,lpop10,0.312921199915635,1.46918327712074,161,1.46918327712074,161,new_rate_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_022,group_is,-6.53440218522156,3.31063700699658,161,3.31063700699658,161,new_rate_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_022,gp:neg,0.690459117882482,0.412256304803954,161,0.412256304803954,161,new_rate_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_023,(Intercept),1.97858937096471,16.4259516483263,161,16.4259516483263,161,d_lpcu_rp_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_023,gp,-0.287905773495418,0.0223579108188158,161,0.0223579108188158,161,d_lpcu_rp_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_023,neg,5.96444882368907,4.04766302418131,161,4.04766302418131,161,d_lpcu_rp_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_023,lpop10,2.10439630747631,1.35050867603467,161,1.35050867603467,161,d_lpcu_rp_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_023,group_is,-9.21990373536683,2.98367801319597,161,2.98367801319597,161,d_lpcu_rp_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_023,gp:neg,0.0572485584952904,0.4246265097051,161,0.4246265097051,161,d_lpcu_rp_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_024,(Intercept),125.31404372955,9.94359081393864,161,9.94359081393864,161,leap_share_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_024,gp,0.0298874757827244,0.0167995338454116,161,0.0167995338454116,161,leap_share_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_024,neg,-3.47107395052549,2.14607339476748,161,2.14607339476748,161,leap_share_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_024,lpop10,-3.81800255970791,0.827427837970693,161,0.827427837970693,161,leap_share_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_024,group_is,-4.84449067948789,2.60228686899495,161,2.60228686899495,161,leap_share_post ~ gp + neg + gp:neg + lpop10 + group_is
-shrink_sprawl_024,gp:neg,0.700519977461148,0.268199293233864,161,0.268199293233864,161,leap_share_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_022,(Intercept),21.4270116398711,17.4839330584612,161,17.4839330584612,161,new_rate_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_022,gp,0.256356801134328,0.0524967760584515,161,0.0524967760584515,161,new_rate_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_022,neg,-0.905229185218275,4.03490305563158,161,4.03490305563158,161,new_rate_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_022,lpop10,0.300301184363176,1.4684198119127,161,1.4684198119127,161,new_rate_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_022,group_is,-6.61766449936737,3.31298688108484,161,3.31298688108484,161,new_rate_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_022,gp:neg,0.687870208920358,0.412763623650422,161,0.412763623650422,161,new_rate_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_023,(Intercept),2.16544328989374,16.4444825515226,161,16.4444825515226,161,d_lpcu_rp_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_023,gp,-0.287842579131728,0.0223761486316147,161,0.0223761486316147,161,d_lpcu_rp_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_023,neg,5.91719889993877,4.01964251006042,161,4.01964251006042,161,d_lpcu_rp_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_023,lpop10,2.09106748764349,1.35144774083338,161,1.35144774083338,161,d_lpcu_rp_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_023,group_is,-9.29136054347455,2.98675215824329,161,2.98675215824329,161,d_lpcu_rp_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_023,gp:neg,0.05796885328283,0.426456630814849,161,0.426456630814849,161,d_lpcu_rp_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_024,(Intercept),125.449555892675,9.96875026361012,161,9.96875026361012,161,leap_share_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_024,gp,0.0299463156846931,0.0167591042908889,161,0.0167591042908889,161,leap_share_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_024,neg,-3.53169004009499,2.1303564563858,161,2.1303564563858,161,leap_share_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_024,lpop10,-3.82729726238802,0.829335712431603,161,0.829335712431603,161,leap_share_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_024,group_is,-4.90927492951568,2.59577340255947,161,2.59577340255947,161,leap_share_post ~ gp + neg + gp:neg + lpop10 + group_is
+shrink_sprawl_024,gp:neg,0.697887777065816,0.269068423480511,161,0.269068423480511,161,leap_share_post ~ gp + neg + gp:neg + lpop10 + group_is
 supply_demand_001,g_hh_lag,0.425100818698979,0.0494119300570033,488,0.0494119300570033,488,s_house ~ g_hh_lag | rp
 supply_demand_002,g_hh_lag,0.350911063791163,0.0633264703380189,488,0.0633264703380189,488,s_house ~ g_hh_lag + shrink_lag | rp
 supply_demand_002,shrink_lag,-0.351274158438808,0.1267979313321,488,0.1267979313321,488,s_house ~ g_hh_lag + shrink_lag | rp
@@ -212,9 +212,9 @@ vacancy_009,s,0.101845848602889,0.0757210171901692,110,0.05841316702192,70,d_vac
 vacancy_010,s,0.523166060912961,0.043360371410765,250,0.0423501741660128,250,d_vac ~ s | sigun + ry
 vacancy_011,s,0.119758374472495,0.0703133598481144,250,0.0686752197658963,250,d_vac_old ~ s | sigun + ry
 vacancy_012,s,0.356361602157734,0.0542084268534204,250,0.0529454947873892,250,d_vac_new5 ~ s | sigun + ry
-vacancy_013,s,0.283731933017146,0.0451062377830223,395,0.0441978734526485,384,d_vac ~ s | sigun + ry
-vacancy_014,s,0.0624785126535771,0.0260154955129704,395,0.0254915868625912,384,d_vac_old ~ s | sigun + ry
-vacancy_015,s,0.172843337508661,0.0300025890314436,395,0.0293983869734892,384,d_vac_new5 ~ s | sigun + ry
+vacancy_013,s,0.284383462383913,0.0455175502318018,395,0.0446009027553384,384,d_vac ~ s | sigun + ry
+vacancy_014,s,0.0611818874039232,0.0262487978914171,395,0.0257201909206022,384,d_vac_old ~ s | sigun + ry
+vacancy_015,s,0.174592973904387,0.0302959590530262,395,0.0296858490125775,384,d_vac_new5 ~ s | sigun + ry
 vacancy_016,s,0.177423884168614,0.0269552531767498,610,0.0267466411164175,610,d_vac_old ~ s + d_hh | sigun + ry
 vacancy_016,d_hh,-0.156182552231872,0.0262163123589539,610,0.0260134191084378,610,d_vac_old ~ s + d_hh | sigun + ry
 plan_pop_001,trend_g,0.247755917517934,0.12542082495088,289,0.12542082495088,289,plan_g ~ trend_g | region

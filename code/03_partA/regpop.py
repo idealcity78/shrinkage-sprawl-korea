@@ -5,11 +5,13 @@ between 2010 and 2015, so population change across that break is measured with t
 
 KOSIS codes are 5-digit administrative codes on current 시도 numbering (강원 51, 전북 52, 세종 36). Kept rows: 시군구;
 구 and 출장소 inside a 시 (same first four digits as the 시, last digit not 0) are dropped. Mapped to the study's
-2022 시군: 광역시·세종 as one unit except 울주군 and 군위군; 마산·진해 -> 창원, 청원 -> 청주, 연기 -> 세종,
+2022 시군: 광역시·세종 as one unit except 울주군 and 군위군; 마산·진해 -> 창원, 청원 -> 청주, 연기 -> 세종, 군포 -> 안양
+(the boundary file sigun_1208_2022_tm.shp holds 군포 inside the 안양 polygon),
 북·남제주 -> 제주·서귀포, 증평출장소 -> 증평군, 계룡출장소 -> 계룡시, a former 군 that became a 시 (양주, 화성, 광주, 포천,
 여주, 당진, ...) -> that 시.
 
-Output: outputs/partA/regpop_sigun.csv (sigun, year, regpop)
+Output: outputs/partA/regpop_sigun.csv (sigun, year, regpop, regpop_plan = regpop of the city whose master plan
+represents the unit, i.e. 안양 without 군포; used by the plan analyses)
 """
 import os
 import sys
@@ -23,7 +25,7 @@ SRC = os.path.join(paths.WORK, "housing", "DT_1B040A3.csv")
 OUT = os.path.join(paths.OUTPUTS, "partA", "regpop_sigun.csv")
 METRO = {"11": "서울특별시", "26": "부산광역시", "27": "대구광역시", "28": "인천광역시", "29": "광주광역시",
          "30": "대전광역시", "31": "울산광역시", "36": "세종시"}
-OLD = {"마산시": "창원시", "진해시": "창원시", "청원군": "청주시", "연기군": "세종시", "북제주군": "제주시",
+OLD = {"마산시": "창원시", "진해시": "창원시", "청원군": "청주시", "연기군": "세종시", "북제주군": "제주시", "군포시": "안양시",
        "남제주군": "서귀포시", "증평출장소": "증평군", "계룡출장소": "계룡시"}
 
 
@@ -51,6 +53,9 @@ def build(units):
     d["sigun"] = [unit(c, n, units) for c, n in zip(d.C1, d.C1_NM)]
     d["year"] = d.PRD_DE.astype(int)
     r = d.groupby(["sigun", "year"]).DT.sum().rename("regpop").reset_index()
+    # regpop_plan: population of the city whose master plan represents the unit (안양 without 군포, which has its own plan)
+    pl = d[d.C1_NM.str.strip() != "군포시"].groupby(["sigun", "year"]).DT.sum().rename("regpop_plan")
+    r = r.merge(pl.reset_index(), on=["sigun", "year"], how="left")
     miss = sorted(set(r.sigun) - set(units))
     r = r[r.sigun.isin(units)]
     r.to_csv(OUT, index=False, encoding="utf-8-sig")
