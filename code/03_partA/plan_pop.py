@@ -199,9 +199,17 @@ def main():
         t = f.split("~")[1].split("+")[0].strip()
         say(f"   신규 시가지 증가율(%) ~ {lab}: {m.params[t]:.3f}{stars(m.pvalues[t])} (se {m.bse[t]:.3f}); "
             f"실제 인구 변화 {m.params.g_reg:.3f}{stars(m.pvalues.g_reg)}, n={int(m.nobs)}")
-        mrows.append(dict(block="urban_on_plan", term=t, coef=m.params[t], se=m.bse[t], p=m.pvalues[t], n=m.nobs))
+        lo, hi = m.conf_int().loc[t]
+        iqr = d[t].quantile(0.75) - d[t].quantile(0.25)
+        say(f"     95% CI [{lo:.3f}, {hi:.3f}]; IQR {iqr:.1f} → upper bound {hi * iqr:.2f}%p, lower {lo * iqr:.2f}%p")
+        mrows.append(dict(block="urban_on_plan", term=t, coef=m.params[t], se=m.bse[t], p=m.pvalues[t], n=m.nobs,
+                          lo=lo, hi=hi, iqr=iqr))
         mrows.append(dict(block="urban_on_plan_" + t, term="g_reg", coef=m.params.g_reg, se=m.bse.g_reg,
                           p=m.pvalues.g_reg, n=m.nobs))
+    iqr = d.g_reg.quantile(0.75) - d.g_reg.quantile(0.25)
+    say(f"   실제 인구 변화 IQR {iqr:.1f}%p, 시가지 증가율 중앙값 {d.new_urb.median():.1f}%")
+    mrows.append(dict(block="urban_on_plan_scale", term="g_reg", coef=np.nan, n=len(d), iqr=iqr))
+    mrows.append(dict(block="urban_on_plan_scale", term="new_urb_median", coef=d.new_urb.median(), n=len(d)))
     say(f"   감소 시군 2009 계획 초과 중앙값 {d[d.group == '감소'].plan_excess.median():.0f}%, "
         f"성장 시군 {d[d.group == '성장'].plan_excess.median():.0f}%")
 

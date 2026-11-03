@@ -379,6 +379,17 @@ def s8():
     gx, gr = pick(m, block="urban_on_plan_plan_excess", term="g_reg"), pick(m, block="urban_on_plan_reserve_share", term="g_reg")
     rows_f = [["2009 overstatement (%)", cell(ox), ""], ["2009 reserve ÷ urbanised land (%)", "", cell(rs)],
               ["Realised population change 2009–19 (%)", cell(gx), cell(gr)], ["N (si/gun)", ln(ox), ln(rs)]]
+    # how large a plan effect the estimates rule out: 95% limits times the interquartile range of the plan term,
+    # next to the effect of an interquartile difference in realised population change
+    iq = pick(m, block="urban_on_plan_scale", term="g_reg").iqr
+    ci = lambda r: f"[{r.lo:.3f}, {r.hi:.3f}]"
+    bd = lambda r: f"[{r.lo * r.iqr:.1f}, {r.hi * r.iqr:.1f}]"
+    rows_f += [["95% confidence interval of the plan term", ci(ox), ci(rs)],
+               ["Interquartile range of the plan term (pp)", f"{ox.iqr:.1f}", f"{rs.iqr:.1f}"],
+               ["Effect of an interquartile difference in the plan term, 95% bounds (pp)", bd(ox), bd(rs)],
+               ["Effect of an interquartile difference in realised population change (pp)",
+                f"{gx.coef * iq:.1f}", f"{gr.coef * iq:.1f}"],
+               ["Median urban land growth 2009–19 (%)", *[f"{pick(m, block='urban_on_plan_scale', term='new_urb_median').coef:.1f}"] * 2]]
     sc = re.search(r"계획\(시군 × 수립일\) (\d+)개, 시군 (\d+)개", p)
     rows0 = [["Plan vintages (si/gun × adoption date), 2005–2025 tables", sc.group(1)], ["si/gun with a master plan", sc.group(2)]]
     for g_ in ("감소", "정체"):
