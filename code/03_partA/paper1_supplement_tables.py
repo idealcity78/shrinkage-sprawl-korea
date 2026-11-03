@@ -1,4 +1,4 @@
-"""Supplementary tables S2-S12 of paper 1, built from the output files (no typed-in numbers).
+"""Supplementary tables S2-S13 of paper 1, built from the output files (no typed-in numbers).
 
 Different models never share a panel: each panel holds one model (or one model across samples or outcomes).
 
@@ -14,6 +14,7 @@ Different models never share a panel: each panel holds one model (or one model a
       (zoning_route.txt)
   S11 innovation and enterprise new towns excluded from the old core (newcity_zones.csv)
   S12 nationwide events in the study period absorbed by the region x period (year) fixed effects (text only)
+  S13 every regression with all terms, N, R², fixed effects and s.e. type (replication/data/paper1, from export_model_frames.py)
 Output: outputs/paper1/supplement_tables.md
 Run with ArcGIS Pro Python:  propy.bat code\\03_partA\\paper1_supplement_tables.py
 """
@@ -534,7 +535,11 @@ def s11():
             for r in z.itertuples()]
     inn, ent = (z.type == "innovation").sum(), (z.type == "enterprise").sum()
     mapped = z[z.source != "없음"]
+    sh = pd.read_csv(os.path.join(A, "newcity_share.csv"))
+    rows_b = [[EN.get(r.group, r.group), f"{r.dh_out:,.0f}", f"{r.dh_out_newtown:,.0f}", f"{r.dh_pct:.1f}", f"{r.new_km2:.1f}",
+               f"{r.new_newtown_km2:.1f}", f"{r.new_pct:.1f}"] for r in sh.itertuples()]
     return ("**Table S11.** Innovation and enterprise new towns excluded from the old core.\n\n"
+            + "Panel A. Districts.\n\n"
             + md(["Zone", "Type", "District designated", "Notified area (km²)", "Area on the 100 m grid (km²)", "Ratio", "Boundary source"], rows)
             + f"\n\n{inn} sites of the 10 innovation cities and {ent} sites of the 4 enterprise cities; {len(mapped)} are mapped. "
               f"The {len(z) - len(mapped)} unmapped sites are small Busan sites inside existing urban areas "
@@ -544,7 +549,13 @@ def s11():
               "Special Act on Enterprise Cities for private-led development. Both were developed by acquiring and rebuilding the "
               "whole district after designation, so housing added inside them is new-town construction rather than change in the "
               "old core; they are therefore excluded from the old core. Other new towns, such as housing-site development "
-              "districts, are not excluded. Source: `newcity_zones.csv`.")
+              "districts, are not excluded. Source: `newcity_zones.csv`."
+            + "\n\nPanel B. New development inside the districts, by group.\n\n"
+            + md(["Group", "Dwellings added 2015–24 outside the old core", "Of which in the districts", "In the districts (%)",
+                  "New urban land 2009–19 (km²)", "Of which in the districts (km²)", "In the districts, land (%)"], rows_b)
+            + "\n\nPanel B: dwellings added on the 100-metre grid (increases only) outside the old core, and new urban land "
+              "(urban share from below 10 to at least 50 percent), with the part inside the mapped districts. Most new "
+              "development lies outside the districts. Source: `newcity_share.csv`.")
 
 
 def s12():
@@ -585,9 +596,152 @@ def s12():
               "same region. The relocation of public institutions affected only the host si/gun and is therefore not absorbed.")
 
 
+# Table S13: every regression of the paper with all its terms, from the replication export
+# (replication/export_model_frames.py paper1 records each fitted model while the analysis scripts run).
+REP = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "replication", "data", "paper1")
+TERM = {"Intercept": "Constant", "gp": "Population growth g (pp)", "neg": "N (negative growth)", "gp:neg": "g × N",
+        "lpop10": "Log population 2010", "lpop00": "Log population 2000", "C(group == '수도권')[T.True]": "Capital region",
+        "new_rate_pre": "New urban land rate 1999–2009 (%)", "leap_share_pre": "Leapfrog share 1999–2009 (%)",
+        "new_rate_post": "New urban land rate 2009–19 (%)", "out_share_1524": "New dwellings outside the old core 2015–24 (%)",
+        "g_pop_0010": "si/gun population change 2000–10 (%)", "g_pop_1524": "si/gun population change 2015–24 (%)",
+        "s_house": "Housing growth (%/yr)", "g_hh_lag": "Prior-period household growth (%/yr)",
+        "shrink_lag": "Prior-period population decline (0/1)", "g_hh": "Same-period household growth (%/yr)",
+        "g_pop": "Same-period population growth (%/yr)", "sg_in": "Same-period gross in-migration",
+        "sg_net": "Same-period net in-migration", "ic_0612": "Area designated 2006–12 (%)", "ic_0105": "Area designated 2001–05 (%)",
+        "ic_1624": "Area designated 2016–24 (%)", "ic_pre": "Area designated before 2001 (%)",
+        "km2_0612": "Area designated 2006–12 (km²)", "km2_0105": "Area designated 2001–05 (km²)",
+        "pre_manuf": "Prior growth 2000–05 of the outcome", "pre_emp": "Prior growth 2000–05 of the outcome",
+        "pre_pop": "Prior growth 2000–05 of the outcome", "pre_hh": "Prior growth 2000–05 of the outcome",
+        "s": "Net additions per 1,000 dwellings", "d_hh": "Household change per 1,000 dwellings",
+        "trend_g": "Prior 5-year trend (%/yr)", "excess_pct": "Planned increase (% of population at adoption)",
+        "post": "Adopted 2019 or later", "plan_excess": "2009 overstatement (%)", "reserve_share": "2009 reserve ÷ urbanised land (%)",
+        "g_reg": "Realised population change 2009–19 (%)", "C(group, Treatment('성장'))[T.감소]": "Shrinking (vs growing)",
+        "C(group, Treatment('성장'))[T.정체]": "Stagnant (vs growing)", "lnew": "Log new urban land",
+        "avail_urb": "Share of available land in urban areas (%)", "old_inA": "Old core in residential, commercial and industrial zones (%)",
+        "gun": "County (0/1)", "reserve_share09": "2009 reserve ÷ urbanised land (%)",
+        "Em4": "k ≤ -4", "Em3": "k = -3", "Em2": "k = -2", "E0": "k = 0", "E1": "k = +1", "E2": "k = +2", "E3": "k = +3",
+        "E4": "k = +4", "E5": "k = +5", "E6": "k ≥ +6"}
+S3C_Y = ["New urban land rate 1999–2009 (%)", "Leapfrog share 1999–2009 (%)", "New urban land rate 2009–19 (%)",
+         "New dwellings outside the old core 2015–24 (%)"]
+S3C_S = ["Non-capital provincial", "Shrinking", "Stagnant and growing", "Metropolitan and capital region"]
+S9_P = ["S9-A", "S9-B", "S9-C", "S9-D", "S9-E"]
+S9_Y = ["Urban-use zoning", "Residential zoning", "Land-form-change permits"]
+S9_S = ["All", "Shrinking", "Stagnant and growing"]
+VAC_S = ["Non-capital provincial", "Shrinking", "Stagnant", "Growing", "Metropolitan and capital region"]
+VAC_Y = ["All vacancies", "Pre-2000 dwellings", "Built in last 5 years"]
+IC_YS = ["Manufacturing employment", "All employment", "Population", "Households"]
+
+
+def s13_where(mid):
+    """(source table-panel, outcome, sample or variant) of each exported model; '' source = not tabulated."""
+    sc, k = mid.rsplit("_", 1)
+    k = int(k)
+    if sc == "shrink_sprawl":
+        s4 = {1: ("New urban land rate (%)", "1999–2009"), 2: ("Leapfrog share (%)", "1999–2009"),
+              3: ("Δ log urban land per resident ×100", "1999–2009"), 22: ("New urban land rate (%)", "2009–2019"),
+              23: ("Δ log urban land per resident ×100", "2009–2019"), 24: ("Leapfrog share (%)", "2009–2019")}
+        if k in s4:
+            return ("S4",) + s4[k]
+        if k in (4, 5):
+            return ("", ("New urban land rate (%)", "Leapfrog share (%)")[k - 4], "2009–2019, census population")
+        j = k - 6
+        return "S3-C", "Old-core population change (%)", f"{S3C_Y[j // 4]}; {S3C_S[j % 4]}"
+    if sc == "supply_demand":
+        tab = {1: ("S5-B", "Housing growth (%/yr)", "(1) Prior demand only"),
+               2: ("S5-B", "Housing growth (%/yr)", "(2) + prior decline"),
+               3: ("S5-B", "Housing growth (%/yr)", "(3) + same-period households"),
+               4: ("S5-C", "Household growth", "All periods"), 5: ("S5-C", "Population growth", "All periods"),
+               6: ("S5-C", "Household growth", "Excl. 2010–15"), 7: ("S5-C", "Population growth", "Excl. 2010–15"),
+               8: ("S5-C", "Household growth", "Shrinking"), 9: ("S5-C", "Household growth", "Stagnant"),
+               10: ("S5-C", "Household growth", "Growing"),
+               11: ("S5-D", "Next-period household growth", "Without si/gun FE"),
+               12: ("S5-D", "Next-period household growth", "With si/gun FE"),
+               13: ("S5-D", "Next-period population growth", "Without si/gun FE"),
+               14: ("S5-D", "Next-period population growth", "With si/gun FE"),
+               15: ("S5-D", "Next-period housing growth", "Without si/gun FE"),
+               16: ("S5-D", "Next-period housing growth", "With si/gun FE"),
+               17: ("S5-E", "Gross in-migration", "Same period"), 18: ("S5-E", "Net in-migration", "Same period"),
+               19: ("S5-E", "Gross in-migration", "Next period"), 20: ("S5-E", "Net in-migration", "Next period")}
+        return tab[k]
+    if sc == "ic_unmet":
+        if k <= 12:
+            v, j = divmod(k - 1, 3)
+            return "S7-C", IC_YS[v], ["Growth 2010–24", "Placebo: growth 2010–24", "Placebo: growth 2005–15"][j]
+        if k <= 15:
+            return "S7-D", "Area designated 2006–12 (%)", ["Manufacturing employment", "Population", "Households"][k - 13]
+        return "", "Manufacturing employment change 2010–24", "Designated area in km²"
+    if sc == "vacancy":
+        if k == 16:
+            return "S6-B", "Pre-2000 dwellings", "Non-capital provincial, 2020–24"
+        s, y = divmod(k - 1, 3)
+        return "S6-A", VAC_Y[y], VAC_S[s]
+    if sc == "plan_pop":
+        return {1: ("S8-C", "Planned growth (%/yr)", "Adopted since 2000"), 2: ("S8-E", "Reserve share (%)", "Adopted since 2000"),
+                3: ("S8-F", "Urban land growth 2009–19 (%)", "(1) Overstatement"),
+                4: ("S8-F", "Urban land growth 2009–19 (%)", "(2) Reserve share"),
+                5: ("S8-D", "Planned growth (%/yr)", "Adopted 2005–2025")}[k]
+    if sc == "plan_event":
+        e, r = divmod(k - 1, 9)
+        y, s = divmod(r, 3)
+        return S9_P[e], S9_Y[y], S9_S[s]
+    if sc == "zoning_route":
+        return "S10-F", "Off-plan share of new urban land (%)", ["Group", "Group and controls", "2009 reserve share"][k - 1]
+    raise KeyError(mid)
+
+
+def s13_fe(formula):
+    fe = []
+    for pat, lab in [(r"C\(SG_ID\)|C\(sigun\)", "si/gun"), (r"C\(rp\)", "region × period"), (r"C\(ry\)", "region × year"),
+                     (r"C\(region\)", "region")]:
+        if re.search(pat, formula):
+            fe.append(lab)
+    return ", ".join(fe) if fe else "none"
+
+
+def s13():
+    mo = pd.read_csv(os.path.join(REP, "models.csv"))
+    es = pd.read_csv(os.path.join(REP, "python_estimates.csv"))
+    order = ["S3-C", "S4", "S5-B", "S5-C", "S5-D", "S5-E", "S6-A", "S6-B", "S7-C", "S7-D", "S8-C", "S8-D", "S8-E", "S8-F",
+             "S9-A", "S9-B", "S9-C", "S9-D", "S9-E", "S10-F", ""]
+    mo["where"] = [s13_where(i) for i in mo.id]
+    mo["rank"] = [order.index(w[0]) for w in mo["where"]]
+    mo = mo.sort_values(["rank", "id"], kind="stable")
+    panels, rows = [], []
+    for (src, part) in [(("S3-C", "S4"), "A. Sprawl and the old core (Tables S3, Panel C, and S4)"),
+                        (("S5-B", "S5-C", "S5-D", "S5-E"), "B. Housing supply, households and in-migration (Table S5)"),
+                        (("S6-A", "S6-B"), "C. Vacancy panel (Table S6)"),
+                        (("S7-C", "S7-D"), "D. Industrial complexes (Table S7)"),
+                        (("S8-C", "S8-D", "S8-E", "S8-F"), "E. Master plans (Table S8)"),
+                        (("S9-A", "S9-B", "S9-C", "S9-D", "S9-E"), "F. Event study of plan adoptions (Table S9)"),
+                        (("S10-F",), "G. Off-plan share of new urban land (Table S10, Panel F)"),
+                        (("",), "H. Models estimated by the analysis scripts but not tabulated")]:
+        rows = []
+        for _, m in mo[mo["where"].map(lambda w: w[0] in src)].iterrows():
+            w = m["where"]
+            se = "HC1" if m.cov_type == "HC1" else f"clustered by si/gun ({int(m.n_clusters)})"
+            first = True
+            for _, t in es[es.id == m.id].iterrows():
+                if t.term == "Intercept" and s13_fe(m.formula) not in ("none", "region"):
+                    continue                                    # absorbed by the fixed effects
+                head = [w[0] or "–", w[1], w[2]] if first else ["", "", ""]
+                tail = [f"{int(m.nobs)}", f"{m.r2:.3f}", s13_fe(m.formula), se] if first else ["", "", "", ""]
+                rows.append(head + [TERM[t.term], cs(t.coef, t.se, t.p)] + tail)
+                first = False
+        panels.append(f"Panel {part}.\n\n" + md(["Table", "Outcome", "Sample or column", "Term", "Coefficient (s.e.)", "N",
+                                                  "R²", "Fixed effects", "Standard errors"], rows))
+    nm, nt = len(mo), int(es.id.isin(mo.id).sum())
+    return ("**Table S13.** Full estimates of all regressions: every term except fixed-effect dummies.\n\n"
+            + "\n\n".join(panels)
+            + f"\n\n{nm} models. Each block of rows is one model; its first row gives the table and panel where the model's main "
+              "terms are reported, N, R², the fixed effects and the standard errors (number of clusters). Coefficients to three "
+              "decimals; * p<0.1, ** p<0.05, *** p<0.01. Constants are omitted where si/gun or region × period (year) fixed "
+              "effects absorb them. Source: `replication/data/paper1/models.csv`, `python_estimates.csv` (written by "
+              "`replication/export_model_frames.py`, which runs the analysis scripts and records each fitted model).")
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
-    t = "\n\n".join([s2(), s3(), s4(), s5(), s6(), s7(), s8(), s9(), s10(), s11(), s12()]) + "\n"
+    t = "\n\n".join([s2(), s3(), s4(), s5(), s6(), s7(), s8(), s9(), s10(), s11(), s12(), s13()]) + "\n"
     with open(os.path.join(OUT, "supplement_tables.md"), "w", encoding="utf-8") as f:
         f.write(t)
     print(t[:6000])

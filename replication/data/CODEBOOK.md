@@ -2,8 +2,8 @@
 
 Each paper has its own folder (`paper1/`, `paper2/`). Each file `{paper}/frames/{model id}.csv` holds the data of one regression, exactly as passed to the estimator
 (rows with missing values in the model variables are dropped by the estimator, in Python and in R alike).
-`models.csv` gives the formula, the standard-error type and N of each model; `python_estimates.csv` the
-published estimates. All files are UTF-8; group and unit names are in Korean.
+`models.csv` gives the formula, the standard-error type, N, R² and (for clustered errors) the number of clusters of each model; `python_estimates.csv` the
+published estimates (coefficient, standard error, p-value, N); for paper 1 these two files generate Supplementary Table S13. All files are UTF-8; group and unit names are in Korean.
 
 Units are the 161 cities and counties (*si/gun*) on 2022 boundaries (metropolitan cities and Sejong as one unit).
 Growth rates are in percent; "log growth" is 100 × ln(x1/x0).

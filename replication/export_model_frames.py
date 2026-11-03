@@ -12,7 +12,7 @@ paper2_numbers_check.py).
 
 Outputs (replication/data/{paper}/):
   frames/{script}_{nnn}.csv   estimation data of each model
-  models.csv                  one row per model: id, script, formula, cov_type, cluster, weights, nobs
+  models.csv                  one row per model: id, script, formula, cov_type, cluster, weights, nobs, r2, n_clusters
   python_estimates.csv        one row per model and term
   perm/{script}_controls.csv  paper 2: control units' panel used by the permutation test
   perm/{script}_draws.csv     paper 2: draw, SG_ID, placebo onset year
@@ -80,12 +80,14 @@ class Recorder:
             fr["w_"] = np.asarray(self.weights)
             w = "w_"
         fr.to_csv(os.path.join(state["out"], "frames", f"{mid}.csv"), index=False, encoding="utf-8")
+        ncl = len(pd.unique(fr["cluster_id"])) if cl else ""
         models.append({"id": mid, "script": state["script"], "formula": self.formula, "cov_type": cov,
-                       "cluster": cl, "weights": w, "nobs": int(res.nobs)})
+                       "cluster": cl, "weights": w, "nobs": int(res.nobs), "r2": res.rsquared, "n_clusters": ncl})
         for t in res.params.index:
             if state["fe_term"].match(t):
                 continue
-            ests.append({"id": mid, "term": t, "coef": res.params[t], "se": res.bse[t], "nobs": int(res.nobs)})
+            ests.append({"id": mid, "term": t, "coef": res.params[t], "se": res.bse[t], "p": res.pvalues[t],
+                         "nobs": int(res.nobs)})
         return res
 
 

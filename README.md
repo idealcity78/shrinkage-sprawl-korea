@@ -72,7 +72,7 @@ industrial-complex files). Raw data go to `data_raw/`, intermediate files to `da
 | 2 | `code/02_grid` | `sigun.py`, `grid_lc_share.py`, `grid_sgis.py`, `check_sgis.py`, `supply_zones.py`, `grid_zoning.py`, `grid_industry.py` |
 | 3 | `code/05_flows` | `build_mdis_db.py`, `check_mdis_db.py`, `dong_xwalk.py`, `dong_class.py`, `flows_old_core_mdis.py`, `zone_pop.py` |
 | 4 | `code/04_partB` (shared panels) | `supply_panel.py`, `flows_supply_panel.py`, `zone_event_study.py`, `emp_supply.py` (its `emp_sigun_year.csv` is also used by paper 1) |
-| 5 | `code/03_partA` (paper 1) | `regpop.py`, `sigun_panel.py`, `supply_demand.py`, `shrink_sprawl.py`, `ic_unmet.py`, `vacancy.py`, `plan_pop.py`, `plan_event.py`, `zoning_route.py` |
+| 5 | `code/03_partA` (paper 1) | `regpop.py`, `sigun_panel.py`, `supply_demand.py`, `shrink_sprawl.py`, `ic_unmet.py`, `vacancy.py`, `plan_pop.py`, `plan_event.py`, `zoning_route.py`, `newcity_share.py` |
 | 6 | `code/04_partB` (paper 2) | `old_core_housing.py`, `flows_age.py`, `same_dong_bound.py`, `same_dong_bound_vital.py`, `partB_did.py`, `supply_decomp.py` |
 | 7 | outputs | paper 1: `paper1_tables.py`, `paper1_supplement_tables.py`, `paper1_figures.py`, `check_paper1_numbers.py`; paper 2: `paper2_tables.py`, `paper2_figures.py`, `paper2_numbers_check.py` |
 
