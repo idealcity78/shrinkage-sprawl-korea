@@ -156,6 +156,10 @@ def main():
     m = smf.ols("out_A ~ reserve_share09 + lnew + C(region)", e).fit(cov_type="HC1")
     say(f"   2009 예정용지 비율(시가화용지 대비 %) 10%p: {m.params.reserve_share09 * 10:+.2f}{stars(m.pvalues.reserve_share09)} "
         f"(se {m.bse.reserve_share09 * 10:.2f}), n={int(m.nobs)}")
+    # how large an on-plan effect of reserves the estimate rules out: 95% limits times the interquartile range
+    lo, hi = m.conf_int().loc["reserve_share09"]
+    iqr = e.reserve_share09.quantile(0.75) - e.reserve_share09.quantile(0.25)
+    say(f"     95% CI 10%p [{lo * 10:.2f}, {hi * 10:.2f}]; 사분위 범위 {iqr:.1f}%p → [{lo * iqr:.1f}, {hi * iqr:.1f}]%p")
     with open(os.path.join(OUT, "zoning_route.txt"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")
 

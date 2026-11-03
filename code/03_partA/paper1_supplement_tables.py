@@ -183,21 +183,29 @@ def cell(r):
     return cs(r.coef, r.se, r.p)
 
 
-def supply_panels(m):
-    """Lead/reverse and in-migration panels, shared by Table 3 of the paper and Table S5."""
+def ci95(r, k=3):
+    """Normal 95% interval of a coefficient, as the models report normal-based p-values."""
+    return f"[{r.coef - 1.959964 * r.se:.{k}f}, {r.coef + 1.959964 * r.se:.{k}f}]"
+
+
+def supply_panels(m, ci=False):
+    """Lead/reverse and in-migration panels, shared by Table 3 of the paper and Table S5 (which adds 95% intervals)."""
     lead = [["Next-period household growth", "Housing growth", "g_hh_lead"],
             ["Next-period population growth", "Housing growth", "g_pop_lead"],
             ["Next-period housing growth", "Household growth", "s_house_lead"]]
     rows_l = []
     for y, x, key in lead:
         r0, r1 = pick(m, block="lead", model=key + "|noFE"), pick(m, block="lead", model=key + "|FE")
-        rows_l.append([y, x, cell(r0), cell(r1), int(r1.n)])
+        rows_l.append([y, x, cell(r0), cell(r1)] + ([ci95(r1)] if ci else []) + [int(r1.n)])
     rows_m = []
     for lab, key in [("Net in-migration", "sg_net"), ("Gross in-migration", "sg_in")]:
         r0, r1 = pick(m, block="inmig", model=key), pick(m, block="inmig", model=key + "_lead")
         rows_m.append([lab, cell(r0), cell(r1)])
+        if ci:
+            rows_m.append([f"{lab}: 95% confidence interval", ci95(r0), ci95(r1)])
     rows_m.append(["N (si/gun-periods)", int(r0.n), int(r1.n)])
-    return (md(["Outcome", "Regressor", "Without si/gun FE", "With si/gun FE", "N (si/gun-periods)"], rows_l),
+    return (md(["Outcome", "Regressor", "Without si/gun FE", "With si/gun FE"] + (["95% CI, with si/gun FE"] if ci else [])
+               + ["N (si/gun-periods)"], rows_l),
             md(["Outcome (per 1,000 residents a year)", "Same period", "Next period"], rows_m))
 
 
@@ -248,7 +256,7 @@ def s5():
         rows_c.append([lab] + [cell(pick(m, block=b, model=s, term=y)) if ((m.block == b) & (m.model == s) & (m.term == y)).any()
                                else "" for b, s in cols])
     rows_c.append(["N (si/gun-periods)"] + [int(pick(m, block=b, model=s, term="g_hh").n) for b, s in cols])
-    pl, pm = supply_panels(m)
+    pl, pm = supply_panels(m, ci=True)
     return ("**Table S5.** Housing supply, household growth and in-migration, non-capital provincial si/gun, five-year periods.\n\n"
             + "Panel A. Mean annual growth in the five-year period following one with and without registered-population "
               "decline (%/yr).\n\n" + md(["Previous period", "Housing stock", "Households"], desc)
@@ -495,12 +503,15 @@ def s10():
     ln = re.search(r"log 신규 시가지: (-[\d.]+)(\**), n=(\d+), 성장 평균 ([\d.]+)%", mm)
     c1 = re.search(r"군 여부 통제: 감소 \+([\d.]+)(\**) \(se ([\d.]+)\); 가용지 도시지역 비율 1%p (-?\+?[\d.]+)(\**), 군 \+([\d.]+)(\**), n=(\d+)", mm)
     rs = re.search(r"10%p: \+([\d.]+)(\**) \(se ([\d.]+)\), n=(\d+)", mm)
+    rb = re.search(r"95% CI 10%p (\[[-\d.]+, [-\d.]+\]); 사분위 범위 ([\d.]+)%p → (\[[-\d.]+, [-\d.]+\])%p", mm)
     reg = md(["Model", "Shrinking vs growing", "Stagnant vs growing", "Other terms", "N"], [
         ["Group + log new urban land + region", f"{g1.group(1)} ({g1.group(3)}){g1.group(2)}", f"{g2.group(1)} ({g2.group(3)}){g2.group(2)}",
          f"log new urban land {ln.group(1)}{ln.group(2)}; mean for growing si/gun {ln.group(4)}%", ln.group(3)],
         ["+ share of available land in urban areas, old-core zoning, county dummy", f"{c1.group(1)} ({c1.group(3)}){c1.group(2)}", "",
          f"available urban share, 1 pp {c1.group(4)}{c1.group(5)}; county {c1.group(6)}{c1.group(7)}", c1.group(8)],
-        ["2009 reserve ÷ urbanised land, 10 pp (instead of group)", "", "", f"{rs.group(1)} ({rs.group(3)}){rs.group(2)}", rs.group(4)]])
+        ["2009 reserve ÷ urbanised land, 10 pp (instead of group)", "", "", f"{rs.group(1)} ({rs.group(3)}){rs.group(2)}", rs.group(4)],
+        ["Same model: 95% confidence interval per 10 pp; effect of an interquartile difference in the reserve share, 95% bounds (pp)",
+         "", "", f"{rb.group(1)}; interquartile range {rb.group(2)} pp: {rb.group(3)}", rs.group(4)]])
     return ("**Table S10.** Where new urban land formed: 2026 zoning routes.\n\n" + "\n\n".join(keep)
             + f"\n\nPanel {chr(65 + len(keep))}. Off-plan share of new urban land (%, outside residential, commercial and industrial zones), non-capital "
               "provincial si/gun with at least 5 ha of new urban land, OLS with HC1 s.e.\n\n" + reg + "\n\nSource: `zoning_route.txt`.")
