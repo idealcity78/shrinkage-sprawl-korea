@@ -11,8 +11,11 @@
   fig5_routes.png     new urban land 2009-19 by 2026 zoning route, by group (zoning_route_sigun.csv)
 
 Every value plotted is read from the output files named above; nothing is typed in.
+The 시군 polygons (sigun_1208_2022_tm.shp) and their dissolve by analysis region are read with arcpy and saved as
+vertex arrays in outputs/partA/geometry_sigun.npz and geometry_region.npz; with "models" the figures start from
+those files and need no arcpy.
 Output: outputs/paper1/
-Run with ArcGIS Pro Python:  propy.bat code\\03_partA\\paper1_figures.py
+Run with ArcGIS Pro Python:  propy.bat code\\03_partA\\paper1_figures.py   (add "models" to skip arcpy)
 """
 import os
 import sys
@@ -36,7 +39,7 @@ COL = {"감소": "#b2182b", "정체": "#ef8a62", "성장": "#2166ac", "광역시
 plt.rcParams.update({"font.family": "Arial", "font.size": 9, "axes.spines.top": False, "axes.spines.right": False})
 
 
-def polygons():
+def polygons_arcpy():
     import arcpy
     shp = os.path.join(paths.L1, "sigun_1208_2022_tm.shp")
     out = {}
@@ -74,7 +77,7 @@ def rings_of(g):
     return rings
 
 
-def region_outlines(t):
+def regions_arcpy(t):
     """Dissolve the 시군 polygons by analysis region (eight non-capital regions and the capital region)."""
     import arcpy
     arcpy.env.overwriteOutput = True
@@ -93,6 +96,33 @@ def region_outlines(t):
             if name:
                 out[name] = rings_of(g)
     return out
+
+
+def save_rings(path, d):
+    keys, offs, xy = [], [0], []
+    for k, rings in d.items():
+        for r in rings:
+            keys.append(k)
+            xy.append(r)
+            offs.append(offs[-1] + len(r))
+    np.savez_compressed(path, keys=np.array(keys), offs=np.array(offs), xy=np.concatenate(xy))
+
+
+def load_rings(path):
+    z = np.load(path)
+    keys, offs, xy = z["keys"], z["offs"], z["xy"]          # read each array once (NpzFile decompresses per access)
+    out = {}
+    for k, a, b in zip(keys, offs[:-1], offs[1:]):
+        out.setdefault(str(k), []).append(xy[a:b])
+    return out
+
+
+def polygons():
+    return load_rings(os.path.join(A, "geometry_sigun.npz"))
+
+
+def region_outlines(t):
+    return load_rings(os.path.join(A, "geometry_region.npz"))
 
 
 def fig1_groups():
@@ -237,6 +267,10 @@ def fig4():
 
 def main():
     os.makedirs(OUT, exist_ok=True)
+    if "models" not in sys.argv[1:]:
+        save_rings(os.path.join(A, "geometry_sigun.npz"), polygons_arcpy())
+        save_rings(os.path.join(A, "geometry_region.npz"),
+                   regions_arcpy(pd.read_csv(os.path.join(A, "shrink_sprawl_sigun.csv"))))
     print("fig1 groups:", fig1_groups())
     n_both, n_dec = fig1()
     n2 = fig2()

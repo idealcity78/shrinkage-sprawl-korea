@@ -12,7 +12,8 @@ ho_ar_001-009 = floor-area classes 01-09 (SGIS HouseAreaCode): 001-003 up to 60 
 N/A cells (fewer than 5 dwellings) are set to 2, as in oa_aging.py.
 Scope: 시군 of the non-capital 도 (groups 감소, 정체, 성장 of shrink_sprawl_sigun.csv), and by group.
 
-Output: outputs/partB/old_core_housing.txt, old_core_housing.csv
+Output: outputs/partB/old_core_housing_sigun.csv (sums per 시군 and 집계구 type), old_core_housing.txt,
+        old_core_housing.csv ("models" starts from old_core_housing_sigun.csv without the grids and arcpy)
 Run with ArcGIS Pro Python:  propy.bat code\\04_partB\\old_core_housing.py
 """
 import os
@@ -26,7 +27,7 @@ CODE = os.path.dirname(HERE)
 for p in (CODE, os.path.join(CODE, "02_grid"), os.path.join(CODE, "03_partA")):
     sys.path.insert(0, p)
 import paths
-from oa_aging import oa_cells
+
 from shrink_sprawl import sgis
 
 sys.stdout.reconfigure(encoding="utf-8")
@@ -48,8 +49,10 @@ def read(year, item):
     return t.pivot_table(index="oa", columns="item", values="v", aggfunc="sum").fillna(0)
 
 
-def main():
+def build():
+    """Grid and 집계구 step: per year, 시군 and 집계구 type, the count of 집계구 and their dwellings by age and size."""
     import sigun
+    from oa_aging import oa_cells
     z = np.load(os.path.join(GRID, "l1_2009.npz"))
     x0, y0 = int(z["x0"]), int(z["y0"])
     shape = z["urb"].shape
@@ -59,19 +62,10 @@ def main():
     new = (h00 < 5) & (h24 >= 5) & ~zone & ~old
     sg, names, _ = sigun.raster(x0, y0, *shape)
     cells = oa_cells(x0, y0, *shape)
-    info = pd.read_csv(os.path.join(paths.OUTPUTS, "partA", "shrink_sprawl_sigun.csv"))[["sigun", "group"]]
     oa = pd.DataFrame([(k, r, c) for k, (r, c) in cells.items()], columns=["oa", "r", "c"])
     oa["type"] = np.where(old[oa.r, oa.c], "old core", np.where(new[oa.r, oa.c], "new", "other"))
     oa["sigun"] = pd.Series(sg[oa.r, oa.c]).map(names).values
-    oa = oa.merge(info, on="sigun", how="left")
-
-    rows, lines = [], []
-
-    def say(s=""):
-        print(s)
-        lines.append(s)
-
-    say("원도심 대 신규 주거지 집계구의 주택: 건축연도와 연건평 (SGIS 집계구, 2025년 경계)")
+    out = []
     for year in (2022, 2024):
         yr = read(year, "건축년도별주택")
         assert yr.shape[1] == n_year_items(year), (year, yr.shape[1])
@@ -83,13 +77,35 @@ def main():
                                      "le60": ar[["ho_ar_001", "ho_ar_002", "ho_ar_003"]].sum(axis=1),
                                      "gt85": ar[[f"ho_ar_{k:03d}" for k in range(5, 10)]].sum(axis=1)}), how="outer")
         m = oa.merge(d, left_on="oa", right_index=True, how="inner")
+        g = m.groupby(["sigun", "type"]).sum(numeric_only=True).drop(columns=["r", "c"])
+        g.insert(0, "n_oa", m.groupby(["sigun", "type"]).size())
+        out.append(g.reset_index().assign(year=year))
+    return pd.concat(out, ignore_index=True)
+
+
+def main():
+    if "models" not in sys.argv[1:]:
+        build().to_csv(os.path.join(OUT, "old_core_housing_sigun.csv"), index=False, encoding="utf-8-sig")
+    s = pd.read_csv(os.path.join(OUT, "old_core_housing_sigun.csv"))
+    info = pd.read_csv(os.path.join(paths.OUTPUTS, "partA", "shrink_sprawl_sigun.csv"))[["sigun", "group"]]
+    s = s.merge(info, on="sigun", how="left")
+
+    rows, lines = [], []
+
+    def say(s=""):
+        print(s)
+        lines.append(s)
+
+    say("원도심 대 신규 주거지 집계구의 주택: 건축연도와 연건평 (SGIS 집계구, 2025년 경계)")
+    for year in (2022, 2024):
+        m = s[s.year == year]
         for scope, sel in [("비수도권 도 시군", m.group.isin(["감소", "정체", "성장"])), ("감소", m.group == "감소"),
                            ("성장", m.group == "성장"), ("광역시·수도권", m.group.isin(["광역시", "수도권"]))]:
             g = m[sel].groupby("type").sum(numeric_only=True)
             for t in ["old core", "new", "other"]:
                 if t not in g.index:
                     continue
-                r = dict(year=year, scope=scope, type=t, oa=int((m[sel].type == t).sum()),
+                r = dict(year=year, scope=scope, type=t, oa=int(g.at[t, "n_oa"]),
                          dwellings=int(g.at[t, "tot_yr"]), pre2000=g.at[t, "pre2000"] / g.at[t, "tot_yr"] * 100)
                 if year == 2022:
                     r["le60"] = g.at[t, "le60"] / g.at[t, "tot_ar"] * 100

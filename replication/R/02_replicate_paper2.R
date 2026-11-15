@@ -72,3 +72,5 @@ lines <- c(lines, "", "## Permutation tests", "",
            sprintf("| %s | %s | %.3f | %.3f | %.3f |", perm$script, perm$y, perm$r_coef, perm$r_p_perm, perm$py_p_perm))
 writeLines(lines, file.path(p$out, "paper2_r_vs_python.md"), useBytes = TRUE)
 cat(lines, sep = "\n")
+# exit status 1 if any term or permutation p differs (run_all.py reads it)
+if (nrow(cmp[status %in% c("DIFFERENT", "dropped in R only")]) || !all(perm$match)) quit(status = 1)

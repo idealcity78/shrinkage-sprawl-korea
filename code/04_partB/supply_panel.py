@@ -26,8 +26,9 @@ only (Part A definition).
 
 Input : data_work/grid100 (l1_2009, newcity_zone, sgis_pop, sgis_hh, sgis_house); SGIS 집계구 boundaries and
         성연령별 인구 (oa_aging.py paths)
-Output: outputs/partB/supply_panel.csv, supply_panel_models.csv, supply_panel.txt
-Run with ArcGIS Pro Python:  propy.bat code\\04_partB\\supply_panel.py
+Output: outputs/partB/supply_panel.csv, supply_panel_build.txt, supply_panel_models.csv, supply_panel.txt
+Run with ArcGIS Pro Python:  propy.bat code\\04_partB\\supply_panel.py   (add "models" to start from
+supply_panel.csv and supply_panel_build.txt without the grids and arcpy)
 """
 import os
 import sys
@@ -42,8 +43,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "02_grid"))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "03_partA"))
 import paths
-import sigun
-from oa_aging import oa_cells, read_age
 
 sys.stdout.reconfigure(encoding="utf-8")
 GRID = os.path.join(paths.WORK, "grid100")
@@ -72,12 +71,13 @@ def stars(p):
     return "***" if p < .01 else "**" if p < .05 else "*" if p < .1 else ""
 
 
-def main():
-    os.makedirs(OUT, exist_ok=True)
+def build():
+    """Grid and 집계구 step: the 시군 x period panel (supply_panel.csv) and the old-core areas (supply_panel_build.txt)."""
+    import sigun
+    from oa_aging import oa_cells, read_age
     lines = []
 
     def say(s=""):
-        print(s)
         lines.append(s)
 
     a = np.load(os.path.join(GRID, "l1_2009.npz"))
@@ -187,7 +187,23 @@ def main():
     lag = df.sort_values("t0").groupby(["defn", "SG_ID"]).s_out.shift()
     df["s_out_lag"] = np.where(df.t0.isin([2005, 2019]), lag, np.nan)
     df.to_csv(os.path.join(OUT, "supply_panel.csv"), index=False, encoding="utf-8-sig")
+    with open(os.path.join(OUT, "supply_panel_build.txt"), "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
 
+
+def main():
+    os.makedirs(OUT, exist_ok=True)
+    if "models" not in sys.argv[1:]:
+        build()
+    lines = []
+
+    def say(s=""):
+        print(s)
+        lines.append(s)
+
+    for s in open(os.path.join(OUT, "supply_panel_build.txt"), encoding="utf-8").read().splitlines():
+        say(s)
+    df = pd.read_csv(os.path.join(OUT, "supply_panel.csv"))
     S = "s_old + s_zone + s_b1 + s_b2 + s_b3 + s_b4"
     A = "a_old + a_zone + a_b1 + a_b2 + a_b3 + a_b4"
     mrows = []

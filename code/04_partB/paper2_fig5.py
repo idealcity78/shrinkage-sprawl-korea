@@ -8,7 +8,8 @@ Cell classes (same definitions as shrink_sprawl.py / the flow allocation):
 Each panel title gives the share of the zone's in-movers (2011-2025 annual mean) who came from the same city's old
 core, computed from the table "신도시 전입자 출신" in outputs/flows/mdis_old_core.txt (old / total).
 
-Output: outputs/paper2/fig5_case_cities.png, fig5_case_cities.txt (cell counts and shares)
+Output: outputs/paper2/fig5_case_cells.npz (cell classes, grid step), fig5_case_cities.png,
+        fig5_case_cities.txt (cell counts and shares)  ("models" starts from fig5_case_cells.npz without the grids and arcpy)
 Run with ArcGIS Pro Python:  propy.bat code\\04_partB\\paper2_fig5.py
 """
 import os
@@ -49,7 +50,8 @@ def origin_shares():
     return out
 
 
-def main():
+def build():
+    """Grid step: the cell classes of each case city, saved to fig5_case_cells.npz."""
     import sigun
     l09, l19 = np.load(os.path.join(GRID, "l1_2009.npz")), np.load(os.path.join(GRID, "l1_2019.npz"))
     x0, y0 = int(l09["x0"]), int(l09["y0"])
@@ -61,10 +63,8 @@ def main():
     new = (h00 < 5) & (h24 >= 5) & ~zone & ~old
     urb = (l19["urb"] >= 50) & ~old & ~new & ~zone
     ids = {v: k for k, v in names.items()}
-    shares = origin_shares()
-    fig, axes = plt.subplots(1, 3, figsize=(7.4, 3.3))
-    lines = []
-    for ax, (name, en) in zip(axes, CASES):
+    out = {}
+    for name, en in CASES:
         own = sg == ids[name]
         if name == "전주시":                      # the Jeonju zone straddles the Wanju border: show both
             own = own | (sg == ids["완주군"])
@@ -77,6 +77,19 @@ def main():
         cls[o & old[r0:r1, c0:c1]] = 3
         cls[o & new[r0:r1, c0:c1]] = 4
         cls[o & zone[r0:r1, c0:c1]] = 5
+        out[en] = cls
+    np.savez_compressed(os.path.join(OUT, "fig5_case_cells.npz"), **out)
+
+
+def main():
+    if "models" not in sys.argv[1:]:
+        build()
+    cells = np.load(os.path.join(OUT, "fig5_case_cells.npz"))
+    shares = origin_shares()
+    fig, axes = plt.subplots(1, 3, figsize=(7.4, 3.3))
+    lines = []
+    for ax, (name, en) in zip(axes, CASES):
+        cls = cells[en]
         ax.imshow(cls, cmap=ListedColormap(COLORS), vmin=0, vmax=5, interpolation="nearest")
         ax.set_axis_off()
         old_n, tot_n = shares[name]

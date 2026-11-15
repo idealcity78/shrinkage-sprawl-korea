@@ -19,7 +19,8 @@ The 2019 -> 2020 step in the business census (national employees +9.9 %) falls i
 taken up by the 권역 x 기간 / 연도 effects.
 
 Output: outputs/partB/emp_supply_panel.csv, emp_sigun_year.csv, emp_supply.txt
-Run with ArcGIS Pro Python:  propy.bat code\\04_partB\\emp_supply.py
+Run with ArcGIS Pro Python:  propy.bat code\\04_partB\\emp_supply.py   (add "models" to start from
+emp_sigun_year.csv without the grids and arcpy)
 """
 import os
 import sys
@@ -33,7 +34,6 @@ sys.path.insert(0, os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(os.path.dirname(HERE), "02_grid"))
 sys.path.insert(0, HERE)
 import paths
-import sigun
 from zone_event_study import N_PERM, fe_projector, stars
 
 sys.stdout.reconfigure(encoding="utf-8")
@@ -55,6 +55,7 @@ def sgis(item, year, shape, na):
 
 
 def sigun_year():
+    import sigun
     a = np.load(os.path.join(GRID, "l1_2009.npz"))
     x0, y0 = int(a["x0"]), int(a["y0"])
     shape = a["urb"].shape
@@ -86,8 +87,9 @@ def main():
         print(s)
         lines.append(s)
 
-    sy = sigun_year()
-    sy.to_csv(os.path.join(OUT, "emp_sigun_year.csv"), index=False, encoding="utf-8-sig")
+    if "models" not in sys.argv[1:]:
+        sigun_year().to_csv(os.path.join(OUT, "emp_sigun_year.csv"), index=False, encoding="utf-8-sig")
+    sy = pd.read_csv(os.path.join(OUT, "emp_sigun_year.csv"))
     w = sy.set_index(["SG_ID", "year"])
     rows = []
     for per, (t0, t1) in PERIODS.items():

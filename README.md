@@ -76,7 +76,11 @@ industrial-complex files). Raw data go to `data_raw/`, intermediate files to `da
 | 6 | `code/04_partB` (paper 2) | `old_core_housing.py`, `flows_age.py`, `same_dong_bound.py`, `same_dong_bound_vital.py`, `partB_did.py`, `supply_decomp.py` |
 | 7 | outputs | paper 1: `paper1_tables.py`, `paper1_supplement_tables.py`, `paper1_figures.py`, `check_paper1_numbers.py`; paper 2: `paper2_tables.py`, `paper2_figures.py`, `paper2_numbers_check.py` |
 
-Paper 1 model scripts accept the argument `models` to skip rebuilding grids from raw data. `check_paper1_numbers.py` and
+Every analysis script that reads the grids or census-block files accepts the argument `models`: it then starts from
+the unit-level aggregates that the full run saved (for example `outputs/partA/zoning_route_grid.csv`,
+`outputs/partB/supply_panel.csv`, `partB_did_blocks.csv`) and needs neither the raw data nor `arcpy`. The submission
+replication package holds these aggregates and runs the whole analysis with `replication/run_all.py`
+(instructions in `replication/README_package.md`). `check_paper1_numbers.py` and
 `paper2_numbers_check.py` re-read every number of the manuscripts from the output files (the manuscripts themselves are not part of the public repository).
 
 ## Data

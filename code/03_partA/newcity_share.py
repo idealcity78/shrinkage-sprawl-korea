@@ -5,8 +5,9 @@ The old core excludes the 19 new-town districts (newcity_zone.npz), but most new
   new urban land 2009-2019 (urban share < 10 -> >= 50) and the part inside the districts.
 Same grids and definitions as shrink_sprawl.py.
 
-Output: outputs/partA/newcity_share.csv
-Run with ArcGIS Pro Python:  propy.bat code\\03_partA\\newcity_share.py
+Output: outputs/partA/newcity_share_grid.csv (grid sums per 시군), newcity_share.csv
+Run with ArcGIS Pro Python:  propy.bat code\\03_partA\\newcity_share.py   (add "models" to start from
+newcity_share_grid.csv without the grids and arcpy)
 """
 import os
 import sys
@@ -25,7 +26,8 @@ sys.stdout.reconfigure(encoding="utf-8")
 OUT = os.path.join(paths.OUTPUTS, "partA")
 
 
-def main():
+def build():
+    """Grid sums per 시군: dwellings added outside the old core and new urban land, all and inside the districts."""
     import sigun
     l = {y: np.load(os.path.join(GRID, f"l1_{y}.npz")) for y in (2009, 2019)}
     x0, y0 = int(l[2009]["x0"]), int(l[2009]["y0"])
@@ -36,17 +38,27 @@ def main():
     old = (u09 >= 50) & (sgis("house", 2000, shape, na=0) >= 5) & ~zone
     dh = np.clip(sgis("house", 2024, shape, na=0) - sgis("house", 2015, shape, na=0), 0, None) * ~old
     new = (u09 < 10) & (u19 >= 50)
-    t = pd.read_csv(os.path.join(OUT, "shrink_sprawl_sigun.csv"))
-    gid = np.full(int(sg.max()) + 1, "", object)
-    for i, g in zip(t.SG_ID, t.group):
-        gid[i] = g
-    grp = gid[sg]
+    lab = sg.ravel().astype(np.int64)
+    k = int(sg.max()) + 1
+    by = lambda w: np.bincount(lab, weights=np.asarray(w, np.float64).ravel(), minlength=k)
+    t = pd.DataFrame({"SG_ID": np.arange(k), "dh_out": by(dh), "dh_out_newtown": by(dh * zone),
+                      "new_km2": by(new) * 0.01, "new_newtown_km2": by(new & zone) * 0.01})
+    return t[t.SG_ID > 0]
+
+
+def main():
+    if "models" not in sys.argv[1:]:
+        build().to_csv(os.path.join(OUT, "newcity_share_grid.csv"), index=False, encoding="utf-8-sig")
+    s = pd.read_csv(os.path.join(OUT, "newcity_share_grid.csv"))
+    t = pd.read_csv(os.path.join(OUT, "shrink_sprawl_sigun.csv"))[["SG_ID", "group"]].merge(s, on="SG_ID")
+    cols = ["dh_out", "dh_out_newtown", "new_km2", "new_newtown_km2"]
     rows = []
     for g in ORDER + ["전체"]:
-        m = grp != "" if g == "전체" else grp == g
-        rows.append({"group": g, "dh_out": dh[m].sum(), "dh_out_newtown": dh[m & zone].sum(),
-                     "new_km2": new[m].sum() * 0.01, "new_newtown_km2": new[m & zone].sum() * 0.01})
+        m = t if g == "전체" else t[t.group == g]
+        rows.append({"group": g, **m[cols].sum().to_dict()})
     d = pd.DataFrame(rows)
+    # areas are cell counts x 0.01 km2: round off the float noise of the sums so that ties print the same everywhere
+    d[["new_km2", "new_newtown_km2"]] = d[["new_km2", "new_newtown_km2"]].round(2)
     d["dh_pct"] = d.dh_out_newtown / d.dh_out * 100
     d["new_pct"] = d.new_newtown_km2 / d.new_km2 * 100
     d.to_csv(os.path.join(OUT, "newcity_share.csv"), index=False, encoding="utf-8-sig")

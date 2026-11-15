@@ -12,7 +12,10 @@ import paths
 sys.stdout.reconfigure(encoding="utf-8")
 R = paths.DATA.replace("\\", "/").rstrip("/") + "/"
 O = R + "outputs/"
-draft = open(os.path.join(paths.REPO, "docs", "paper2_draft.md"), encoding="utf-8").read()
+DRAFT = os.path.join(paths.REPO, "docs", "paper2_draft.md")
+# replication package: no manuscript; the values reported in the paper (draft_val of add) are compared with the outputs
+PACKAGE = not os.path.exists(DRAFT)
+draft = "" if PACKAGE else open(DRAFT, encoding="utf-8").read()
 
 
 def lines(p):
@@ -244,7 +247,8 @@ add(129, "movers linked at destination (%)", "99.56", "xwalk_stats.txt", re.sear
 rtot = int(re.search(r"합계 ([\d,]+)", X).group(1).replace(",", ""))
 add(130, "registrations total (millions)", "147.5", "xwalk_stats.txt", f"{rtot / 1e6:.1f}")
 tb = open(O + "paper2/tables.md", encoding="utf-8").read()
-add(131, "Tables section identical to generated tables.md", "True", "outputs/paper2/tables.md", str(tb in draft))
+if not PACKAGE:
+    add(131, "Tables section identical to generated tables.md", "True", "outputs/paper2/tables.md", str(tb in draft))
 
 # ---------- revision 2026-10-20: vacancy by construction year (companion paper source) and Figure 5 ----------
 V = "partA/vacancy.txt"
@@ -271,7 +275,7 @@ out = []
 bad = 0
 for cid, claim, dv, src, rr in checks:
     ok = (dv == rr) or (dv.replace("−", "-") == rr.replace("−", "-"))
-    present = dv in draft or dv in ("True", "0.66", "0.34", "25", "124", "+10.18 (1.44)") or dv.replace("−", "-") in draft
+    present = PACKAGE or dv in draft or dv in ("True", "0.66", "0.34", "25", "124", "+10.18 (1.44)") or dv.replace("−", "-") in draft
     if not ok or not present:
         bad += 1
     out.append((cid, claim, dv, src, rr, "OK" if ok else "MISMATCH", "yes" if present else "NOT IN DRAFT"))
@@ -279,3 +283,4 @@ df = pd.DataFrame(out, columns=["#", "claim", "draft", "source", "reread", "matc
 print(df.to_string(index=False))
 print(f"\nchecked {len(df)}, problems {bad}")
 df.to_csv(R + "outputs/paper2/numbers_check_pass2.csv", index=False, encoding="utf-8-sig")
+sys.exit(1 if bad else 0)

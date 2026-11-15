@@ -23,7 +23,9 @@ of the accounts (mean of start and end, times years). A 시군 without a new-lan
 Census survival ratios also carry net international migration and coverage change; they are used only as
 national age schedules, and the local differences come from the age structure.
 
-Output: outputs/partB/same_dong_bound_vital.csv, same_dong_bound_vital.txt
+Output: outputs/partB/same_dong_bound_vital_rates.csv, same_dong_bound_vital_schedules.csv (집계구 step),
+        same_dong_bound_vital.csv, same_dong_bound_vital.txt, same_dong_bound_vital_models.csv
+("models" starts from the two 집계구-step files and same_dong_bound_grid.csv without the grids and arcpy)
 Run with ArcGIS Pro Python:  propy.bat code\\04_partB\\same_dong_bound_vital.py
 """
 import os
@@ -38,11 +40,8 @@ CODE = os.path.dirname(HERE)
 for p in (CODE, os.path.join(CODE, "02_grid"), os.path.join(CODE, "03_partA"), os.path.join(CODE, "05_flows"), HERE):
     sys.path.insert(0, p)
 import paths
-import sigun
-from dong_class import dong_raster
 from flows_supply_panel import S, flow_panel, stars
-from oa_aging import oa_cells
-from same_dong_bound import OLD_DONG, PERIODS, TERMS, grid_accounts, new_flows
+from same_dong_bound import OLD_DONG, PERIODS, TERMS, accounts, new_flows
 from supply_panel import sgis
 
 sys.stdout.reconfigure(encoding="utf-8")
@@ -89,6 +88,8 @@ def ni_5yr(w, surv, cwr):
 
 
 def oa_types():
+    import sigun
+    from oa_aging import oa_cells
     a = np.load(os.path.join(GRID, "l1_2009.npz"))
     x0, y0 = int(a["x0"]), int(a["y0"])
     shape = a["urb"].shape
@@ -123,6 +124,23 @@ def rates(types):
     return pd.concat(rows, ignore_index=True), sched
 
 
+def build():
+    """집계구 step: natural-increase rates per 시군, period and type, and the national age schedules."""
+    r, sched = rates(oa_types())
+    r.to_csv(os.path.join(OUT, "same_dong_bound_vital_rates.csv"), index=False, encoding="utf-8-sig")
+    rows = [dict(period=per, cwr=cwr, **{f"{sx}{i:02d}": surv[sx][i] for sx in ("m", "f") for i in range(NB)})
+            for per, (surv, cwr) in sched.items()]
+    pd.DataFrame(rows).to_csv(os.path.join(OUT, "same_dong_bound_vital_schedules.csv"), index=False, encoding="utf-8-sig")
+
+
+def load():
+    r = pd.read_csv(os.path.join(OUT, "same_dong_bound_vital_rates.csv"))
+    sc = pd.read_csv(os.path.join(OUT, "same_dong_bound_vital_schedules.csv"))
+    sched = {row.period: ({sx: np.array([getattr(row, f"{sx}{i:02d}") for i in range(NB)]) for sx in ("m", "f")}, row.cwr)
+             for row in sc.itertuples()}
+    return r, sched
+
+
 def main():
     lines = []
 
@@ -130,9 +148,10 @@ def main():
         print(s)
         lines.append(s)
 
-    types = oa_types()
-    r, sched = rates(types)
-    g = grid_accounts()
+    if "models" not in sys.argv[1:]:
+        build()
+    r, sched = load()
+    g = accounts()
     f = flow_panel()[["SG_ID", "period", "net_old", "out_new"]].merge(new_flows(), on=["SG_ID", "period"], how="left")
     d = g.merge(f, on=["SG_ID", "period"], how="inner")
     d["net_new"] = d.net_new.fillna(0)

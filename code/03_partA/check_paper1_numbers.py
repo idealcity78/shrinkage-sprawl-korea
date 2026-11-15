@@ -22,6 +22,8 @@ DOCS = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.absp
 SUP = os.path.join("..", "paper1", "supplement_tables.md")
 TAB = os.path.join("..", "paper1", "tables.md")
 DRAFT = os.path.join(DOCS, sys.argv[1] if len(sys.argv) > 1 else "paper1_results_draft.md")
+# replication package: no manuscript; the values reported in the paper (column 2 of C) are compared with the outputs
+PACKAGE = not os.path.exists(DRAFT)
 
 # (claim, value as written in the draft, file, regex capturing the source value, scale applied to the source value)
 C = [
@@ -282,7 +284,7 @@ def section_words(text, head):
 
 
 def main():
-    draft = open(DRAFT, encoding="utf-8").read()
+    draft = "" if PACKAGE else open(DRAFT, encoding="utf-8").read()
     cache, rows, bad, seen = {}, [], 0, {}
     tv = table_values()
     for i, (claim, val, f, rx, scale) in enumerate(C, 1):
@@ -298,7 +300,7 @@ def main():
             ok = abs(round(x, d) - num(val)) < 1e-9
             if f.endswith(".md") and scale == 1:          # read from a printed table: same digits required
                 ok = ok and m.group(1).lstrip("-") == val.lstrip("-")
-        in_draft = re.search(rf"(?<![\d.]){re.escape(val)}(?!\d)", draft) is not None
+        in_draft = PACKAGE or re.search(rf"(?<![\d.]){re.escape(val)}(?!\d)", draft) is not None
         bad += (not ok) + (not in_draft)
         seen[val] = num(val)
         where = in_tables(val, tv)
@@ -307,7 +309,7 @@ def main():
     for claim, val, fn in DERIVED:
         x = fn(seen)
         ok = abs(x - num(val)) < 1e-9
-        in_draft = re.search(rf"(?<![\d.]){re.escape(val)}(?!\d)", draft) is not None
+        in_draft = PACKAGE or re.search(rf"(?<![\d.]){re.escape(val)}(?!\d)", draft) is not None
         bad += (not ok) + (not in_draft)
         rows.append((len(rows) + 1, claim + " [derived]", val, "computed from rows above", str(x),
                      "OK" if ok else "MISMATCH", "yes" if in_draft else "NO", "derived"))
@@ -324,6 +326,9 @@ def main():
     lines += [f"| {r[0]} | {r[1]} | {r[2]} | `{r[3]}` | {r[4]} | {r[5]} | {r[6]} | {r[7]} |" for r in rows]
     lines[2] = lines[2].replace("`docs/paper1_results_draft.md`", f"`docs/{os.path.basename(DRAFT)}`")
     out = "paper1_numbers_check.md" if DRAFT.endswith("paper1_results_draft.md") else "paper1_manuscript_numbers_check.md"
+    if PACKAGE:
+        lines[2] = f"Values reported in paper 1 re-read from the output files: {len(rows)} numbers, {bad} problems."
+        out = os.path.join(paths.OUTPUTS, "paper1", "numbers_check.md")
     with open(os.path.join(DOCS, out), "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")
     print(f"checked {len(rows)}, problems {bad}; abstract {w_abs} words, rationale {w_rat} words")

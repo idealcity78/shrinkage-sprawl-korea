@@ -19,6 +19,7 @@ Samples: all, without 세종.
 
 Input : data_work/grid100 (l1_2009, newcity_zone, sgis_pop, sgis_hh, sgis_house)
 Output: outputs/partB/supply_decomp_panel.csv, supply_decomp_models.csv, supply_decomp.txt
+("models" starts from supply_decomp_panel.csv without the grids and arcpy)
 Run with ArcGIS Pro Python:  propy.bat code\\04_partB\\supply_decomp.py
 """
 import os
@@ -31,7 +32,6 @@ import statsmodels.formula.api as smf
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "02_grid"))
 import paths
-import sigun
 
 sys.stdout.reconfigure(encoding="utf-8")
 GRID = os.path.join(paths.WORK, "grid100")
@@ -66,14 +66,9 @@ def fit(df, y, x, label, say, rows):
     return m
 
 
-def main():
-    os.makedirs(OUT, exist_ok=True)
-    lines = []
-
-    def say(s=""):
-        print(s)
-        lines.append(s)
-
+def build():
+    """Grid step: the 시군 x period panel (supply_decomp_panel.csv)."""
+    import sigun
     a = np.load(os.path.join(GRID, "l1_2009.npz"))
     x0, y0 = int(a["x0"]), int(a["y0"])
     shape = a["urb"].shape
@@ -125,6 +120,19 @@ def main():
     df["lpop05"] = np.log(df.groupby("SG_ID").pop0.transform("first"))
     df = df[df.old0 >= 1000].copy()
     df.to_csv(os.path.join(OUT, "supply_decomp_panel.csv"), index=False, encoding="utf-8-sig")
+
+
+def main():
+    os.makedirs(OUT, exist_ok=True)
+    if "models" not in sys.argv[1:]:
+        build()
+    lines = []
+
+    def say(s=""):
+        print(s)
+        lines.append(s)
+
+    df = pd.read_csv(os.path.join(OUT, "supply_decomp_panel.csv"))
 
     pd.set_option("display.width", 220)
     mrows = []

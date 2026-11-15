@@ -24,3 +24,5 @@ lines <- summary_lines("Paper 1: R (fixest) re-estimation compared with the Pyth
                        "01_replicate_paper1.R", r$models, cmp)
 writeLines(lines, file.path(p$out, "paper1_r_vs_python.md"), useBytes = TRUE)
 cat(lines, sep = "\n")
+# exit status 1 if any term differs (run_all.py reads it)
+if (nrow(cmp[status %in% c("DIFFERENT", "dropped in R only")])) quit(status = 1)

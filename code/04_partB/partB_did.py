@@ -14,14 +14,15 @@ B. Aging on census blocks (집계구, 2000, 2005, 2010, 2015, 2019, 2020, 2022, 
    집계구 with >= 50 residents in 2005, same event-study.
 Note: the 2010 -> 2015 census change hits treated and control alike and is absorbed by the year effects.
 
-Output: outputs/partB/partB_event_pop.csv, partB_event_age.csv, partB_pooled.csv, partB_did.txt
+Output: outputs/partB/partB_did_blocks.csv, partB_did_oa.csv, partB_did_units.csv (grid and 집계구 step),
+        partB_event_pop.csv, partB_event_age.csv, partB_pooled.csv, partB_did.txt
+("models" starts from the three step files without the grids and arcpy)
 Run with ArcGIS Pro Python:  propy.bat code\\04_partB\\partB_did.py
 """
 import os
 import sys
 import tempfile
 
-import arcpy
 import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
@@ -31,8 +32,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "02_grid"))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "03_partA"))
 import paths
-import sigun
-from oa_aging import OA, CSV, OLD65, TOTAL, NA_VALUE
 
 sys.stdout.reconfigure(encoding="utf-8")
 GRID = os.path.join(paths.WORK, "grid100")
@@ -98,29 +97,20 @@ def pooled(df, y, unit, label, say, extra=""):
     return out
 
 
-def main():
-    os.makedirs(OUT, exist_ok=True)
-    lines = []
-
-    def say(s=""):
-        print(s)
-        lines.append(s)
-
+def build():
+    """Grid and 집계구 step: 기성시가지 population on 500 m blocks, 집계구 ages, and the 시군 list."""
+    import arcpy
+    import sigun
+    from oa_aging import OA, CSV, OLD65, TOTAL, NA_VALUE
     a = np.load(os.path.join(GRID, "l1_2009.npz"))
     x0, y0 = int(a["x0"]), int(a["y0"])
     shape = a["urb"].shape
     sg, names, cap = sigun.raster(x0, y0, *shape)
-    by_name = {v: k for k, v in names.items()}
+    treat_ids, ctrl_ids = groups(names, cap)
     zone = np.load(os.path.join(GRID, "newcity_zone.npz"))["zone"]
     near_zone = ndimage.binary_dilation(zone > 0, iterations=BUFFER)
     old = (a["urb"] >= 50) & ~near_zone
-    excl = set(ENTERPRISE) | {"세종시"} | {n for n in names.values() if n.endswith("광역시")}
-    treat_ids = {by_name[n] for n in TREATED}
-    ctrl_ids = {i for i, n in names.items() if i not in cap and n not in excl and i not in treat_ids}
-    say(f"처치 시군 {len(treat_ids)}, 비교 시군 {len(ctrl_ids)}")
     dist = (ndimage.distance_transform_edt(zone == 0) * 0.1).astype(np.float32)
-
-    # A. population on 500 m blocks
     keep = old & np.isin(sg, list(treat_ids | ctrl_ids))
     pops = {y: blocks(sgis_pop(y, shape) * keep).sum(axis=(1, 3)).ravel() for y in POP_YEARS}
     bsg = blocks(np.where(keep, sg, 0)).max(axis=(1, 3)).ravel()
@@ -131,16 +121,73 @@ def main():
     ids = np.nonzero(ok)[0]
     long = pd.DataFrame([(b, y, pops[y][b], bsg[b], bdist[b]) for y in POP_YEARS for b in ids],
                         columns=["block", "year", "pop", "sg", "dist"])
+    long.to_csv(os.path.join(OUT, "partB_did_blocks.csv"), index=False, encoding="utf-8-sig")
+    tmp = tempfile.mkdtemp(prefix="oa_")
+    pts = os.path.join(arcpy.management.CreateFileGDB(tmp, "o.gdb")[0], "pts")
+    arcpy.management.FeatureToPoint(OA, pts, "INSIDE")
+    ytop = y0 + shape[0] * 100
+    meta = {}
+    with arcpy.da.SearchCursor(pts, ["TOT_OA_CD", "SHAPE@XY"]) as cur:
+        for code, (x, y) in cur:
+            r, c = int((ytop - y) // 100), int((x - x0) // 100)
+            if 0 <= r < shape[0] and 0 <= c < shape[1] and keep[r, c]:
+                meta[code] = int(sg[r, c])
+    rows = []
+    for year in AGE_YEARS:
+        tot_, o65 = {}, {}
+        with open(CSV.format(year), encoding="cp949") as fh:
+            for line in fh:
+                p = line.rstrip("\n").split(",")
+                if len(p) < 4 or p[1] not in meta or p[2] not in TOTAL:
+                    continue
+                v = int(p[3]) if p[3].isdigit() else NA_VALUE
+                tot_[p[1]] = tot_.get(p[1], 0) + v
+                if p[2] in OLD65:
+                    o65[p[1]] = o65.get(p[1], 0) + v
+        rows += [(k, year, t, o65.get(k, 0), meta[k]) for k, t in tot_.items()]
+    pd.DataFrame(rows, columns=["oa", "year", "pop", "p65", "sg"]).to_csv(os.path.join(OUT, "partB_did_oa.csv"),
+                                                                         index=False, encoding="utf-8-sig")
+    pd.DataFrame({"SG_ID": list(names), "sigun": list(names.values()),
+                  "capital": [int(i in cap) for i in names]}).to_csv(os.path.join(OUT, "partB_did_units.csv"),
+                                                                     index=False, encoding="utf-8-sig")
+
+
+def groups(names, cap):
+    by_name = {v: k for k, v in names.items()}
+    excl = set(ENTERPRISE) | {"세종시"} | {n for n in names.values() if n.endswith("광역시")}
+    treat_ids = {by_name[n] for n in TREATED}
+    ctrl_ids = {i for i, n in names.items() if i not in cap and n not in excl and i not in treat_ids}
+    return treat_ids, ctrl_ids
+
+
+def main():
+    os.makedirs(OUT, exist_ok=True)
+    if "models" not in sys.argv[1:]:
+        build()
+    lines = []
+
+    def say(s=""):
+        print(s)
+        lines.append(s)
+
+    u = pd.read_csv(os.path.join(OUT, "partB_did_units.csv"))
+    names, cap = dict(zip(u.SG_ID, u.sigun)), set(u.SG_ID[u.capital == 1])
+    treat_ids, ctrl_ids = groups(names, cap)
+    say(f"처치 시군 {len(treat_ids)}, 비교 시군 {len(ctrl_ids)}")
+
+    # A. population on 500 m blocks
+    # pop and dist are float32 grid sums, as in build(); keep that precision
+    long = pd.read_csv(os.path.join(OUT, "partB_did_blocks.csv"), dtype={"pop": np.float32, "dist": np.float32})
     long["treated"] = long.sg.isin(treat_ids).astype(int)
     long["lpop"] = np.log(long["pop"])
-    say(f"기성시가지 블록 (2005년 100명 이상, 전 연도 인구 있음): {len(ids):,}개, 처치 {long[long.treated == 1].block.nunique():,}")
+    say(f"기성시가지 블록 (2005년 100명 이상, 전 연도 인구 있음): {long.block.nunique():,}개, 처치 {long[long.treated == 1].block.nunique():,}")
     tot = long.groupby(["treated", "year"])["pop"].sum().unstack(0)
     tot = tot / tot.loc[REF]
     say("\n기성시가지 인구 지수 (2005 = 1; 0 비교, 1 처치)")
     say(tot.round(3).to_string())
 
     ev = event(long.copy(), "lpop", "block", "인구(로그), 전체 비교군", say)
-    long["w05"] = long.block.map(dict(zip(ids, pops[REF][ids])))
+    long["w05"] = long.block.map(long[long.year == REF].set_index("block")["pop"])
     ev += event(long.copy(), "lpop", "block", "인구(로그), 전체 비교군, 2005 인구 가중", say, weights="w05")
 
     # each treated 시군 against the control distribution: 기성시가지 population 2024 / 2005
@@ -187,30 +234,7 @@ def main():
         po.append(["거리대", "lpop", k, m.params[k], m.bse[k], p, int(m.nobs)])
 
     # B. aging on census blocks
-    tmp = tempfile.mkdtemp(prefix="oa_")
-    pts = os.path.join(arcpy.management.CreateFileGDB(tmp, "o.gdb")[0], "pts")
-    arcpy.management.FeatureToPoint(OA, pts, "INSIDE")
-    ytop = y0 + shape[0] * 100
-    meta = {}
-    with arcpy.da.SearchCursor(pts, ["TOT_OA_CD", "SHAPE@XY"]) as cur:
-        for code, (x, y) in cur:
-            r, c = int((ytop - y) // 100), int((x - x0) // 100)
-            if 0 <= r < shape[0] and 0 <= c < shape[1] and keep[r, c]:
-                meta[code] = int(sg[r, c])
-    rows = []
-    for year in AGE_YEARS:
-        tot_, o65 = {}, {}
-        with open(CSV.format(year), encoding="cp949") as fh:
-            for line in fh:
-                p = line.rstrip("\n").split(",")
-                if len(p) < 4 or p[1] not in meta or p[2] not in TOTAL:
-                    continue
-                v = int(p[3]) if p[3].isdigit() else NA_VALUE
-                tot_[p[1]] = tot_.get(p[1], 0) + v
-                if p[2] in OLD65:
-                    o65[p[1]] = o65.get(p[1], 0) + v
-        rows += [(k, year, t, o65.get(k, 0), meta[k]) for k, t in tot_.items()]
-    oa = pd.DataFrame(rows, columns=["oa", "year", "pop", "p65", "sg"])
+    oa = pd.read_csv(os.path.join(OUT, "partB_did_oa.csv"), dtype={"oa": str})
     base = oa[(oa.year == REF) & (oa["pop"] >= 50)].oa
     oa = oa[oa.oa.isin(base) & (oa["pop"] > 0)]
     full = oa.groupby("oa").year.nunique()

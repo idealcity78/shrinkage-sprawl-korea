@@ -19,8 +19,9 @@ Models (non-capital 도 시군): share of new urban land outside zone A ~ group 
   and ~ 2009 reserve share (시가화예정용지 / 시가화용지), to see whether larger reserves keep development inside the
   planned route.
 
-Outputs: outputs/partA/zoning_route.txt, zoning_route_sigun.csv
-Run with ArcGIS Pro Python:  propy.bat code\\03_partA\\zoning_route.py
+Outputs: outputs/partA/zoning_route_grid.csv (grid sums per 시군), zoning_route.txt, zoning_route_sigun.csv
+Run with ArcGIS Pro Python:  propy.bat code\\03_partA\\zoning_route.py   (add "models" to start from
+zoning_route_grid.csv without the grids and arcpy)
 """
 import os
 import sys
@@ -101,7 +102,9 @@ def main():
         print(s)
         lines.append(s)
 
-    t = build()
+    if "models" not in sys.argv[1:]:
+        build().to_csv(os.path.join(OUT, "zoning_route_grid.csv"), index=False, encoding="utf-8-sig")
+    t = pd.read_csv(os.path.join(OUT, "zoning_route_grid.csv"))
     info = pd.read_csv(os.path.join(OUT, "shrink_sprawl_sigun.csv"))[["SG_ID", "group", "region"]]
     t = t.merge(info, on="SG_ID", how="inner")
     t = t.join(kosis_check(t.sigun.values).reset_index(drop=True).set_index(t.index))

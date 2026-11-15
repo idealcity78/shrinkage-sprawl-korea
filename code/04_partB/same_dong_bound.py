@@ -20,7 +20,8 @@ net_old is then lowered by H / n and the supply models of flows_supply_panel.py 
 The grid counts for 2000-2010 are census counts and the moves are registrations, so the residuals also carry the
 census-register gap; the bound is loose there and the 2015-19 / 2019-24 (register census) periods are shown apart.
 
-Output: outputs/partB/same_dong_bound.csv (시군 x 기간), same_dong_bound.txt
+Output: outputs/partB/same_dong_bound_grid.csv (grid accounts), same_dong_bound.csv (시군 x 기간), same_dong_bound.txt
+("models" starts from same_dong_bound_grid.csv without the grids and arcpy)
 Run with ArcGIS Pro Python:  propy.bat code\\04_partB\\same_dong_bound.py
 """
 import os
@@ -35,8 +36,6 @@ CODE = os.path.dirname(HERE)
 for p in (CODE, os.path.join(CODE, "02_grid"), os.path.join(CODE, "05_flows"), HERE):
     sys.path.insert(0, p)
 import paths
-import sigun
-from dong_class import dong_raster
 from flows_supply_panel import MDIS_YEARS, S, flow_panel, stars
 from supply_panel import sgis
 
@@ -51,6 +50,8 @@ TERMS = ["s_old", "s_zone", "s_b1", "s_b2", "s_b3", "s_b4"]
 
 def grid_accounts():
     """Per 시군 and period: dOld, dNew, dNew in 동 with old core."""
+    import sigun
+    from dong_class import dong_raster
     a = np.load(os.path.join(GRID, "l1_2009.npz"))
     x0, y0 = int(a["x0"]), int(a["y0"])
     shape = a["urb"].shape
@@ -84,6 +85,14 @@ def grid_accounts():
     return g
 
 
+def accounts():
+    """grid_accounts(), saved as same_dong_bound_grid.csv; with "models" the saved file is read instead."""
+    f = os.path.join(OUT, "same_dong_bound_grid.csv")
+    if "models" not in sys.argv[1:]:
+        grid_accounts().to_csv(f, index=False, encoding="utf-8-sig")
+    return pd.read_csv(f)
+
+
 def new_flows():
     """Observed net moves into the new-land part of each 시군 per period (annual means)."""
     r = pd.read_csv(os.path.join(FLOWS, "mdis_old_core_flows.csv"))
@@ -105,7 +114,7 @@ def main():
         print(s)
         lines.append(s)
 
-    g = grid_accounts()
+    g = accounts()
     f = flow_panel()[["SG_ID", "period", "net_old", "out_new"]].merge(new_flows(), on=["SG_ID", "period"], how="left")
     d = g.merge(f, on=["SG_ID", "period"], how="inner")
     d["net_new"] = d.net_new.fillna(0)

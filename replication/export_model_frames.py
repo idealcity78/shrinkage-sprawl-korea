@@ -1,6 +1,7 @@
 """Export the estimation data and specification of every regression in paper 1 or paper 2 for the R replication.
 
-The analysis scripts are run unchanged (paper 1 scripts in their "models" mode, which skips the grid rebuild).
+The analysis scripts are run unchanged, in their "models" mode (they start from the saved unit-level aggregates and
+skip the grid and census-block steps, so neither the raw data nor arcpy is needed).
 While they run, statsmodels.formula.api.ols and .wls are wrapped so that each fitted model records
   - the formula, the covariance type (HC1, clustered or classical) and the cluster variable,
   - the estimation data: the columns named in the formula (plus the cluster variable and WLS weights), rows as passed,
@@ -36,13 +37,13 @@ sys.stdout.reconfigure(encoding="utf-8")
 import paths
 
 PAPERS = {
-    "paper1": {"scripts": ["shrink_sprawl", "supply_demand", "ic_unmet", "vacancy", "plan_pop", "plan_event",
+    "paper1": {"scripts": ["supply_demand", "shrink_sprawl", "ic_unmet", "vacancy", "plan_pop", "plan_event",
                            "zoning_route"],
                "argv": ["models"], "fe": ["SG_ID", "sigun", "rp", "ry", "region"]},
     # order matters: zone_event_study writes zone_event_panel.csv, read by emp_supply and flows_age
     "paper2": {"scripts": ["flows_supply_panel", "same_dong_bound_vital", "zone_event_study", "emp_supply",
                            "flows_age", "partB_did"],
-               "argv": [], "fe": ["SG_ID", "rp", "ry", "block", "oa", "year"]},
+               "argv": ["models"], "fe": ["SG_ID", "rp", "ry", "block", "oa", "year"]},
 }
 # permutation tests of paper 2: outcomes tested, and where the script reports the result
 PERM = {"zone_event_study": ["out_zone", "out_new", "out_rest", "out_outside", "out_capital", "in_outside", "net_old",
