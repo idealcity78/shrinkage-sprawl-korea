@@ -1,6 +1,6 @@
 """Figures for paper 1 (supply, sprawl and planning; Economic Geography). English labels.
 
-  fig1_groups.png     study units: the 161 시군 by group (registered population change 2000-19), with the eight
+  fig1_groups.png     study units: the 162 시군 by group (registered population change 2000-19), with the eight
                       non-capital regions and the capital region outlined (shrink_sprawl_sigun.csv: group, region)
   fig2_map.png        시군 maps: registered population change 2009-19 (%) and urban land change 2009-19 (%)
                       (shrink_sprawl_sigun.csv: g_rp_0919, g_urb_post), with the shrinking-and-expanding 시군 outlined
@@ -11,7 +11,7 @@
   fig5_routes.png     new urban land 2009-19 by 2026 zoning route, by group (zoning_route_sigun.csv)
 
 Every value plotted is read from the output files named above; nothing is typed in.
-The 시군 polygons (sigun_1208_2022_tm.shp) and their dissolve by analysis region are read with arcpy and saved as
+The 시군 polygons (data_work/boundary/sigun_sgis2020.shp, simplified to 100 m for drawing) and their dissolve by analysis region are read with arcpy and saved as
 vertex arrays in outputs/partA/geometry_sigun.npz and geometry_region.npz; with "models" the figures start from
 those files and need no arcpy.
 Output: outputs/paper1/
@@ -39,9 +39,18 @@ COL = {"감소": "#b2182b", "정체": "#ef8a62", "성장": "#2166ac", "광역시
 plt.rcParams.update({"font.family": "Arial", "font.size": 9, "axes.spines.top": False, "axes.spines.right": False})
 
 
+def map_shp():
+    """The 시군 polygons simplified to 100 m for drawing (the analysis uses the full boundary); far below one pixel."""
+    import arcpy
+    arcpy.env.overwriteOutput = True
+    shp = os.path.join(paths.WORK, "boundary", "sigun_sgis2020.shp")
+    return arcpy.cartography.SimplifyPolygon(shp, r"memory\sigun_map", "POINT_REMOVE", "100 Meters",
+                                             collapsed_point_option="NO_KEEP")[0]
+
+
 def polygons_arcpy():
     import arcpy
-    shp = os.path.join(paths.L1, "sigun_1208_2022_tm.shp")
+    shp = map_shp()
     out = {}
     with arcpy.da.SearchCursor(shp, ["sigun", "SHAPE@"]) as cur:
         for name, g in cur:
@@ -81,15 +90,17 @@ def regions_arcpy(t):
     """Dissolve the 시군 polygons by analysis region (eight non-capital regions and the capital region)."""
     import arcpy
     arcpy.env.overwriteOutput = True
-    shp = os.path.join(paths.L1, "sigun_1208_2022_tm.shp")
+    shp = os.path.join(paths.WORK, "boundary", "sigun_sgis2020.shp")
     tmp = arcpy.management.CopyFeatures(shp, r"memory\sigun_tmp")
     arcpy.management.AddField(tmp, "region", "TEXT", field_length=20)
     reg = dict(zip(t.sigun, t.region))
     with arcpy.da.UpdateCursor(tmp, ["sigun", "region"]) as cur:
         for name, _ in cur:
             cur.updateRow([name, reg.get(name, "")])
-    # a 50 m buffer closes the slivers between neighbouring 시군 so that the dissolve leaves no interior edges
-    dis = arcpy.analysis.Buffer(tmp, r"memory\region_tmp", "50 Meters", dissolve_option="LIST", dissolve_field="region")
+    # the 시군 are dissolved from the same 읍면동 polygons, so they share edges exactly and dissolve without slivers
+    dis = arcpy.management.Dissolve(tmp, r"memory\region_full", "region")
+    dis = arcpy.cartography.SimplifyPolygon(dis, r"memory\region_tmp", "POINT_REMOVE", "100 Meters",
+                                            collapsed_point_option="NO_KEEP")[0]
     out = {}
     with arcpy.da.SearchCursor(dis, ["region", "SHAPE@"]) as cur:
         for name, g in cur:

@@ -144,8 +144,10 @@ def t4():
     labs = [("net_old 관측", "Observed"), ("net_old - H_ub (기존)", "− H (zero natural increase)"),
             ("net_old - H_ub2 (기존)", "− H (old-core dong only)"), ("net_old - H_v (자연증가 반영)", "− H (expected natural increase)"),
             ("net_old - H_v2 (자연증가 반영)", "− H (both)")]
-    for title, start in [("Panel B. Old-core net migration on supply location, all periods (122 cities, 488 city-periods)", "전 기간"),
-                         ("Panel C. Register-census periods only (2015–19, 2019–24; 244 city-periods)", "등록센서스 기간만")]:
+    head = open(os.path.join(O, "partB", "flows_supply_panel.txt"), encoding="utf-8").readline()
+    n_city, n_cp = map(int, re.search(r"시군 (\d+), 시군-기간 (\d+)", head).groups())
+    for title, start in [(f"Panel B. Old-core net migration on supply location, all periods ({n_city} cities, {n_cp} city-periods)", "전 기간"),
+                         (f"Panel C. Register-census periods only (2015–19, 2019–24; {2 * n_city} city-periods)", "등록센서스 기간만")]:
         k0 = next(k for k, l in enumerate(L) if l.startswith(start))
         rows = []
         for key, lab in labs:
@@ -171,11 +173,13 @@ def t5():
 
 
 def main():
+    ev = open(os.path.join(O, "partB", "zone_event.txt"), encoding="utf-8").read()
+    n_tr, n_cmp = map(int, re.search(r"처치 시군 (\d+), 비교 시군 (\d+)", ev).groups())
     parts = [("Table 1. Data construction and validation", t1()), ("Table 2. Old-core out-moves by destination (share of "
              "out-moves, moves between old-core neighbourhoods excluded) and net migration (persons a year)", t2()),
              ("Table 3. Age paths of old-core out-migration", t3()), ("Table 4. Supply location, hidden moves and old-core "
              "net migration", t4()), ("Table 5. Opening of the new towns: pooled post-move-in effects (per 1,000 old-core "
-             "residents a year unless noted; 10 treated, 109 comparison cities, 2001–2025; 1,000 permutations)", t5())]
+             f"residents a year unless noted; {n_tr} treated, {n_cmp} comparison cities, 2001–2025; 1,000 permutations)", t5())]
     with open(OUT, "w", encoding="utf-8") as f:
         for t, s in parts:
             f.write(f"### {t}\n\n{s}\n")

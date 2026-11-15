@@ -1,6 +1,7 @@
 """시군 boundaries on the SGIS 100 m frame, shared by the grid scripts.
 
-Boundaries: landcover_L1_30m_korea/sigun_1208_2022_tm.shp (2022 시군, KGD2002 TM).
+Boundaries: data_work/boundary/sigun_sgis2020.shp (SGIS census boundaries 2020 4Q dissolved to the study units,
+EPSG:5179; build_sigun_boundary.py).
 Ids follow ugm_national/sigun_id.csv (SG_ID 1-159). That table leaves out 제주시, 서귀포시 and 울릉군,
 which the previous model excluded; here they get ids 160 upward in name order and count as 비수도권.
 Capital-region membership comes from ugm_national/sma_zone_by_city.csv (zone other than 비수도권).
@@ -14,7 +15,7 @@ import numpy as np
 
 import paths
 
-SHP = os.path.join(paths.L1, "sigun_1208_2022_tm.shp")
+SHP = os.path.join(paths.WORK, "boundary", "sigun_sgis2020.shp")
 
 
 def ids_and_zones():

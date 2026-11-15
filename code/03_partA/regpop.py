@@ -6,7 +6,7 @@ between 2010 and 2015, so population change across that break is measured with t
 KOSIS codes are 5-digit administrative codes on current 시도 numbering (강원 51, 전북 52, 세종 36). Kept rows: 시군구;
 구 and 출장소 inside a 시 (same first four digits as the 시, last digit not 0) are dropped. Mapped to the study's
 2022 시군: 광역시·세종 as one unit except 울주군 and 군위군; 마산·진해 -> 창원, 청원 -> 청주, 연기 -> 세종, 군포 -> 안양
-(the boundary file sigun_1208_2022_tm.shp holds 군포 inside the 안양 polygon),
+(군포 is kept inside the 안양 unit; see 02_grid/build_sigun_boundary.py),
 북·남제주 -> 제주·서귀포, 증평출장소 -> 증평군, 계룡출장소 -> 계룡시, a former 군 that became a 시 (양주, 화성, 광주, 포천,
 여주, 당진, ...) -> that 시.
 

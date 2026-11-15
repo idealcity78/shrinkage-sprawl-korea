@@ -41,7 +41,7 @@ Rscript replication/R/02_replicate_paper2.R
 The scripts write `replication/output/paper1_r_vs_python.md` and `paper2_r_vs_python.md`. In the current version every
 estimated term agrees with the published estimates (coefficients, standard errors and N):
 
-- paper 1: 687 terms, largest difference 1.6e-11;
+- paper 1: 687 terms, largest difference 1.0e-11;
 - paper 2: 877 terms, largest difference 2.8e-8.
 
 The permutation p of all 13 outcomes of paper 2 is the same in R, using the placebo draws made in Python.

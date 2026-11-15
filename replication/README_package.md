@@ -45,7 +45,7 @@ editions and download dates are listed in `DATA_SOURCES.md` (in Korean) and in S
 | Korea Industrial Complex Corporation, national industrial-complex statistics (30 June 2026), https://www.data.go.kr | Industrial-complex status | Public data portal, free use | `ugm/ugm_national/supply_raw/*.csv` |
 | MOLIT V-World zoning polygons UQ111, UQ112 (October 2026), https://www.vworld.kr | Zoning route of new urban land | Free; polygons not redistributed (CC BY-NC-ND) | Aggregates in `outputs/partA/zoning_route_grid.csv` |
 | Industrial-complex boundaries (KRIHS) and innovation/enterprise-city boundaries (V-World UB811) | Industrial complexes, new-town zones | Free | Aggregates in `outputs/partA/ic_complexes_grid.csv`, `newcity_zones.csv` |
-| 2022 si/gun boundaries | Unit of analysis, maps | See `DATA_SOURCES.md` | Vertex arrays for the maps in `outputs/partA/geometry_sigun.npz`, `geometry_region.npz` |
+| Statistics Korea, SGIS census boundaries (*eup/myeon/dong*, 2020 4th quarter), dissolved to the study's 162 si/gun units (`code/02_grid/build_sigun_boundary.py`, unit table `code/02_grid/sgis2020_sgg_units.csv`) | Unit of analysis, maps | Free after registration | Vertex arrays for the maps in `outputs/partA/geometry_sigun.npz`, `geometry_region.npz` |
 
 The variables of the regression data are described in `replication/data/CODEBOOK.md`.
 
@@ -57,12 +57,12 @@ The variables of the regression data are described in `replication/data/CODEBOOK
   the path, `run_all.py` skips the R step.
 - Figures use the Arial font; on systems without it matplotlib substitutes another font, which changes only the
   appearance of the figures.
-- Run time on a Windows 11 workstation: about 19 minutes in total, of which about 16 minutes are the 500 m block
+- Run time on a Windows 11 workstation: about 17 minutes in total, of which about 15 minutes are the 500 m block
   and census-block event studies of paper 2 (`partB_did`, run inside `export_model_frames.py paper2`); the R step
-  takes under a minute. Disk: about 120 MB for `results/`.
-- Tested twice from a fresh copy of this package with `arcpy` made unavailable: (1) the Python environment listed
-  above with R 4.4.1 — every step succeeded, every reported number (188 + 141) and every R estimate agreed, and the
-  tables and figures were byte-identical to those in the papers; (2) Python 3.12 with numpy 1.26, pandas 2.2,
+  takes under a minute. Disk: about 90 MB for `results/`.
+- Tested from a fresh copy of this package with `arcpy` made unavailable: (1) this version, with the Python environment listed
+  above and R 4.4.1 — every step succeeded, every reported number (188 + 141) and every R estimate agreed, and the
+  tables and figures were byte-identical to those in the papers; (2) the previous build, with Python 3.12, numpy 1.26, pandas 2.2,
   statsmodels 0.14.2, matplotlib 3.8 — all numbers and tables identical; figures differ only in rendering.
   (Paper 2's check has 142 items in the authors' copy; item 131 compares the manuscript's table section with the
   generated tables and needs the manuscript, which is not part of the package.)
@@ -117,7 +117,21 @@ scripts run without the `models` argument rebuild the aggregates in `data/`. Ord
 `01_landcover`, `02_grid`, `05_flows`, then the analysis scripts above. Each script states its inputs, outputs and
 command in its header.
 
-## 7. Licence
+## 7. Licences and terms of use
 
-Code: MIT (`LICENSE`). Data: the aggregates are derived from the public sources above and remain subject to their
-terms; cite the sources when reusing them.
+| Files | Terms |
+|---|---|
+| `code/`, `replication/`, `run_all.py` | MIT (`LICENSE`) |
+| `data_work/housing/*.csv` (KOSIS tables) | KOSIS terms of use: free use, reuse and redistribution, commercial or not, with the source stated (producer, survey, table, reference date, URL); the figures may not be altered. Source: https://kosis.kr/serviceInfo/useGuide.do |
+| `outputs/partA/zoning_route_grid.csv`, `newcity_zones.csv`, `newcity_share_grid.csv` (derived from V-World polygons) | Aggregates only; the source polygons are licensed CC BY-NC-ND 4.0 by MOLIT (V-World). Reuse for non-commercial purposes with attribution to MOLIT/V-World |
+| `ugm/ugm_national/supply_raw/*.csv` (KICOX) | Public data portal (data.go.kr) open data; attribution to the Korea Industrial Complex Corporation |
+| All other files in `data/` (aggregates of SGIS grid and census-block statistics, MDIS migration counts, land-cover shares, boundary vertices) | Statistics derived by the authors from the sources in Section 2; CC BY 4.0 for the authors' contribution. Cite the original producers (Statistics Korea: SGIS, MDIS; Ministry of Environment: land-cover maps) when reusing them. No record refers to an individual person or household |
+
+The raw data are not redistributed: the MDIS microdata are licensed for the registered user only, and the raw grids,
+census-block files, land-cover maps and V-World polygons can be obtained free of charge from their producers.
+
+## 8. Archiving
+
+For review, this package is available through an anonymised link. On acceptance it will be deposited in Zenodo
+(https://zenodo.org) under a DOI with the licences above, and the DOI will be cited in the data availability statement
+of both papers.

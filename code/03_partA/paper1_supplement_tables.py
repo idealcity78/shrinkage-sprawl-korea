@@ -160,7 +160,8 @@ def s4():
             rows.append([period, {"new_rate": "New urban land rate (%)", "leap_share": "Leapfrog share (%)", "d_lpcu": "Δ log urban land per resident ×100",
                                   "d_lpcu_rp": "Δ log urban land per resident ×100"}[y],
                          c("pred_zero_growth"), c("Intercept"), c("gp"), c("gp:neg"), c("neg"), c("lpop10"), c(cap), int(d.at["gp", "n"])])
-    return ("**Table S4.** Elasticity of sprawl to population growth, all 161 si/gun (OLS, HC1 standard errors).\n\n"
+    n_all = max(r[-1] for r in rows)
+    return (f"**Table S4.** Elasticity of sprawl to population growth, all {n_all} si/gun (OLS, HC1 standard errors).\n\n"
             + md(["Period", "Outcome", "Prediction at zero growth", "(a) Constant", "(b) Population growth g, 1 pp",
                   "(c) g × N", "(d) N (negative growth)", "(δ) ln P 2010", "(κ) Capital region C", "N (si/gun)"], rows)
             + "\n\nSpecification (equation 5): y_i = a + b g_i + c (g_i × N_i) + d N_i + δ ln P_i,2010 + κ C_i + e_i, with g "
