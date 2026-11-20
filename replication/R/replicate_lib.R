@@ -4,7 +4,7 @@
 # and compared with the Python (statsmodels) estimates in data/{paper}/python_estimates.csv.
 #
 # Translation of the formulas: C(v) for v in the paper's fixed-effect list is absorbed as a fixed effect;
-# C(group == '...') becomes a 0/1 variable; C(group, Treatment('...')) becomes i(group, ref = "...").
+# C(group == '...') becomes a 0/1 variable; C(var, Treatment('...')) becomes i(var, ref = "...").
 # Standard errors: HC1 = vcov "hetero"; clustered = cluster on cluster_id; classical (nonrobust) = "iid".
 # WLS weights (column w_) are passed as weights. All fits use ssc(adj = TRUE, fixef.K = "full",
 # cluster.adj = TRUE), the same small-sample correction as statsmodels (fixed-effect dummies counted in K), and keep
@@ -31,9 +31,10 @@ translate <- function(f, FE) {
   dummy <- regmatches(f, regexpr("C\\(group == '[^']+'\\)", f))
   lev_dummy <- if (length(dummy)) sub("C\\(group == '([^']+)'\\)", "\\1", dummy) else NA
   if (length(dummy)) f <- sub("C\\(group == '[^']+'\\)", "group_is", f, perl = TRUE)
-  trt <- regmatches(f, regexpr("C\\(group, Treatment\\('[^']+'\\)\\)", f))
+  trt <- regmatches(f, regexpr("C\\([A-Za-z_]+, Treatment\\('[^']+'\\)\\)", f))
   ref <- if (length(trt)) sub(".*Treatment\\('([^']+)'\\).*", "\\1", trt) else NA
-  if (length(trt)) f <- sub("C\\(group, Treatment\\('[^']+'\\)\\)", sprintf('i(group, ref = "%s")', ref), f)
+  gv <- if (length(trt)) sub("^C\\(([A-Za-z_]+),.*", "\\1", trt) else NA
+  if (length(trt)) f <- sub("C\\([A-Za-z_]+, Treatment\\('[^']+'\\)\\)", sprintf('i(%s, ref = "%s")', gv, ref), f)
   if (length(rhs_fe)) f <- paste(f, "|", paste(rhs_fe, collapse = " + "))
   list(formula = f, lev_dummy = lev_dummy, ref = ref, has_fe = length(rhs_fe) > 0)
 }
@@ -42,7 +43,8 @@ translate <- function(f, FE) {
 py_to_r <- function(t) {
   if (t == "Intercept") return("(Intercept)")
   if (grepl("^C\\(group == ", t)) return("group_is")
-  if (grepl("^C\\(group, Treatment", t)) return(paste0("group::", sub(".*\\[T\\.(.*)\\]$", "\\1", t)))
+  if (grepl("^C\\([A-Za-z_]+, Treatment", t))
+    return(paste0(sub("^C\\(([A-Za-z_]+),.*", "\\1", t), "::", sub(".*\\[T\\.(.*)\\]$", "\\1", t)))
   t
 }
 

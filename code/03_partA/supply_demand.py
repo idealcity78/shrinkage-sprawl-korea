@@ -231,6 +231,24 @@ def main():
     except FileNotFoundError:
         say("   (d) MDIS 이동 결과가 없어 건너뜀")
 
+    # (e) robustness of (b)-(c) (mock review 2026-11-21): with T = 4 the unit-FE models with the lagged outcome carry
+    # Nickell bias, and two of the four period pairs straddle the 2010-15 census-method change
+    say("\n   (e) 강건성: 선행·역방향 모형의 사양 (시군 군집)")
+    same = gl[gl.t0.isin([2000, 2015])]          # 2000-05 -> 2005-10 and 2015-19 -> 2019-24: one census method each
+    shr = gl[gl.group == "감소"]
+    for y, x in [("g_hh_lead", "s_house + g_hh"), ("g_pop_lead", "s_house + g_pop"), ("s_house_lead", "g_hh + s_house")]:
+        key = "s_house" if y != "s_house_lead" else "g_hh"
+        specs = [("FE, no lagged outcome", f"{y} ~ {key} + C(SG_ID) + C(rp)", gl),
+                 ("same census method, no unit FE", f"{y} ~ {x} + C(rp)", same),
+                 ("shrinking, unit FE", f"{y} ~ {x} + C(SG_ID) + C(rp)", shr),
+                 ("shrinking, no unit FE", f"{y} ~ {x} + C(rp)", shr)]
+        out = []
+        for lab, f, g in specs:
+            m = smf.ols(f, data=g).fit(cov_type="cluster", cov_kwds={"groups": g.SG_ID})
+            out.append(f"{lab} {fmt(m, key)} n={int(m.nobs)}")
+            rows.append(["lead_robust", f"{y}|{lab}", key, m.params[key], m.bse[key], m.pvalues[key], int(m.nobs)])
+        say(f"     {y:13s} ~ {key}: " + "; ".join(out))
+
     pd.DataFrame(rows, columns=["block", "model", "term", "coef", "se", "p", "n"]).to_csv(
         os.path.join(OUT, "supply_demand_models.csv"), index=False, encoding="utf-8-sig")
     with open(os.path.join(OUT, "supply_demand.txt"), "w", encoding="utf-8") as fh:

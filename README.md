@@ -12,7 +12,7 @@ building does:
 
 The folder `replication/` re-estimates every regression of both papers in R, without the raw data or ArcGIS:
 
-- **Paper 1:** 153 models (Tables 2–4, Figures 2–3, Supplementary Tables S4–S10).
+- **Paper 1:** 187 models (Tables 2–4, Figures 2–3, Supplementary Tables S4–S10).
 - **Paper 2:** 212 models (Tables 3–5 and the robustness checks of Sections 5.3–5.4), plus its two permutation tests.
 
 ```
@@ -41,7 +41,7 @@ Rscript replication/R/02_replicate_paper2.R
 The scripts write `replication/output/paper1_r_vs_python.md` and `paper2_r_vs_python.md`. In the current version every
 estimated term agrees with the published estimates (coefficients, standard errors and N):
 
-- paper 1: 789 terms, largest difference 1.0e-11;
+- paper 1: 919 terms, largest difference 1.0e-11;
 - paper 2: 961 terms, largest difference 2.8e-8.
 
 The permutation p of all 13 outcomes of paper 2 is the same in R, using the placebo draws made in Python.
@@ -72,7 +72,7 @@ industrial-complex files). Raw data go to `data_raw/`, intermediate files to `da
 | 2 | `code/02_grid` | `sigun.py`, `grid_lc_share.py`, `grid_sgis.py`, `check_sgis.py`, `supply_zones.py`, `housing_districts.py`, `grid_zoning.py`, `grid_industry.py` |
 | 3 | `code/05_flows` | `build_mdis_db.py`, `check_mdis_db.py`, `dong_xwalk.py`, `dong_class.py`, `flows_old_core_mdis.py`, `zone_pop.py` |
 | 4 | `code/04_partB` (shared panels) | `supply_panel.py`, `flows_supply_panel.py`, `zone_event_study.py`, `emp_supply.py` (its `emp_sigun_year.csv` is also used by paper 1) |
-| 5 | `code/03_partA` (paper 1) | `regpop.py`, `sigun_panel.py`, `supply_demand.py`, `shrink_sprawl.py`, `ic_unmet.py`, `hd_unmet.py`, `vacancy.py`, `plan_pop.py`, `plan_event.py`, `zoning_route.py`, `newcity_share.py` |
+| 5 | `code/03_partA` (paper 1) | `regpop.py`, `sigun_panel.py`, `supply_demand.py`, `shrink_sprawl.py`, `ic_unmet.py`, `hd_unmet.py`, `vacancy.py`, `plan_pop.py`, `plan_event.py`, `zoning_route.py`, `zoning_route_robust.py`, `robust_review.py`, `newcity_share.py` |
 | 6 | `code/04_partB` (paper 2) | `old_core_housing.py`, `flows_age.py`, `same_dong_bound.py`, `same_dong_bound_vital.py`, `hd_supply_panel.py`, `partB_did.py`, `supply_decomp.py` |
 | 7 | outputs | paper 1: `paper1_tables.py`, `paper1_supplement_tables.py`, `paper1_figures.py`, `check_paper1_numbers.py`; paper 2: `paper2_tables.py`, `paper2_figures.py`, `paper2_numbers_check.py` |
 

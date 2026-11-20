@@ -8,8 +8,8 @@ This package reproduces every table, figure and number reported in two companion
   decline in Korea's shrinking cities, 2001–2025* (Tables 1–5, Figures 1–5).
 
 One command runs the whole analysis from the data in `data/`, checks every number reported in the two papers
-against the new output (192 numbers in paper 1, 152 in paper 2), and re-estimates every regression independently in
-R (789 and 961 terms):
+against the new output (181 numbers in paper 1, 152 in paper 2), and re-estimates every regression independently in
+R (919 and 961 terms):
 
 ```
 python run_all.py
@@ -58,11 +58,11 @@ The variables of the regression data are described in `replication/data/CODEBOOK
   the path, `run_all.py` skips the R step.
 - Figures use the Arial font; on systems without it matplotlib substitutes another font, which changes only the
   appearance of the figures.
-- Run time on a Windows 11 workstation: about 17 minutes in total, of which about 15 minutes are the 500 m block
+- Run time on a Windows 11 workstation: about 16 minutes in total, of which about 14 minutes are the 500 m block
   and census-block event studies of paper 2 (`partB_did`, run inside `export_model_frames.py paper2`); the R step
   takes under a minute. Disk: about 90 MB for `results/`.
 - Tested from a fresh copy of this package with `arcpy` made unavailable: (1) this version, with the Python environment listed
-  above and R 4.4.1 — every step succeeded, every reported number (192 + 151) and every R estimate agreed, and the
+  above and R 4.4.1 — every step succeeded, every reported number (181 + 151) and every R estimate agreed, and the
   tables and figures were byte-identical to those in the papers; (2) the previous build, with Python 3.12, numpy 1.26, pandas 2.2,
   statsmodels 0.14.2, matplotlib 3.8 — all numbers and tables identical; figures differ only in rendering.
   (Paper 2's check has 152 items in the authors' copy; item 131 compares the manuscript's table section with the
@@ -81,7 +81,7 @@ variable `USUS_DATA` to it, and runs:
 | Step | Script (in `code/`, mode) | Output in `results/outputs/` |
 |---|---|---|
 | Paper 1 | `03_partA/regpop.py` | `partA/regpop_sigun.csv` |
-| | `replication/export_model_frames.py paper1`: runs `supply_demand`, `shrink_sprawl`, `ic_unmet`, `hd_unmet`, `vacancy`, `plan_pop`, `plan_event`, `zoning_route` (models) and records each regression | `partA/*.txt`, `*_models.csv`; `replication/data/paper1/` |
+| | `replication/export_model_frames.py paper1`: runs `supply_demand`, `shrink_sprawl`, `ic_unmet`, `hd_unmet`, `vacancy`, `plan_pop`, `plan_event`, `zoning_route`, `robust_review` (models) and records each regression | `partA/*.txt`, `*_models.csv`; `replication/data/paper1/` |
 | | `03_partA/newcity_share.py` (models) | `partA/newcity_share.csv` |
 | | `03_partA/paper1_supplement_tables.py`, `paper1_tables.py` | `paper1/supplement_tables.md`, `paper1/tables.md` |
 | | `03_partA/paper1_figures.py` (models) | `paper1/fig1_groups.png` … `fig5_routes.png` |

@@ -8,7 +8,8 @@
                       (plan_vintages.csv), non-capital 도 시군 by group
   fig4_event.png      event-study coefficients, k = -3..5 (plan_event_coefs.csv): new plan / plan enlarging the
                       reserve -> urban-use zoning and land-form-change permits, full sample
-  fig5_routes.png     new urban land 2009-19 by 2026 zoning route, by group (zoning_route_sigun.csv)
+  fig5_routes.png     new urban land 2009-19 and dwellings added 2015-24 (cells gaining >= 5) by 2026 zoning route,
+                      by group (zoning_route_sigun.csv, zoning_route_robust_grid.csv)
 
 Every value plotted is read from the output files named above; nothing is typed in.
 The 시군 polygons (data_work/boundary/sigun_sgis2020.shp, simplified to 100 m for drawing) and their dissolve by analysis region are read with arcpy and saved as
@@ -260,17 +261,26 @@ def fig4():
     cols = ["#2166ac", "#a6d96a", "#d9ef8b", "#fdae61", "#f46d43", "#bdbdbd"]
     s = t.groupby("group")[[f"new_{r}" for r in R]].sum().reindex(list(GROUPS))
     sh = s.div(s.sum(axis=1), axis=0) * 100
-    fig, ax = plt.subplots(figsize=(6.4, 2.8))
-    left = np.zeros(len(sh))
-    for (r, lab), cc in zip(R.items(), cols):
-        ax.barh([GROUPS[g] for g in sh.index], sh[f"new_{r}"], left=left, color=cc, label=lab, height=0.6)
-        left += sh[f"new_{r}"].values
-    for i, g in enumerate(sh.index):
-        ax.text(101, i, f"{100 - sh.loc[g, 'new_A']:.1f}% outside", va="center", fontsize=7)
-    ax.set_xlim(0, 118)
-    ax.invert_yaxis()
-    ax.set_xlabel("Share of new urban land 2009-19 (%)")
-    ax.legend(frameon=False, fontsize=6.5, ncol=2, loc="upper center", bbox_to_anchor=(0.45, -0.25))
+    # (b) dwellings added outside the old core 2015-24, cells gaining at least 5 (zoning_route_robust.py)
+    d = pd.read_csv(os.path.join(A, "zoning_route_robust_grid.csv"))
+    d["group"] = d.SG_ID.map(t.set_index("SG_ID").group)
+    dh = d.groupby("group")[[f"ge5_{r}" for r in R]].sum().reindex(list(GROUPS))
+    dh = dh.div(dh.sum(axis=1), axis=0) * 100
+    fig, axes = plt.subplots(2, 1, figsize=(6.4, 4.6), sharex=True)
+    for ax, (tab, pre, title) in zip(axes, [(sh, "new", "(a) New urban land 2009-19"),
+                                            (dh, "ge5", "(b) Dwellings added outside the old core 2015-24 "
+                                                        "(cells gaining at least 5)")]):
+        left = np.zeros(len(tab))
+        for (r, lab), cc in zip(R.items(), cols):
+            ax.barh([GROUPS[g] for g in tab.index], tab[f"{pre}_{r}"], left=left, color=cc, label=lab, height=0.6)
+            left += tab[f"{pre}_{r}"].values
+        for i, g in enumerate(tab.index):
+            ax.text(101, i, f"{100 - tab.loc[g, f'{pre}_A']:.1f}% outside", va="center", fontsize=7)
+        ax.set_xlim(0, 118)
+        ax.invert_yaxis()
+        ax.set_title(title, fontsize=8, loc="left")
+    axes[1].set_xlabel("Share by 2026 zoning (%)")
+    axes[1].legend(frameon=False, fontsize=6.5, ncol=2, loc="upper center", bbox_to_anchor=(0.45, -0.3))
     fig.savefig(os.path.join(OUT, "fig5_routes.png"), dpi=300, bbox_inches="tight")
     plt.close(fig)
     return sh

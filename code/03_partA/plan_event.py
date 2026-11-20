@@ -170,6 +170,31 @@ def main():
                         f"0~5년 누적 {float(cum.effect[0]):.3f}{stars(float(cum.pvalue))} (se {float(cum.sd[0][0]):.3f})")
                     say("   " + coefs)
 
+    # robustness (mock review 2026-11-21): units that never report a plan are pure controls in the main sample;
+    # re-estimate on units with at least one plan vintage, and give the minimum detectable cumulative effect
+    # (2.8 x s.e.: 5 % two-sided test, 80 % power)
+    has = set(p.loc[p.adopt == 1, "sigun"])
+    say(f"\n강건성: 계획 빈티지가 한 번이라도 있는 시군만 ({len(has)}개; 전체 {p.sigun.nunique()}개)."
+        " 최소검출효과(MDE) = 2.8 x 누적 효과 s.e.")
+    rob = []
+    for d, lab in specs[:2]:
+        names = event_terms(p, d)
+        for y, ylab in [("zone", "용도지역(주거·상업·공업) 증가"), ("devp", "토지형질변경 허가")]:
+            for smp, q in [("전체", p), ("계획 있는 시군", p[p.sigun.isin(has)])]:
+                q = q[q.year.isin(YEARS)].dropna(subset=[y])
+                q = q.assign(ry=q.region + "_" + q.year.astype(str))
+                f = f"{y} ~ " + " + ".join(n for _, n in names) + " + C(sigun) + C(ry)"
+                m = smf.ols(f, q).fit(cov_type="cluster", cov_kwds={"groups": pd.factorize(q.sigun)[0]})
+                cum = m.t_test(" + ".join(n for k, n in names if 0 <= k <= 5) + " = 0")
+                pre = m.wald_test(" , ".join(f"{n} = 0" for k, n in names if k < -1), use_f=True, scalar=True)
+                c, s = float(cum.effect[0]), float(cum.sd[0][0])
+                say(f"  [{lab} → {ylab}, {smp}] 시군 {q.sigun.nunique()}, n={int(m.nobs)}: 0~5년 누적 {c:.3f}"
+                    f"{stars(float(cum.pvalue))} (se {s:.3f}), MDE {2.8 * s:.2f}, 사전 p={float(pre.pvalue):.2f}, "
+                    f"결과 평균 {q[y].mean():.2f}")
+                rob.append(dict(treat=d, y=y, sample=smp, units=q.sigun.nunique(), n=int(m.nobs), cum=c, se=s,
+                                p=float(cum.pvalue), mde=2.8 * s, pre_p=float(pre.pvalue), mean_y=q[y].mean()))
+    pd.DataFrame(rob).to_csv(os.path.join(OUT, "plan_event_robust.csv"), index=False, encoding="utf-8-sig")
+
     pd.DataFrame(rows).to_csv(os.path.join(OUT, "plan_event_coefs.csv"), index=False, encoding="utf-8-sig")
     with open(os.path.join(OUT, "plan_event.txt"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines) + "\n")

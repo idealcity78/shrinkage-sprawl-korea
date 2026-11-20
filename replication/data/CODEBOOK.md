@@ -59,6 +59,17 @@ Cross-section of 123 non-capital provincial units.
 | `d_manuf` | Change in manufacturing employees 2010–2024 |
 | `lpop00` | Log population 2000 |
 
+## Robustness checks after the mock review (`robust_review_*`; Supplementary Tables S6, Panels F–G, and S10, Panel I)
+
+| Variable | Meaning |
+|---|---|
+| `out_A`, `lnew`, `region` | As in `zoning_route_*`: off-plan share of new urban land, log new urban land, region |
+| `pre_group` | Group by registered-population change 1992–2000 (decline below −2 %, growth above +2 %) |
+| `d_vac_old`, `s`, `d_hh`, `sigun`, `ry` | As in `vacancy_*` |
+| `s_l1`, `s_l2` | Net additions per 1,000 dwellings one and two years earlier |
+
+Variants of existing models: `supply_demand_*` models 21–32 (Supplementary Table S5, Panel F: no lagged outcome, period pairs within one census method, shrinking units) and `plan_event_*` models 46–53 (Table S9, Panel F: units with a plan vintage).
+
 ## Vacancy (`vacancy_*`; Table 3, Supplementary Table S6)
 
 Unit × year panel 2016–2025.

@@ -180,6 +180,7 @@ def main():
     p["ry"] = p.region + "_" + p.year.astype(str)
     p = p.dropna(subset=["s", "d_vac_old"])
     p = p[p.s.between(-100, 200)]
+    p.to_csv(os.path.join(OUT, "vacancy_panel.csv"), index=False, encoding="utf-8-sig")
     say("\n2. 위치의 문제: 주택이 더 늘어난 해에 오래된(2000년 전) 주택의 빈집이 더 늘어나는가 (2016-2025, 시군 연 패널)")
     say("   y = 빈집 변화 / 직전 주택 x 1000, s = 주택 순증 / 직전 주택 x 1000, 시군 FE + 권역 x 연도 FE, 시군 군집")
     for grp in [["감소", "정체", "성장"], ["감소"], ["정체"], ["성장"], ["광역시", "수도권"]]:

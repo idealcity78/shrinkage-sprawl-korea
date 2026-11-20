@@ -43,11 +43,6 @@ C = [
     ("per-capita 2009-19 shrinking", "30.9", "shrink_sprawl.txt", r"/ 2009-2019 감소 ([\d.]+)", 1),
     ("per-capita 2009-19 growing", "30.9", "shrink_sprawl.txt", r"/ 2009-2019 감소 [\d.]+, 정체 [\d.]+, 성장 ([\d.]+)", 1),
     ("per-capita 2009-19 capital region", "16.2", "shrink_sprawl.txt", r"/ 2009-2019 감소 [\d.]+, 정체 [\d.]+, 성장 [\d.]+, 광역시 [\d.]+, 수도권 ([\d.]+)", 1),
-    ("density shrinking 2000/1999", "6,556", "shrink_sprawl.txt", r"감소 ([\d,]+) -> [\d,]+ -> [\d,]+;", 1),
-    ("density shrinking 2009", "5,044", "shrink_sprawl.txt", r"감소 [\d,]+ -> ([\d,]+) -> [\d,]+;", 1),
-    ("density shrinking 2019", "3,739", "shrink_sprawl.txt", r"감소 [\d,]+ -> [\d,]+ -> ([\d,]+);", 1),
-    ("density capital region 2000/1999", "21,814", "shrink_sprawl.txt", r"수도권 ([\d,]+) -> [\d,]+ -> [\d,]+", 1),
-    ("density capital region 2019", "15,574", "shrink_sprawl.txt", r"수도권 [\d,]+ -> [\d,]+ -> ([\d,]+)", 1),
     ("new dwellings outside old core 2015-24, shrinking (%)", "90.3", "shrink_sprawl.txt", r"감소\s+[\d.]+\s+[\d.]+\s+([\d.]+)\s+-[\d.]+\s+-[\d.]+\s+-[\d.]+", 1),
     ("old-core population change 2015-24, shrinking (%)", "16.7", "shrink_sprawl.txt", r"감소\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+-[\d.]+\s+-[\d.]+\s+-([\d.]+)\s+-[\d.]+", 1),
     ("si/gun population change 2015-24, shrinking (%)", "3.1", "shrink_sprawl.txt", r"감소\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+-[\d.]+\s+-[\d.]+\s+-[\d.]+\s+-([\d.]+)", 1),
@@ -73,15 +68,25 @@ C = [
     ("2006-10 urbanised by 2019 (%)", "31.2", "ic_unmet.txt", r"2006-10\s+[\d.]+\s+[\d.]+\s+([\d.]+)", 1),
     ("2006-10 industrial use 2022 (%)", "13.8", "ic_unmet.txt", r"2006-10\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+([\d.]+)", 1),
     ("post-2006 designations, shrinking (km2)", "127.3", "ic_unmet.txt", r"2006년 이후 지정\n[^\n]*\n[^\n]*\n감소\s+[\d.]+\s+([\d.]+)", 1),
-    ("post-2006 complexes, shrinking", "269", "ic_unmet.txt", r"2006년 이후 지정\n[^\n]*\n[^\n]*\n감소\s+(\d+)\.0", 1),
     ("post-2006 designations, growing (km2)", "136.0", "ic_unmet.txt", r"2006년 이후 지정\n(?:[^\n]*\n){4}성장\s+[\d.]+\s+([\d.]+)", 1),
-    ("sale rate shrinking (%)", "90.2", "ic_unmet.txt", r"2006년 이후 지정\n[^\n]*\n[^\n]*\n감소(?:\s+[\d.]+){5}\s+([\d.]+)", 1),
-    ("sale rate growing (%)", "96.0", "ic_unmet.txt", r"2006년 이후 지정\n(?:[^\n]*\n){4}성장(?:\s+[\d.]+){5}\s+([\d.]+)", 1),
     ("manufacturing workers/km2 shrinking", "503.8", SUP, r"\| Shrinking \(after 2006\) \|(?: [^|]+ \|){8} ([\d.,]+) \|", 1),
     ("manufacturing workers/km2 growing", "675.5", SUP, r"\| Growing \(after 2006\) \|(?: [^|]+ \|){8} ([\d.,]+) \|", 1),
     ("2006-12 designation -> later manufacturing growth", "1.127", "ic_unmet.txt", r"제조업 종사자  2006-12 지정 \+([\d.]+)", 1),
     ("placebo 2016-24 designation -> 2005-15 growth", "0.982", "ic_unmet.txt", r"제조업 종사자[^\n]*2005-15 성장 \+([\d.]+)", 1),
     ("prior manufacturing growth -> designation", "0.085", "ic_unmet.txt", r"pre_manuf \+([\d.]+)", 1),
+    # revision after the mock review (2026-11-21): robustness numbers in the text, read from the supplementary tables
+    ("off-plan dwellings, cells gaining >= 5, shrinking (%)", "69.1", SUP, r"\| Dwellings added outside the old core, cells gaining at least 5 \| ([\d.]+) \| [\d.]+ \| ([\d.]+) \| [\d.]+ \| ([\d.]+) \|", 1),
+    ("same, growing (%)", "35.2", SUP, r"\| Dwellings added outside the old core, cells gaining at least 5 \| [\d.]+ \| [\d.]+ \| ([\d.]+) \| [\d.]+ \| ([\d.]+) \|", 1),
+    ("same, capital region (%)", "27.1", SUP, r"\| Dwellings added outside the old core, cells gaining at least 5 \|(?: [\d.]+ \|){4} ([\d.]+) \|", 1),
+    ("off-plan share of residential new urban land, shrinking (%)", "50.5", SUP, r"\| New urban land in residential use \(2022\) \| ([\d.]+) \| [\d.]+ \| ([\d.]+) \|", 1),
+    ("same, growing (%)", "28.6", SUP, r"\| New urban land in residential use \(2022\) \|(?: [\d.]+ \|){2} ([\d.]+) \|", 1),
+    ("transport share of new urban land, shrinking (%)", "36.1", SUP, r"\| Shrinking \(all\) \| [\d.]+ \| [\d.]+ \| [\d.]+ \| [\d.]+ \| ([\d.]+) \| ([\d.]+) \|", 1),
+    ("public-facility share of new urban land, shrinking (%)", "13.8", SUP, r"\| Shrinking \(all\) \|(?: [\d.]+ \|){5} ([\d.]+) \|", 1),
+    ("minimum detectable effect, new plan on zoning", "4.41", SUP, r"\| Any new plan \| Urban-use zoning \| All si/gun \(\d+\) \| [^|]+\| ([\d.]+) \|", 1),
+    ("minimum detectable effect, reserve-enlarging plan on zoning", "9.54", SUP, r"\| New plan enlarging the reserve \| Urban-use zoning \| All si/gun \(\d+\) \| [^|]+\| ([\d.]+) \|", 1),
+    ("units with a plan vintage, event study", "85", SUP, r"si/gun with a plan vintage \((\d+)\)", 1),
+    ("reverse coefficient within one census method", "0.394", SUP, r"\| Next-period housing growth on household growth \| [^|]+\| ([\d.]+) \(", 1),
+    ("its s.e.", "0.142", SUP, r"\| Next-period housing growth on household growth \| [^|]+\| [\d.]+ \(([\d.]+)\)", 1),
     ("housing districts 2006-12 -> later household growth", "0.934", "hd_unmet.txt", r"가구\s+2006-12 시작 \+([\d.]+)", 1),
     ("housing districts 2016-24 -> 2005-15 household growth", "0.922", "hd_unmet.txt", r"가구[^\n]*2005-15 성장 \+([\d.]+)", 1),
     ("dwellings added 2010-24 inside districts, shrinking (%)", "13.1", "hd_unmet.txt", r"2010-2024: 감소 [\d,]+ / [\d,]+ = ([\d.]+)%", 1),
@@ -115,8 +120,6 @@ C = [
     ("its s.e.", "0.120", SUP, r"\| Prior 5-year trend \(1 pp\) \| [\d.]+ \(([\d.]+)\)", 1),
     ("planned growth at zero trend, mean over regions", "3.327", SUP, r"\| Prediction at zero trend, mean over regions \| ([\d.]+) \(", 1),
     ("its s.e.", "0.280", SUP, r"\| Prediction at zero trend, mean over regions \| [\d.]+ \(([\d.]+)\)", 1),
-    ("reserve per added resident, shrinking (m2)", "382.9", TAB, r"\*\*Table 5\.\*\*[\s\S]*?\| Shrinking \|(?: [^|]+ \|){5} ([\d.]+) \|", 1),
-    ("reserve per added resident, capital (m2)", "82.0", TAB, r"\*\*Table 5\.\*\*[\s\S]*?\| Capital region \|(?: [^|]+ \|){5} ([\d.]+) \|", 1),
     ("cap effect (%p/yr)", "2.164", SUP, r"\| Adopted 2019 or later \| -([\d.]+) \(", 1),
     ("its s.e.", "0.595", SUP, r"\| Adopted 2019 or later \| -[\d.]+ \(([\d.]+)\)", 1),
     ("2019-25 shrinking plans projecting growth (%)", "89.6", SUP, r"\| Shrinking \| 2019–25 \| \d+ \|(?: [^|]+ \|){2} ([\d.]+) \|", 1),
@@ -144,16 +147,12 @@ C = [
     ("continuous reserve -> zoning cumulative", "0.002", "plan_event.txt", r"\[예정용지 증가 1%p → 용도지역\(주거·상업·공업\) 증가, 전체\].*?누적 ([\d.]+)", 1),
     ("its s.e.", "0.004", "plan_event.txt", r"\[예정용지 증가 1%p → 용도지역\(주거·상업·공업\) 증가, 전체\].*?\(se ([\d.]+)\)", 1),
     ("median reserve increase (points)", "19.8", "plan_event.txt", r"예정용지 \+([\d.]+)%", 1),
-    ("permits 3 years after new plan, shrinking", "3.865", "plan_event.txt", r"\[새 계획 시행\(0/1\) → 토지형질변경 허가, 감소\][^\n]*\n[^\n]*\+3:-([\d.]+)", 1),
     # zoning routes
     ("new urban outside urban-use zones, shrinking (%)", "65.2", "zoning_route.txt", r"신규 시가지 2009→19: 용도지역별 비중\(%\)\n.*?\n.*?\n감소\s+([\d.]+)", -1),
     ("planned-management share, shrinking (%)", "25.4", "zoning_route.txt", r"신규 시가지 2009→19.*?\n감소\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+([\d.]+)", 1),
     ("natural-green share, shrinking (%)", "14.0", "zoning_route.txt", r"신규 시가지 2009→19.*?\n감소\s+[\d.]+\s+([\d.]+)", 1),
     ("outside, growing (%)", "55.0", "zoning_route.txt", r"신규 시가지 2009→19.*?\n성장\s+([\d.]+)", -1),
     ("outside, metropolitan (%)", "46.6", "zoning_route.txt", r"신규 시가지 2009→19.*?\n광역시\s+([\d.]+)", -1),
-    ("new dwellings outside urban-use zones, shrinking (%)", "70.7", "zoning_route.txt", r"원도심 밖 주택 증가.*?\n감소\s+([\d.]+)", -1),
-    ("same, growing (%)", "36.3", "zoning_route.txt", r"원도심 밖 주택 증가.*?\n성장\s+([\d.]+)", -1),
-    ("same, capital region (%)", "27.8", "zoning_route.txt", r"원도심 밖 주택 증가.*?\n수도권\s+([\d.]+)", -1),
     ("gap vs growing (points)", "15.2", "zoning_route.txt", r"감소 \(성장 대비\): \+([\d.]+)", 1),
     ("gap with controls (points)", "11.1", "zoning_route.txt", r"군 여부 통제: 감소 \+([\d.]+)", 1),
     ("urban-use zone growth 2008-19, shrinking (km2)", "157.3", "zoning_route.txt", r"예정용지 변화\n.*?\n감소\s+([\d.]+)", 1),
@@ -175,13 +174,10 @@ C = [
     ("median share > 2 km from old core, capital region (%)", "0.6", "shrink_sprawl.txt", r"2km 넘는 신규 비율 %(?:\s+[\d.]+ \([\d.]+\)){4}\s+([\d.]+) \(", 1),
     ("old-dwelling vacancy per new dwelling, non-capital", "0.169", "vacancy.txt", r"감소·정체·성장\s+\(시군 \d+\): d_vac \+[\d.]+ \([\d.]+\)\*+, d_vac_old \+([\d.]+)", 1),
     ("same, household change controlled 2020-24", "0.189", "vacancy.txt", r"가구 변화 통제 \(2020-2024\): d_vac_old ~ s \+([\d.]+)", 1),
-    ("planned-route share of available land, shrinking (%)", "0.6", "zoning_route.txt", r"가용지\): 용도지역별 비중\(%\).*?감소\s+([\d.]+)", 1),
     ("lead regressions, observations", "492", SUP, r"\| Next-period household growth \| Housing growth \| [^|]+\| [^|]+\| [^|]+\| (\d+) \|", 1),
     ("vacancy panel, si/gun-years", "1,230", SUP, r"Panel A\. Change in vacant[\s\S]*?\| Non-capital provincial \| [^|]+\| [^|]+\| [^|]+\| ([\d,]+) \|", 1),
     ("industrial-complex cross-section, si/gun", "123", SUP, r"Designation and later growth, cross-section of (\d+) si/gun", 1),
     ("event-study si/gun", "121", "plan_event.txt", r"시군 (\d+)개, 새 계획", 1),
-    ("same-period household growth on housing growth, all periods", "1.032", SUP, r"\| Household growth \| ([\d.]+) \(", 1),
-    ("same, excluding 2010-15", "0.988", SUP, r"\| Household growth \| [^|]+\| ([\d.]+) \(", 1),
     ("new-urban rate at zero growth 1999-2009 (%)", "18.66", SUP, r"census population 2000–2010\) \| New urban land rate \(%\) \| ([\d.]+) \(", 1),
     ("its s.e.", "3.99", SUP, r"census population 2000–2010\) \| New urban land rate \(%\) \| [\d.]+ \(([\d.]+)\)", 1),
     ("slope 1999-2009", "0.382", SUP, r"census population 2000–2010\) \| New urban land rate \(%\) \| [^|]+\| [^|]+\| ([\d.]+)", 1),
@@ -203,13 +199,9 @@ C = [
     ("IQR of the 2009 reserve share, off-plan sample (points)", "96.8", SUP, r"interquartile range ([\d.]+) pp: ", 1),
     ("largest off-plan reduction for an IQR difference in reserves (points)", "1.7", SUP,
      r"interquartile range [\d.]+ pp: \[-([\d.]+),", 1),
-    ("urban in late-1990s map, shrinking, designated before 2006 (%)", "20.7", SUP, r"\| Shrinking \(before 2006\)(?: \| [\d.,]+){4} \| ([\d.]+) \|", 1),
-    ("urban in late-1990s map, shrinking, designated after 2006 (%)", "3.0", SUP, r"\| Shrinking \(after 2006\)(?: \| [\d.,]+){4} \| ([\d.]+) \|", 1),
     ("placebo, all employment, designated 2016-24", "0.383", SUP, r"\| Placebo: growth 2010–24 \| Designated 2016–24 \| [^|]+\| ([\d.]+) \(", 1),
     ("all employment, designated 2006-12", "0.411", SUP, r"\| Growth 2010–24 \| Designated 2006–12 \| [^|]+\| ([\d.]+) \(", 1),
     ("placebo 2005-15 growth, all employment, designated 2016-24", "0.493", SUP, r"\| Placebo: growth 2005–15 \| Designated 2016–24 \| [^|]+\| ([\d.]+) \(", 1),
-    ("next-period household growth on housing growth, no unit FE", "0.345", SUP, r"\| Next-period household growth \| Housing growth \| ([\d.]+) \(", 1),
-    ("its s.e.", "0.125", SUP, r"\| Next-period household growth \| Housing growth \| [\d.]+ \(([\d.]+)\)", 1),
     ("2010 long-term vacancy share, shrinking (%)", "50.1", "vacancy.txt", r"12개월 이상 빈 주택 비중 \(%\): 감소 ([\d.]+)", 1),
     ("2010 long-term vacancy share, capital region (%)", "20.8", "vacancy.txt", r"12개월 이상 빈 주택 비중 \(%\):[^\n]*수도권 ([\d.]+)", 1),
     ("recent-dwelling vacancy per new dwelling, shrinking", "0.376", SUP, r"Panel A\. Change in vacant[\s\S]*?\| Shrinking \| [^|]+\| [^|]+\| ([\d.]+) \(", 1),
@@ -218,23 +210,32 @@ C = [
     ("prior trend, same plans", "0.37", SUP, r"\| Shrinking \| 2013–18 \| \d+ \| [\d.]+ \| -([\d.]+)", 1),
     ("reserve share on planned increase", "0.079", SUP, r"Planned increase \(% of population at adoption\) \| -([\d.]+)", 1),
     ("its s.e.", "0.255", SUP, r"Planned increase \(% of population at adoption\) \| -[\d.]+ \(([\d.]+)\)", 1),
-    ("concentration of new urban land in planned route, shrinking", "54.62", SUP, r"\| Shrinking \| (\d+\.\d\d) \|", 1),
-    ("planned-management share of available land, shrinking (%)", "10.8", SUP, r"\| Shrinking \| 0\.6 \| [\d.]+ \| [\d.]+ \| ([\d.]+) \|", 1),
-    ("planned-management share of added dwellings outside old core, shrinking (%)", "28.2", SUP, r"\| Shrinking \| [\d.]+ \| [\d.]+ \| [\d.]+ \| ([\d.]+) \| [\d.]+ \| [\d.]+ \| \d{3},\d{3} \|", 1),
-    ("production/conservation management share, same", "16.3", SUP, r"\| Shrinking \| [\d.]+(?: \| [\d.]+){3} \| ([\d.]+) \| [\d.]+ \| \d{3},\d{3} \|", 1),
-    ("metropolitan reserve 2009 (km2)", "146.3", SUP, r"\| Metropolitan \| 19\.4 \| [\d.]+ \| [\d.]+ \| ([\d.]+) \|", 1),
-    ("metropolitan reserve 2019 (km2)", "226.4", SUP, r"\| Metropolitan \| 19\.4(?: \| [\d.]+){3} \| ([\d.]+) \|", 1),
     ("event-study si/gun-years", "1,936", "plan_event.txt", r"\[예정용지를 늘린 새 계획\(0/1\) → 용도지역\(주거·상업·공업\) 증가, 전체\] n=(\d+)", 1),
 ]
 
 # values derived from the checked ones (computed here, not read)
 DERIVED = [
-    ("density decline shrinking (%)", "43", lambda v: round((1 - v["3,739"] / v["6,556"]) * 100)),
-    ("density decline capital (%)", "29", lambda v: round((1 - v["15,574"] / v["21,814"]) * 100)),
     ("study si/gun = 87 + 11 + 25 + 7 + 32 (group counts, shrink_sprawl.txt)", "162", lambda v: 87 + 11 + 25 + 7 + 32),
     ("2019-25 shrinking plans projecting growth, count (89.6% of 48)", "43", lambda v: round(v["89.6"] / 100 * v["48"])),
     ("upper bound of continuous effect, % of 6-yr zoning flow (about 3)", "3",
      lambda v: round((0.002 + 1.96 * 0.004) * 19.8 / (1.26 * 6) * 100)),
+]
+
+# counts that must appear in a given phrase (a value present elsewhere in the text does not count);
+# "supp" phrases are checked in docs/paper1_supplement_text.md. (claim, phrase, where, file, regex)
+_GROUPS = r"감소 (\d+), 정체 (\d+), 성장 (\d+)"
+CONTEXT = [
+    ("si/gun with plans, Section 3", "{} of the 162 study units report one", "draft", "plan_pop.txt", r"(\d+)개 \(연구 시군"),
+    ("plan vintages since 2000, Figure 3", "trend for {} plan vintages", "draft", "plan_pop.txt",
+     r"절편\(추세 0일 때 계획 성장\) [^,]*, n=(\d+)"),
+    ("plan vintages since 2000, Table S8 note", "over the {} vintages", "supp", "plan_pop.txt",
+     r"절편\(추세 0일 때 계획 성장\) [^,]*, n=(\d+)"),
+    ("2009 cross-section si/gun, Table S8 note", "across the {} si/gun", "supp", "plan_pop.txt",
+     r"실제 인구 변화 [\d.]+\**, n=(\d+)"),
+    ("housing panel units, Table S5 note", "panel of the {} non-capital provincial units", "supp", "supply_demand.txt",
+     _GROUPS),
+    ("new-town share of new urban land, Table S11 note", "and {} percent of new urban land in 2009–2019", "supp", SUP,
+     r"\| All \| [\d,]+ \| [\d,]+ \| [\d.]+ \| [\d.]+ \| [\d.]+ \| ([\d.]+) \|"),
 ]
 
 
@@ -317,6 +318,17 @@ def main():
         bad += (not ok) + (not in_draft)
         rows.append((len(rows) + 1, claim + " [derived]", val, "computed from rows above", str(x),
                      "OK" if ok else "MISMATCH", "yes" if in_draft else "NO", "derived"))
+    supp_file = os.path.join(DOCS, "paper1_supplement_text.md")
+    supp = "" if PACKAGE or not os.path.exists(supp_file) else open(supp_file, encoding="utf-8").read()
+    for claim, phrase, where, f, rx in CONTEXT:
+        text = cache.setdefault(f, open(os.path.join(A, f), encoding="utf-8").read())
+        g = re.search(rx, text, re.S).groups()
+        val = str(sum(int(x) for x in g)) if len(g) > 1 else g[0]
+        target = draft if where == "draft" else supp
+        found = PACKAGE or phrase.format(val) in target
+        bad += not found
+        rows.append((len(rows) + 1, claim + " [in context]", phrase.format(val), f, val, "OK", "yes" if found else "NO",
+                     "context"))
     w_abs, w_rat = section_words(draft, "Abstract"), section_words(draft, "Submission rationale")
     lines = ["# 논문 1 수치 대조표 (자동 생성: `code/03_partA/check_paper1_numbers.py`)", "",
              f"대상 `docs/paper1_results_draft.md`. 수치 {len(rows)}개, 불일치·미기재 {bad}건. "
