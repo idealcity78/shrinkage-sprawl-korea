@@ -7,7 +7,8 @@ Different models never share a panel: each panel holds one model (or one model a
   S4  elasticity of new urban land to population growth (shrink_sprawl.txt blocks 2 and 4)
   S5  housing supply and demand: all panel models (supply_demand_models.csv)
   S6  vacancy panel, all outcomes and the household-controlled model (vacancy_models.csv); vacancy levels
-  S7  industrial complexes by designation window and group; all growth and placebo models (ic_unmet.txt, ic_unmet_models.csv)
+  S7  industrial complexes by designation window and group; all growth and placebo models (ic_unmet.txt, ic_unmet_models.csv);
+      housing-site districts, same layout (hd_unmet.txt, hd_unmet_models.csv)
   S8  plans: planned growth by adoption era (cap), plan-on-trend and cross-section models (plan_pop.txt, plan_pop_models.csv)
   S9  event study: all coefficients k = -4..6, cumulative 0-5 effects and pre-trend tests (plan_event_coefs.csv)
   S10 zoning routes: new urban land, new dwellings and available land by zone; concentration ratios; KOSIS comparison
@@ -239,6 +240,26 @@ def ic_panels(m, ys=tuple(IC_Y), full=True):
     return rows, rev
 
 
+HD_Y = {"hh": "Households", "pop": "Population", "house": "Dwellings"}
+HD_X = {"hd": "area (% of 2009 urban land)", "u": "planned dwellings (% of 2005 households)"}
+
+
+def hd_panels(m):
+    """ic_panels for the housing-site districts: both measures of designation, growth, placebo and reverse rows."""
+    has = lambda b, y, t: ((m.block == b) & (m.y == y) & (m.term == t)).any()
+    get = lambda b, y, t: cell(pick(m, block=b, y=y, term=t)) if has(b, y, t) else ""
+    rows = []
+    for x, xl in HD_X.items():
+        for b, t, lab, reg in [("growth", f"{x}_0612", "Growth 2010–24", "Started 2006–12"),
+                               ("growth", f"{x}_0105", "Growth 2010–24", "Started 2001–05"),
+                               ("placebo_0515", f"{x}_1624", "Placebo: growth 2005–15", "Started 2016–24"),
+                               ("placebo_1024", f"{x}_1624", "Placebo: growth 2010–24", "Started 2016–24")]:
+            rows.append([lab, f"{reg}, {xl}"] + [get(b, y, t) for y in HD_Y])
+        rows.append([f"Reverse: started 2006–12, {xl}", "Prior growth 2000–05 of the outcome"]
+                    + [get(f"reverse_{x}", y, f"pre_{y}") for y in HD_Y])
+    return rows
+
+
 def s5():
     m = pd.read_csv(os.path.join(A, "supply_demand_models.csv"))
     d0 = re.search(r"주택 증가율 ([\d.]+)%/년, 가구 증가율 ([\d.]+)%/년; 비감소 ([\d.]+), ([\d.]+)", read("supply_demand.txt"))
@@ -343,7 +364,47 @@ def s7():
     m = pd.read_csv(os.path.join(A, "ic_unmet_models.csv"))
     rows3, rows4 = ic_panels(m, full=True)
     tot = re.search(r"산업단지 (\d+)개, 지정 면적 (\d+) km2", c)
-    return ("**Table S7.** Industrial complexes in non-capital provincial si/gun (area-weighted).\n\nPanel A. By designation window.\n\n"
+    h = read("hd_unmet.txt")
+    hcols = ["Start", "Districts", "Area km²", "Planned dwellings", "Urban in 1999 (%)", "Urbanised 2019 (%)",
+             "Dwellings 2024", "Realised (% of planned)", "Dwelling increase 2010–24", "Completed (%)"]
+    blk = h[h.index("1. 시작 시기별"):h.index("   시군 집단별, 2006년 이후")]
+    rows5 = []
+    for line in blk.splitlines():
+        p = line.split()
+        if p and re.match(r"(~1990|\d{4}-\d{2,4}|2021-)$", p[0]):
+            rows5.append([p[0].replace("-", "–"), p[1][:-2]] + p[2:])
+    blk = h[h.index("   시군 집단별, 2006년 이후"):h.index("   법별")]
+    rows6, sec = [], "from 2006"
+    for line in blk.splitlines():
+        if "2005년 이전" in line:
+            sec = "before 2006"
+        p = line.split()
+        if p and p[0] in ("감소", "정체", "성장"):
+            rows6.append([f"{EN[p[0]]} ({sec})", p[1][:-2]] + p[2:])
+    rows7 = []
+    for a, rest in re.findall(r"   (\d{4}-\d{4}): (.+)", h):
+        sh = dict((g, (i, t, s)) for g, i, t, s in re.findall(r"(\S+) ([\d,]+) / ([\d,]+) = ([\d.]+)%", rest))
+        rows7.append([a.replace("-", "–")] + [f"{sh[g][2]} ({sh[g][0]} of {sh[g][1]})" for g in ("감소", "정체", "성장")])
+    rows8 = hd_panels(pd.read_csv(os.path.join(A, "hd_unmet_models.csv")))
+    ht = re.search(r"주택 지구 (\d+)개 \(격자 셀 있음\), 지정 면적 ([\d.]+) km2, 계획 ([\d,]+)호.*계획 호수 없음 또는 0 (\d+)", h)
+    hd_text = ("\n\nPanel E. Housing-site districts by start year (area-weighted shares).\n\n" + md(hcols, rows5)
+               + "\n\nPanel F. Housing-site districts by group.\n\n" + md(["Group (start)"] + hcols[1:], rows6)
+               + "\n\nPanel G. Share of the increase in dwellings that lay inside housing-site districts (%; dwellings "
+                 "inside ÷ all added, group totals).\n\n" + md(["Period"] + [EN[g] for g in ("감소", "정체", "성장")], rows7)
+               + "\n\nPanel H. District start and later growth, cross-section of 123 si/gun: log growth ×100 of each "
+                 "column's outcome on the area or the planned dwellings of the districts started in each window; reverse "
+                 "rows regress the 2006–12 measure on the outcome's prior growth.\n\n"
+               + md(["Model", "Regressor"] + list(HD_Y.values()), rows8)
+               + f"\n\nPanels E–H: {ht.group(1)} housing-site districts on the grid ({ht.group(2)} km², "
+                 f"{ht.group(3)} planned dwellings): districts under the Housing Site Development Promotion Act, the Urban "
+                 "Development Act, the Special Act on Public Housing and the Private Rental Housing Act (source 18). The start "
+                 "year is the designation date, or the earliest plan approval where the designation date is missing. "
+                 f"Realised = dwellings in the district cells in 2024 (SGIS grid) ÷ planned dwellings, over the districts with "
+                 f"a planned number ({ht.group(4)} districts have none); completed = share of districts with a completion "
+                 "date. Panel H models as in Panel C, with the outcome's growth 2000–05, log population 2000, region and the "
+                 "earlier windows as controls. Source: `hd_unmet.txt`, `hd_unmet_models.csv`.")
+    return ("**Table S7.** Industrial complexes and housing-site districts in non-capital provincial si/gun.\n\n"
+            "Panel A. Industrial complexes by designation window (area-weighted).\n\n"
             + md(cols, rows) + "\n\nPanel B. By group.\n\n" + md(["Group (designation)"] + cols[1:], rows2)
             + "\n\nPanel C. Designation and later growth, cross-section of 123 si/gun: log growth ×100 of each column's outcome "
               "on designated area (% of 2009 urban land).\n\n"
@@ -359,7 +420,7 @@ def s7():
               "industrial area, operating = operating ÷ resident firms, both summed over the complexes matched to the KICOX "
               "statistics (June 2026). "
               "Manufacturing workers are gridded employees times the manufacturing share of the enclosing 1 km cell. "
-              "Source: `ic_unmet.txt`, `ic_unmet_models.csv`.")
+              "Source: `ic_unmet.txt`, `ic_unmet_models.csv`." + hd_text)
 
 
 def s8():
@@ -613,6 +674,11 @@ TERM = {"Intercept": "Constant", "gp": "Population growth g (pp)", "neg": "N (ne
         "km2_0612": "Area designated 2006–12 (km²)", "km2_0105": "Area designated 2001–05 (km²)",
         "pre_manuf": "Prior growth 2000–05 of the outcome", "pre_emp": "Prior growth 2000–05 of the outcome",
         "pre_pop": "Prior growth 2000–05 of the outcome", "pre_hh": "Prior growth 2000–05 of the outcome",
+        "pre_house": "Prior growth 2000–05 of the outcome",
+        "hd_0612": "District area started 2006–12 (%)", "hd_0105": "District area started 2001–05 (%)",
+        "hd_1624": "District area started 2016–24 (%)", "hd_pre": "District area started before 2001 (%)",
+        "u_0612": "Planned dwellings started 2006–12 (%)", "u_0105": "Planned dwellings started 2001–05 (%)",
+        "u_1624": "Planned dwellings started 2016–24 (%)", "u_pre": "Planned dwellings started before 2001 (%)",
         "s": "Net additions per 1,000 dwellings", "d_hh": "Household change per 1,000 dwellings",
         "trend_g": "Prior 5-year trend (%/yr)", "excess_pct": "Planned increase (% of population at adoption)",
         "post": "Adopted 2019 or later", "plan_excess": "2009 overstatement (%)", "reserve_share": "2009 reserve ÷ urbanised land (%)",
@@ -631,6 +697,7 @@ S9_S = ["All", "Shrinking", "Stagnant and growing"]
 VAC_S = ["Non-capital provincial", "Shrinking", "Stagnant", "Growing", "Metropolitan and capital region"]
 VAC_Y = ["All vacancies", "Pre-2000 dwellings", "Built in last 5 years"]
 IC_YS = ["Manufacturing employment", "All employment", "Population", "Households"]
+HD_YS = ["Households", "Population", "Dwellings"]
 
 
 def s13_where(mid):
@@ -671,6 +738,13 @@ def s13_where(mid):
         if k <= 15:
             return "S7-D", "Area designated 2006–12 (%)", ["Manufacturing employment", "Population", "Households"][k - 13]
         return "", "Manufacturing employment change 2010–24", "Designated area in km²"
+    if sc == "hd_unmet":
+        x, r = divmod(k - 1, 12)
+        xl = ["district area", "planned dwellings"][x]
+        if r < 9:
+            v, j = divmod(r, 3)
+            return "S7-H", HD_YS[v], ["Growth 2010–24", "Placebo: growth 2010–24", "Placebo: growth 2005–15"][j] + f", {xl}"
+        return "S7-H", f"Start 2006–12, {xl} (%)", HD_YS[r - 9]
     if sc == "vacancy":
         if k == 16:
             return "S6-B", "Pre-2000 dwellings", "Non-capital provincial, 2020–24"
@@ -702,7 +776,7 @@ def s13_fe(formula):
 def s13():
     mo = pd.read_csv(os.path.join(REP, "models.csv"))
     es = pd.read_csv(os.path.join(REP, "python_estimates.csv"))
-    order = ["S3-C", "S4", "S5-B", "S5-C", "S5-D", "S5-E", "S6-A", "S6-B", "S7-C", "S7-D", "S8-C", "S8-D", "S8-E", "S8-F",
+    order = ["S3-C", "S4", "S5-B", "S5-C", "S5-D", "S5-E", "S6-A", "S6-B", "S7-C", "S7-D", "S7-H", "S8-C", "S8-D", "S8-E", "S8-F",
              "S9-A", "S9-B", "S9-C", "S9-D", "S9-E", "S10-F", ""]
     mo["where"] = [s13_where(i) for i in mo.id]
     mo["rank"] = [order.index(w[0]) for w in mo["where"]]
@@ -711,7 +785,7 @@ def s13():
     for (src, part) in [(("S3-C", "S4"), "A. Sprawl and the old core (Tables S3, Panel C, and S4)"),
                         (("S5-B", "S5-C", "S5-D", "S5-E"), "B. Housing supply, households and in-migration (Table S5)"),
                         (("S6-A", "S6-B"), "C. Vacancy panel (Table S6)"),
-                        (("S7-C", "S7-D"), "D. Industrial complexes (Table S7)"),
+                        (("S7-C", "S7-D", "S7-H"), "D. Industrial complexes and housing-site districts (Table S7)"),
                         (("S8-C", "S8-D", "S8-E", "S8-F"), "E. Master plans (Table S8)"),
                         (("S9-A", "S9-B", "S9-C", "S9-D", "S9-E"), "F. Event study of plan adoptions (Table S9)"),
                         (("S10-F",), "G. Off-plan share of new urban land (Table S10, Panel F)"),

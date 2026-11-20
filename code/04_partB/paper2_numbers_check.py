@@ -271,6 +271,23 @@ for cid, (y, t, c, val) in zip(range(137, 143), [(2024, "old core", "pre2000", "
                                                   (2022, "old core", "gt85", "19.8%"), (2022, "new", "gt85", "14.9%")]):
     add(cid, f"{t} census blocks, {c} {y} (%)", val, "outputs/partB/old_core_housing.csv", f"{hq(y, t, c):.1f}%")
 
+# ---------- revision 2026-11-20: housing-site districts (hd_supply_panel.py) ----------
+HM = pd.read_csv(O + "partB/hd_supply_models.csv")
+hm = lambda y, t: HM[(HM["sample"] == "전 기간") & (HM.y == y) & (HM.term == t)].iloc[0]
+hsh = HM[HM["sample"] == "share"].coef
+add(143, "district share of supply outside old core, by period (%)", "27–43 percent", "outputs/partB/hd_supply_models.csv",
+    f"{hsh.min() * 100:.0f}–{hsh.max() * 100:.0f} percent")
+for cid, (y, t, val) in zip(range(144, 150), [("net_old", "s_hd_near", "+7.43"), ("net_old", "s_nh_near", "+8.39"),
+                                               ("y_h_v2", "s_hd_near", "−0.34"), ("y_h_v2", "s_nh_near", "+0.47"),
+                                               ("sg_net", "s_hd_near", "+9.24"), ("sg_net", "s_nh_near", "+6.77")]):
+    add(cid, f"district split: {y} on {t}", val, "outputs/partB/hd_supply_models.csv",
+        f"{hm(y, t).coef:+.2f}".replace("-", "−"))
+for cid, (y, val) in zip((150, 151), [("net_old", "p = 0.488"), ("sg_net", "p = 0.023")]):
+    add(cid, f"district split: equal within 2 km, {y}", val, "outputs/partB/hd_supply_models.csv",
+        f"p = {hm(y, 'diff_near').p:.3f}")
+add(152, "housing-site districts used", "1,199 districts", "outputs/partA/hd_districts_grid.csv",
+    f"{len(pd.read_csv(O + 'partA/hd_districts_grid.csv')):,} districts")
+
 # ---------- compare ----------
 out = []
 bad = 0

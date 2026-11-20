@@ -3,7 +3,7 @@
 The script copies data/ to a fresh results/ folder, points the analysis code at it (USUS_DATA), runs the analysis
 scripts in their "models" mode (no raw data, grids or ArcGIS needed), then
   1. compares every number reported in the papers with the new outputs (check_paper1_numbers.py,
-     paper2_numbers_check.py; 188 + 142 values),
+     paper2_numbers_check.py; 192 + 152 values),
   2. re-estimates every regression in R (replication/R, if Rscript is found) and compares the R estimates with the
      Python estimates.
 A log of each step goes to results/logs/. Exit status 1 if any step fails or any number differs.
@@ -26,14 +26,14 @@ EXPORT = os.path.join(ROOT, "replication", "export_model_frames.py")
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 PAPER1 = [("03_partA/regpop.py", []),
-          (EXPORT, ["paper1"]),          # supply_demand, shrink_sprawl, ic_unmet, vacancy, plan_pop, plan_event, zoning_route
+          (EXPORT, ["paper1"]),          # supply_demand, shrink_sprawl, ic_unmet, hd_unmet, vacancy, plan_pop, plan_event, zoning_route
           ("03_partA/newcity_share.py", ["models"]),
           ("03_partA/paper1_supplement_tables.py", []),
           ("03_partA/paper1_tables.py", []),
           ("03_partA/paper1_figures.py", ["models"]),
           ("03_partA/check_paper1_numbers.py", [])]
 PAPER2 = [("04_partB/supply_panel.py", ["models"]),
-          (EXPORT, ["paper2"]),          # flows_supply_panel, same_dong_bound_vital, zone_event_study, emp_supply, flows_age, partB_did
+          (EXPORT, ["paper2"]),          # flows_supply_panel, same_dong_bound_vital, hd_supply_panel, zone_event_study, emp_supply, flows_age, partB_did
           ("04_partB/old_core_housing.py", ["models"]),
           ("04_partB/same_dong_bound.py", ["models"]),
           ("04_partB/supply_decomp.py", ["models"]),

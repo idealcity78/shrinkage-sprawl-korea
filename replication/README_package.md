@@ -8,8 +8,8 @@ This package reproduces every table, figure and number reported in two companion
   decline in Korea's shrinking cities, 2001–2025* (Tables 1–5, Figures 1–5).
 
 One command runs the whole analysis from the data in `data/`, checks every number reported in the two papers
-against the new output (188 numbers in paper 1, 142 in paper 2), and re-estimates every regression independently in
-R (687 and 877 terms):
+against the new output (192 numbers in paper 1, 152 in paper 2), and re-estimates every regression independently in
+R (789 and 961 terms):
 
 ```
 python run_all.py
@@ -45,6 +45,7 @@ editions and download dates are listed in `DATA_SOURCES.md` (in Korean) and in S
 | Korea Industrial Complex Corporation, national industrial-complex statistics (30 June 2026), https://www.data.go.kr | Industrial-complex status | Public data portal, free use | `ugm/ugm_national/supply_raw/*.csv` |
 | MOLIT V-World zoning polygons UQ111, UQ112 (October 2026), https://www.vworld.kr | Zoning route of new urban land | Free; polygons not redistributed (CC BY-NC-ND) | Aggregates in `outputs/partA/zoning_route_grid.csv` |
 | Industrial-complex boundaries (KRIHS) and innovation/enterprise-city boundaries (V-World UB811) | Industrial complexes, new-town zones | Free | Aggregates in `outputs/partA/ic_complexes_grid.csv`, `newcity_zones.csv` |
+| Housing Site Information System, development-district files (attributes and boundaries; as of 30 September 2026) | Housing-site districts (paper 1, Table S7; paper 2, Table 4, Panel D) | Free; boundaries not redistributed | District attributes with grid aggregates in `outputs/partA/hd_districts_grid.csv`; housing added inside and outside districts by si/gun and period in `outputs/partB/hd_supply_grid.csv` |
 | Statistics Korea, SGIS census boundaries (*eup/myeon/dong*, 2020 4th quarter), dissolved to the study's 162 si/gun units (`code/02_grid/build_sigun_boundary.py`, unit table `code/02_grid/sgis2020_sgg_units.csv`) | Unit of analysis, maps | Free after registration | Vertex arrays for the maps in `outputs/partA/geometry_sigun.npz`, `geometry_region.npz` |
 
 The variables of the regression data are described in `replication/data/CODEBOOK.md`.
@@ -61,10 +62,10 @@ The variables of the regression data are described in `replication/data/CODEBOOK
   and census-block event studies of paper 2 (`partB_did`, run inside `export_model_frames.py paper2`); the R step
   takes under a minute. Disk: about 90 MB for `results/`.
 - Tested from a fresh copy of this package with `arcpy` made unavailable: (1) this version, with the Python environment listed
-  above and R 4.4.1 — every step succeeded, every reported number (188 + 141) and every R estimate agreed, and the
+  above and R 4.4.1 — every step succeeded, every reported number (192 + 151) and every R estimate agreed, and the
   tables and figures were byte-identical to those in the papers; (2) the previous build, with Python 3.12, numpy 1.26, pandas 2.2,
   statsmodels 0.14.2, matplotlib 3.8 — all numbers and tables identical; figures differ only in rendering.
-  (Paper 2's check has 142 items in the authors' copy; item 131 compares the manuscript's table section with the
+  (Paper 2's check has 152 items in the authors' copy; item 131 compares the manuscript's table section with the
   generated tables and needs the manuscript, which is not part of the package.)
 
 ## 4. Instructions
@@ -80,13 +81,13 @@ variable `USUS_DATA` to it, and runs:
 | Step | Script (in `code/`, mode) | Output in `results/outputs/` |
 |---|---|---|
 | Paper 1 | `03_partA/regpop.py` | `partA/regpop_sigun.csv` |
-| | `replication/export_model_frames.py paper1`: runs `supply_demand`, `shrink_sprawl`, `ic_unmet`, `vacancy`, `plan_pop`, `plan_event`, `zoning_route` (models) and records each regression | `partA/*.txt`, `*_models.csv`; `replication/data/paper1/` |
+| | `replication/export_model_frames.py paper1`: runs `supply_demand`, `shrink_sprawl`, `ic_unmet`, `hd_unmet`, `vacancy`, `plan_pop`, `plan_event`, `zoning_route` (models) and records each regression | `partA/*.txt`, `*_models.csv`; `replication/data/paper1/` |
 | | `03_partA/newcity_share.py` (models) | `partA/newcity_share.csv` |
 | | `03_partA/paper1_supplement_tables.py`, `paper1_tables.py` | `paper1/supplement_tables.md`, `paper1/tables.md` |
 | | `03_partA/paper1_figures.py` (models) | `paper1/fig1_groups.png` … `fig5_routes.png` |
 | | `03_partA/check_paper1_numbers.py` | `paper1/numbers_check.md` |
 | Paper 2 | `04_partB/supply_panel.py` (models) | `partB/supply_panel.txt` |
-| | `replication/export_model_frames.py paper2`: runs `flows_supply_panel`, `same_dong_bound_vital`, `zone_event_study`, `emp_supply`, `flows_age`, `partB_did` (models) | `partB/*.txt`, `*.csv`; `replication/data/paper2/` |
+| | `replication/export_model_frames.py paper2`: runs `flows_supply_panel`, `same_dong_bound_vital`, `hd_supply_panel`, `zone_event_study`, `emp_supply`, `flows_age`, `partB_did` (models) | `partB/*.txt`, `*.csv`; `replication/data/paper2/` |
 | | `04_partB/old_core_housing.py`, `same_dong_bound.py`, `supply_decomp.py` (models) | `partB/*.txt`, `*.csv` |
 | | `04_partB/paper2_tables.py`, `paper2_figures.py`, `paper2_fig5.py` (models) | `paper2/tables.md`, `paper2/fig1_destinations.png` … `fig5_case_cities.png` |
 | | `04_partB/paper2_numbers_check.py` | `paper2/numbers_check_pass2.csv` |

@@ -82,6 +82,10 @@ C = [
     ("2006-12 designation -> later manufacturing growth", "1.127", "ic_unmet.txt", r"제조업 종사자  2006-12 지정 \+([\d.]+)", 1),
     ("placebo 2016-24 designation -> 2005-15 growth", "0.982", "ic_unmet.txt", r"제조업 종사자[^\n]*2005-15 성장 \+([\d.]+)", 1),
     ("prior manufacturing growth -> designation", "0.085", "ic_unmet.txt", r"pre_manuf \+([\d.]+)", 1),
+    ("housing districts 2006-12 -> later household growth", "0.934", "hd_unmet.txt", r"가구\s+2006-12 시작 \+([\d.]+)", 1),
+    ("housing districts 2016-24 -> 2005-15 household growth", "0.922", "hd_unmet.txt", r"가구[^\n]*2005-15 성장 \+([\d.]+)", 1),
+    ("dwellings added 2010-24 inside districts, shrinking (%)", "13.1", "hd_unmet.txt", r"2010-2024: 감소 [\d,]+ / [\d,]+ = ([\d.]+)%", 1),
+    ("dwellings added 2010-24 inside districts, stagnant (%)", "32.0", "hd_unmet.txt", r"2010-2024: [^\n]*정체 [\d,]+ / [\d,]+ = ([\d.]+)%", 1),
     # 5.3 vacancy
     ("vacancy shrinking 2015 (%)", "12.5", "vacancy.txt", r"감소\s+[\d.]+\s+[\d.]+\s+([\d.]+)\s+[\d.]+\s+[\d.]+\s+[\d.]+\n정체", 1),
     ("vacancy shrinking 2025 (%)", "15.0", "vacancy.txt", r"감소\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+([\d.]+)\n정체", 1),

@@ -37,11 +37,11 @@ sys.stdout.reconfigure(encoding="utf-8")
 import paths
 
 PAPERS = {
-    "paper1": {"scripts": ["supply_demand", "shrink_sprawl", "ic_unmet", "vacancy", "plan_pop", "plan_event",
+    "paper1": {"scripts": ["supply_demand", "shrink_sprawl", "ic_unmet", "hd_unmet", "vacancy", "plan_pop", "plan_event",
                            "zoning_route"],
                "argv": ["models"], "fe": ["SG_ID", "sigun", "rp", "ry", "region"]},
     # order matters: zone_event_study writes zone_event_panel.csv, read by emp_supply and flows_age
-    "paper2": {"scripts": ["flows_supply_panel", "same_dong_bound_vital", "zone_event_study", "emp_supply",
+    "paper2": {"scripts": ["flows_supply_panel", "same_dong_bound_vital", "hd_supply_panel", "zone_event_study", "emp_supply",
                            "flows_age", "partB_did"],
                "argv": ["models"], "fe": ["SG_ID", "rp", "ry", "block", "oa", "year"]},
 }

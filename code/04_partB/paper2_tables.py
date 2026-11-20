@@ -156,6 +156,22 @@ def t4():
             rows.append({"Outcome": lab, **{c: minus(f"{v} ({se})") for c, (v, se) in
                                               zip(["Old core", "New towns", "0–0.5 km", "0.5–2 km", "2–5 km", "> 5 km"], cells)}})
         s += f"\n{title}\n\n" + md(pd.DataFrame(rows))
+    m = pd.read_csv(os.path.join(O, "partB", "hd_supply_models.csv"))
+    sh = m[m["sample"] == "share"].set_index("y").coef
+    m = m[m["sample"] == "전 기간"]
+    st = lambda p: "***" if p < .01 else "**" if p < .05 else "*" if p < .1 else ""
+    rows = []
+    for y, lab in [("net_old", "Observed"), ("y_h_ub", "− H (zero natural increase)"), ("y_h_v2", "− H (both)"),
+                   ("out_new", "Old core → new land"), ("in_outside", "Outside city → old core"),
+                   ("sg_net", "City net migration (per 1,000 city residents)")]:
+        r = m[m.y == y].set_index("term")
+        rows.append({"Outcome": lab, **{c: minus(f"{r.at[t, 'coef']:+.2f}{st(r.at[t, 'p'])} ({r.at[t, 'se']:.2f})") for c, t in
+                                        [("≤ 2 km, in districts", "s_hd_near"), ("≤ 2 km, elsewhere", "s_nh_near"),
+                                         ("> 2 km, in districts", "s_hd_far"), ("> 2 km, elsewhere", "s_nh_far")]},
+                     "Equal ≤ 2 km: p": f"{r.at['diff_near', 'p']:.3f}"})
+    s += (f"\nPanel D. Supply outside the old core split by housing-site districts, all periods ({n_city} cities, "
+          f"{n_cp} city-periods; districts held {sh.min():.0%}–{sh.max():.0%} of this supply by period)\n\n"
+          + md(pd.DataFrame(rows)))
     return s
 
 

@@ -45,6 +45,20 @@ same_dong_bound_vital_007,same_dong_bound_vital,y_net_h_ub ~ s_old + s_zone + s_
 same_dong_bound_vital_008,same_dong_bound_vital,y_net_h_ub2 ~ s_old + s_zone + s_b1 + s_b2 + s_b3 + s_b4 + C(SG_ID) + C(rp),cluster,cluster_id,,246,0.7057126311580189,123
 same_dong_bound_vital_009,same_dong_bound_vital,y_net_h_v ~ s_old + s_zone + s_b1 + s_b2 + s_b3 + s_b4 + C(SG_ID) + C(rp),cluster,cluster_id,,246,0.773464948516066,123
 same_dong_bound_vital_010,same_dong_bound_vital,y_net_h_v2 ~ s_old + s_zone + s_b1 + s_b2 + s_b3 + s_b4 + C(SG_ID) + C(rp),cluster,cluster_id,,246,0.7684305312065806,123
+hd_supply_panel_001,hd_supply_panel,out_new ~ s_old + s_zone + s_hd_near + s_nh_near + s_hd_far + s_nh_far + C(SG_ID) + C(rp),cluster,cluster_id,,492,0.8939885480089672,123
+hd_supply_panel_002,hd_supply_panel,out_outside ~ s_old + s_zone + s_hd_near + s_nh_near + s_hd_far + s_nh_far + C(SG_ID) + C(rp),cluster,cluster_id,,492,0.8385887251913424,123
+hd_supply_panel_003,hd_supply_panel,in_outside ~ s_old + s_zone + s_hd_near + s_nh_near + s_hd_far + s_nh_far + C(SG_ID) + C(rp),cluster,cluster_id,,492,0.8200750980101693,123
+hd_supply_panel_004,hd_supply_panel,net_old ~ s_old + s_zone + s_hd_near + s_nh_near + s_hd_far + s_nh_far + C(SG_ID) + C(rp),cluster,cluster_id,,492,0.706944673579721,123
+hd_supply_panel_005,hd_supply_panel,y_h_ub ~ s_old + s_zone + s_hd_near + s_nh_near + s_hd_far + s_nh_far + C(SG_ID) + C(rp),cluster,cluster_id,,492,0.6741444878628927,123
+hd_supply_panel_006,hd_supply_panel,y_h_v2 ~ s_old + s_zone + s_hd_near + s_nh_near + s_hd_far + s_nh_far + C(SG_ID) + C(rp),cluster,cluster_id,,492,0.7202905182350119,123
+hd_supply_panel_007,hd_supply_panel,sg_net ~ s_old + s_zone + s_hd_near + s_nh_near + s_hd_far + s_nh_far + C(SG_ID) + C(rp),cluster,cluster_id,,492,0.8598057673471604,123
+hd_supply_panel_008,hd_supply_panel,out_new ~ s_old + s_zone + s_hd_near + s_nh_near + s_hd_far + s_nh_far + C(SG_ID) + C(rp),cluster,cluster_id,,246,0.9898414607805965,123
+hd_supply_panel_009,hd_supply_panel,out_outside ~ s_old + s_zone + s_hd_near + s_nh_near + s_hd_far + s_nh_far + C(SG_ID) + C(rp),cluster,cluster_id,,246,0.9620534721066659,123
+hd_supply_panel_010,hd_supply_panel,in_outside ~ s_old + s_zone + s_hd_near + s_nh_near + s_hd_far + s_nh_far + C(SG_ID) + C(rp),cluster,cluster_id,,246,0.9587070744749474,123
+hd_supply_panel_011,hd_supply_panel,net_old ~ s_old + s_zone + s_hd_near + s_nh_near + s_hd_far + s_nh_far + C(SG_ID) + C(rp),cluster,cluster_id,,246,0.778376841764877,123
+hd_supply_panel_012,hd_supply_panel,y_h_ub ~ s_old + s_zone + s_hd_near + s_nh_near + s_hd_far + s_nh_far + C(SG_ID) + C(rp),cluster,cluster_id,,246,0.7117681697498375,123
+hd_supply_panel_013,hd_supply_panel,y_h_v2 ~ s_old + s_zone + s_hd_near + s_nh_near + s_hd_far + s_nh_far + C(SG_ID) + C(rp),cluster,cluster_id,,246,0.7694847935455642,123
+hd_supply_panel_014,hd_supply_panel,sg_net ~ s_old + s_zone + s_hd_near + s_nh_near + s_hd_far + s_nh_far + C(SG_ID) + C(rp),cluster,cluster_id,,246,0.92922388162555,123
 zone_event_study_001,zone_event_study,out_zone ~ em8 + em7 + em6 + em5 + em4 + em3 + em2 + e0 + e1 + e2 + e3 + e4 + e5 + e6 + e7 + e8 + C(SG_ID) + C(ry),cluster,cluster_id,,2996,0.6929295086381719,120
 zone_event_study_002,zone_event_study,out_new ~ em8 + em7 + em6 + em5 + em4 + em3 + em2 + e0 + e1 + e2 + e3 + e4 + e5 + e6 + e7 + e8 + C(SG_ID) + C(ry),cluster,cluster_id,,2996,0.826479200194822,120
 zone_event_study_003,zone_event_study,out_rest ~ em8 + em7 + em6 + em5 + em4 + em3 + em2 + e0 + e1 + e2 + e3 + e4 + e5 + e6 + e7 + e8 + C(SG_ID) + C(ry),cluster,cluster_id,,2996,0.8268536867100615,120

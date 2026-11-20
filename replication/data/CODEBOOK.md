@@ -5,7 +5,7 @@ Each paper has its own folder (`paper1/`, `paper2/`). Each file `{paper}/frames/
 `models.csv` gives the formula, the standard-error type, N, R² and (for clustered errors) the number of clusters of each model; `python_estimates.csv` the
 published estimates (coefficient, standard error, p-value, N); for paper 1 these two files generate Supplementary Table S13. All files are UTF-8; group and unit names are in Korean.
 
-Units are the 161 cities and counties (*si/gun*) on 2022 boundaries (metropolitan cities and Sejong as one unit).
+Units are the 162 cities and counties (*si/gun*), with boundaries from the SGIS census boundaries of the fourth quarter of 2020 (metropolitan cities and Sejong as one unit).
 Growth rates are in percent; "log growth" is 100 × ln(x1/x0).
 
 # Paper 1
@@ -47,7 +47,7 @@ Unit × five-year period panel (2000–05, 2005–10, 2010–15, 2015–19, 2019
 
 ## Industrial complexes (`ic_unmet_*`; Table 2, Supplementary Table S7)
 
-Cross-section of 122 non-capital provincial units.
+Cross-section of 123 non-capital provincial units.
 
 | Variable | Meaning |
 |---|---|
@@ -120,10 +120,20 @@ dwellings in 2000, outside the innovation and enterprise city zones. Migration c
 | `cluster_id` | Cluster for standard errors (the unit) |
 | `w_` | WLS weight: block population in 2005 (`partB_did_*`, weighted model) |
 
+## Housing-site districts (`hd_unmet_*`; Supplementary Table S7, Panel H)
+
+Cross-section of 123 non-capital provincial units, laid out as the industrial-complex models.
+
+| Variable | Meaning |
+|---|---|
+| `hd_pre`, `hd_0105`, `hd_0612`, `hd_1624` | Area of housing-site districts started up to 2000, 2001–05, 2006–12, 2016–24, percent of 2009 urban land |
+| `u_pre`, `u_0105`, `u_0612`, `u_1624` | Planned dwellings of the same districts, percent of 2005 households |
+| `g_v`, `g05_v`, `pre_v` for v in `hh`, `pop`, `house` | Log growth 2010–2024, 2005–2015 and 2000–2005 of households, residents, dwellings |
+
 ## Supply-location panel (`flows_supply_panel_*`, `same_dong_bound_vital_*`, `emp_supply_*`, `flows_age_*`; Tables 3–4, Sections 4.2–4.3)
 
 Unit × period panel, four periods (2000–05, 2005–10, 2015–19, 2019–24; migration years 2001–05, 2006–10, 2016–19,
-2020–24), 122 units, 488 unit-periods.
+2020–24), 123 units, 492 unit-periods.
 
 | Variable | Meaning |
 |---|---|
@@ -138,6 +148,8 @@ Unit × period panel, four periods (2000–05, 2005–10, 2015–19, 2019–24; 
 | `y_net` | `net_old` (same as above) in the bound models |
 | `y_net_h_ub`, `y_net_h_ub2` | `net_old` minus the upper bound of hidden same-neighbourhood moves (natural change assumed ≥ 0 on new land, ≤ 0 in the old core; `2` = neighbourhoods that also hold old core) |
 | `y_net_h_v`, `y_net_h_v2` | The same with expected natural increase subtracted (local age structure, national survival and child–woman ratios) |
+| `s_hd_near`, `s_nh_near`, `s_hd_far`, `s_nh_far` | `hd_supply_panel_*` (Table 4, Panel D): the dwellings of `s_b1` + `s_b2` (within 2 km) and `s_b3` + `s_b4` (beyond 2 km) split into those added inside housing-site districts (`hd`) and elsewhere (`nh`) |
+| `y_h_ub`, `y_h_v2` | `hd_supply_panel_*`: as `y_net_h_ub` and `y_net_h_v2` |
 | `g_old` | Old-core population growth (percent per year, log) |
 | `g_emp_old`, `g_comm_old` | Old-core employees / commerce employees (retail, accommodation, food), growth percent per year (log) |
 | `rel_comm_old` | `g_comm_old` minus the unit's commerce employee growth (points per year) |
@@ -150,7 +162,7 @@ are old-core net migration and old core → zone moves by age band in the new-to
 
 ## New-town event study (`zone_event_study_*`, `emp_supply_*`, `flows_age_*`; Table 5, Section 4.4)
 
-Unit × year panel 2001–2025: 10 treated units (innovation or enterprise city with move-in) and 109 comparison units.
+Unit × year panel 2001–2025: 10 treated units (innovation or enterprise city with move-in) and 110 comparison units.
 
 | Variable | Meaning |
 |---|---|
