@@ -150,7 +150,7 @@ def s3():
             + "\n\nPanel D. si/gun whose urban land grew while old-core population fell (%), and of these, si/gun whose "
               "population also fell (%).\n\n"
             + md(["Group", "Expansion + core decline 1999–2010", "+ population decline 1999–2010",
-                  "Expansion + core decline 2009–24", "+ population decline 2009–24"], rows_d)
+                  "Expansion 2009–19 + core decline 2015–24", "+ population decline 2015–24"], rows_d)
             + f"\n\nOf the {n84.group(1)} non-capital provincial si/gun, {n84.group(2)} lost registered population in 2009–19 and "
               f"{n84.group(3)} of these expanded urban land; of all {n96.group(1)} si/gun with falling registered population, "
               f"{n96.group(2)} percent expanded, with a median new-urban-land rate of {n96.group(3)} percent. "

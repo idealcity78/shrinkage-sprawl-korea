@@ -75,7 +75,7 @@ def table1():
     return ("**Table 2.** Shrinkage sprawl by group, si/gun medians unless noted.\n\n" + md(
         ["Group", "si/gun", "Registered pop. change 2009–19 (%)", "Urban land change 2009–19 (%)",
          "Δ log urban land per resident ×100, 1999–2009", "Δ log urban land per resident ×100, 2009–19", "Residents per urban km², 2000/1999 → 2009 → 2019 (group total)",
-         "Expansion + core decline + pop. decline, 2009–24 (% of si/gun)"], rows)
+         "Expansion 2009–19 + core and pop. decline 2015–24 (% of si/gun)"], rows)
         + "\n\nSources: land cover (large class), SGIS 100 m grid, registered population (KOSIS DT_1B040A3).")
 
 
