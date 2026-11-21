@@ -207,22 +207,46 @@ def fig1():
 def fig2():
     v = pd.read_csv(os.path.join(A, "plan_vintages.csv"))
     v = v[(v.y0 >= 2000) & v.group.isin(["감소", "정체", "성장"])].dropna(subset=["plan_g", "trend_g"])
-    fig, ax = plt.subplots(figsize=(4.6, 4.0))
+    # fitted line: plan-on-trend model of Table S8, Panel C (region fixed effects, unit-clustered), drawn through the
+    # prediction at zero trend averaged over regions; slope = 1 is the "plans follow the trend" benchmark
+    m = pd.read_csv(os.path.join(A, "plan_pop_models.csv"))
+    m = m[m.block == "plan_on_trend"].set_index("term")
+    b, se, a = m.at["trend_g", "coef"], m.at["trend_g", "se"], m.at["pred_zero_trend", "coef"]
+    r = np.corrcoef(v.trend_g, v.plan_g)[0, 1]
+    rho = v.trend_g.rank().corr(v.plan_g.rank())
+    xl, yl = (-5, 6), (-5, 12)
+    out = (v.trend_g < xl[0]) | (v.trend_g > xl[1]) | (v.plan_g < yl[0]) | (v.plan_g > yl[1])
+    stats = (f"Figure 3: {len(v)} plan vintages, {int(out.sum())} outside the axes; Pearson r = {r:.3f}, "
+             f"Spearman rho = {rho:.3f}; fitted slope {b:.3f} (s.e. {se:.3f}), t against slope 1 = {(1 - b) / se:.1f}; "
+             f"prediction at zero trend {a:.3f}")
+    with open(os.path.join(OUT, "fig3_stats.txt"), "w", encoding="utf-8") as fh:
+        fh.write(stats + "\n")
+    fig, ax = plt.subplots(figsize=(3.6, 5.4))
     for g in ["성장", "정체", "감소"]:
         d = v[v.group == g]
-        ax.scatter(d.trend_g, d.plan_g, s=10, alpha=0.6, color=COL[g], label=f"{GROUPS[g]} (n={len(d)})")
-    lim = (-4, 10)
-    ax.plot(lim, lim, color="black", lw=0.7, ls="--")
+        ax.scatter(d.trend_g.clip(*xl), d.plan_g.clip(*yl), s=10, alpha=0.6, color=COL[g],
+                   label=f"{GROUPS[g]} (n={len(d)})", marker=None)
+        o = d[out[d.index]]
+        # vintages beyond the axes: drawn at the edge, pointing the way they lie
+        for mk, sel in [("^", o.plan_g > yl[1]), ("v", o.plan_g < yl[0]), (">", o.trend_g > xl[1]), ("<", o.trend_g < xl[0])]:
+            ax.scatter(o[sel].trend_g.clip(*xl), o[sel].plan_g.clip(*yl), s=24, color=COL[g], marker=mk,
+                       edgecolors="black", linewidths=0.4, zorder=3, clip_on=False)
+    ax.plot(xl, xl, color="black", lw=0.7, ls="--")
+    ax.plot(xl, [a + b * x for x in xl], color="black", lw=1.0)
     ax.axhline(0, color="grey", lw=0.5)
     ax.axvline(0, color="grey", lw=0.5)
-    ax.set_xlim(-4, 6)
-    ax.set_ylim(-4, 12)
-    ax.set_xlabel("Population growth in the five years before adoption (%/yr)")
+    ax.set_xlim(*xl)
+    ax.set_ylim(*yl)
+    ax.set_aspect("equal")
+    ax.set_xlabel("Population growth in the five years\nbefore adoption (%/yr)")
     ax.set_ylabel("Planned population growth to target year (%/yr)")
-    ax.legend(frameon=False, fontsize=7, loc="upper left")
-    ax.text(5.8, 5.2, "planned = trend", fontsize=7, ha="right", rotation=35)
+    ax.legend(frameon=False, fontsize=7, loc="lower right")
+    ax.text(5.8, 5.2, "planned = trend", fontsize=7, ha="right", va="top", rotation=45, rotation_mode="anchor")
+    ax.text(-4.8, a + b * -4.8 + 0.3, f"fitted, slope {b:.2f}", fontsize=7, ha="left", va="bottom")
+    ax.text(5.8, 11.6, f"r = {r:.2f}\nrank r = {rho:.2f}", fontsize=7, ha="right", va="top")
     fig.savefig(os.path.join(OUT, "fig3_plan_trend.png"), dpi=300, bbox_inches="tight")
     plt.close(fig)
+    print(stats)
     return len(v)
 
 

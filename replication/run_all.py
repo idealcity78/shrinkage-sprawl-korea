@@ -3,7 +3,7 @@
 The script copies data/ to a fresh results/ folder, points the analysis code at it (USUS_DATA), runs the analysis
 scripts in their "models" mode (no raw data, grids or ArcGIS needed), then
   1. compares every number reported in the papers with the new outputs (check_paper1_numbers.py,
-     paper2_numbers_check.py; 181 + 152 values),
+     paper2_numbers_check.py; 184 + 152 values),
   2. re-estimates every regression in R (replication/R, if Rscript is found) and compares the R estimates with the
      Python estimates.
 A log of each step goes to results/logs/. Exit status 1 if any step fails or any number differs.

@@ -21,6 +21,7 @@ A = os.path.join(paths.OUTPUTS, "partA")
 DOCS = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "docs")
 SUP = os.path.join("..", "paper1", "supplement_tables.md")
 TAB = os.path.join("..", "paper1", "tables.md")
+FIG3 = os.path.join("..", "paper1", "fig3_stats.txt")
 DRAFT = os.path.join(DOCS, sys.argv[1] if len(sys.argv) > 1 else "paper1_results_draft.md")
 # replication package: no manuscript; the values reported in the paper (column 2 of C) are compared with the outputs
 PACKAGE = not os.path.exists(DRAFT)
@@ -120,6 +121,8 @@ C = [
     ("its s.e.", "0.120", SUP, r"\| Prior 5-year trend \(1 pp\) \| [\d.]+ \(([\d.]+)\)", 1),
     ("planned growth at zero trend, mean over regions", "3.327", SUP, r"\| Prediction at zero trend, mean over regions \| ([\d.]+) \(", 1),
     ("its s.e.", "0.280", SUP, r"\| Prediction at zero trend, mean over regions \| [\d.]+ \(([\d.]+)\)", 1),
+    ("correlation of planned growth and trend, Figure 3", "0.06", FIG3, r"Pearson r = ([\d.]+)", 1),
+    ("t of the plan-on-trend slope against 1", "6.5", FIG3, r"t against slope 1 = ([\d.]+)", 1),
     ("cap effect (%p/yr)", "2.164", SUP, r"\| Adopted 2019 or later \| -([\d.]+) \(", 1),
     ("its s.e.", "0.595", SUP, r"\| Adopted 2019 or later \| -[\d.]+ \(([\d.]+)\)", 1),
     ("2019-25 shrinking plans projecting growth (%)", "89.6", SUP, r"\| Shrinking \| 2019–25 \| \d+ \|(?: [^|]+ \|){2} ([\d.]+) \|", 1),
@@ -228,6 +231,7 @@ CONTEXT = [
     ("si/gun with plans, Section 3", "{} of the 162 study units report one", "draft", "plan_pop.txt", r"(\d+)개 \(연구 시군"),
     ("plan vintages since 2000, Figure 3", "trend for {} plan vintages", "draft", "plan_pop.txt",
      r"절편\(추세 0일 때 계획 성장\) [^,]*, n=(\d+)"),
+    ("vintages beyond the axes, Figure 3 caption", "Triangles mark {} vintages", "draft", FIG3, r"(\d+) outside the axes"),
     ("plan vintages since 2000, Table S8 note", "over the {} vintages", "supp", "plan_pop.txt",
      r"절편\(추세 0일 때 계획 성장\) [^,]*, n=(\d+)"),
     ("2009 cross-section si/gun, Table S8 note", "across the {} si/gun", "supp", "plan_pop.txt",

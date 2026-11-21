@@ -97,6 +97,13 @@ def s3():
             continue
         vals = re.findall(r"([\d.]+) \(([\d.]+)\)", m.group(2))
         rows.append([lab[m.group(1)]] + [f"{a} ({b})" for a, b in vals])
+    # Panel A, last column: all si/gun whose registered population fell 2009-19 (any group); last row: share expanding
+    t = pd.read_csv(os.path.join(A, "shrink_sprawl_sigun.csv"))
+    dn = t[t.g_rp_0919 < 0]
+    for r, c in zip(rows, ["g_urb", "new_rate", "leap_share", "dist", "far_share"]):
+        r.append(f"{dn[c + '_post'].median():.1f} ({dn[c + '_pre'].median():.1f})")
+    grew = lambda d: f"{(d.g_urb_post > 0).mean() * 100:.1f} ({(d.g_urb_pre > 0).mean() * 100:.1f})"
+    rows.append(["Si/gun whose urban land grew (%)"] + [grew(t[t.group == g]) for g in G] + [grew(dn)])
     # Panel B: where new dwellings went and how the old core changed (group totals)
     bl = s[s.index("   새 주택이 기성시가지 밖에"):s.index("2. 확산의 인구 성장 탄력성")]
     rows_b = []
@@ -131,7 +138,7 @@ def s3():
     n84 = re.search(r"비수도권 도 시군 (\d+) 가운데 2009-19 주민등록인구가 준 시군 (\d+), 그중 시가지가 늘어난 시군 (\d+)", s)
     return ("**Table S3.** Sprawl indicators and the old core by group.\n\nPanel A. Sprawl indicators, si/gun medians, 2009–2019 "
             "(1999–2009 in parentheses).\n\n"
-            + md(["Indicator"] + [EN[g] for g in G], rows)
+            + md(["Indicator"] + [EN[g] for g in G] + [f"All si/gun with falling population, 2009–19 ({len(dn)})"], rows)
             + "\n\nPanel B. New dwellings outside the old core and population change (group totals, %).\n\n"
             + md(["Group", "New dwellings outside old core 2010–19", "…more than 500 m outside, 2010–19",
                   "New dwellings outside old core 2015–24", "Old-core population 2000–10", "si/gun population 2000–10",
