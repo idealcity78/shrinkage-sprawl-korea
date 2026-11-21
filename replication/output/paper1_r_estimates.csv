@@ -340,6 +340,10 @@ vacancy_014,s,0.0616913891435775,0.0263831600903648,385,0.0254981603346717,364,d
 vacancy_015,s,0.174776620145383,0.0304528191448165,385,0.029431306277847,364,d_vac_new5 ~ s | sigun + ry
 vacancy_016,s,0.189408158688784,0.0255311371849796,615,0.0253352789934321,615,d_vac_old ~ s + d_hh | sigun + ry
 vacancy_016,d_hh,-0.174653585562117,0.0293058763091971,615,0.0290810607871134,615,d_vac_old ~ s + d_hh | sigun + ry
+vacancy_017,s,0.225103266301714,0.0285542123426116,870,0.0284348213848268,870,d_vac_old ~ s | sigun + ry
+vacancy_018,s,0.241182205928291,0.0720231983648793,110,0.0555605731625958,70,d_vac_old ~ s | sigun + ry
+vacancy_019,s,0.119758374472495,0.0703133598481144,250,0.0686752197658963,250,d_vac_old ~ s | sigun + ry
+vacancy_020,s,0.0591152565995762,0.016301696153024,390,0.015783874207082,370,d_vac_old ~ s | sigun + ry
 plan_pop_001,trend_g,0.218433200599973,0.120250097104872,293,0.120250097104872,293,plan_g ~ trend_g | region
 plan_pop_002,excess_pct,-0.0789333580959352,0.254595232937481,274,0.254595232937481,274,reserve_share ~ excess_pct | region
 plan_pop_003,plan_excess,-0.0135295054672451,0.0528463574306181,89,0.0528463574306181,89,new_urb ~ plan_excess + g_reg | region
@@ -918,3 +922,62 @@ robust_review_013,s,0.47219181816972,0.26532928713855,55,0.184263893956405,35,d_
 robust_review_013,d_hh,-0.274204009778184,0.0897030361516843,55,0.0622962919746978,35,d_vac_old ~ s + d_hh | sigun + ry
 robust_review_014,s,0.0896955366501756,0.0130351472976316,125,0.012324519069347,125,d_vac_old ~ s + d_hh | sigun + ry
 robust_review_014,d_hh,-0.0998501272393139,0.0314359849515992,125,0.0297222108161437,125,d_vac_old ~ s + d_hh | sigun + ry
+robust_review_015,s,0.382583847494718,0.0277592868064613,696,0.0276093705701167,696,d_vac_new5 ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_015,s_l1,-0.130595339851771,0.0212554695645372,696,0.0211406777105148,696,d_vac_new5 ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_015,s_l2,-0.00584611008313685,0.0177330282974252,696,0.0176372596676374,696,d_vac_new5 ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_016,s,0.172293964878393,0.11071434849027,88,0.0832740280306756,56,d_vac_new5 ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_016,s_l1,-0.079725324768962,0.068894178755083,88,0.0518189001790076,56,d_vac_new5 ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_016,s_l2,-0.00648104620812854,0.0335044158845943,88,0.0252004162565282,56,d_vac_new5 ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_017,s,0.456115665935374,0.0678676801886311,200,0.0657880871425972,200,d_vac_new5 ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_017,s_l1,-0.179102620767134,0.0513062495437043,200,0.0497341298031649,200,d_vac_new5 ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_017,s_l2,-0.00696090883853172,0.0495701026855062,200,0.0480511817418487,200,d_vac_new5 ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_018,s,0.405332513813769,0.0310728395154207,984,0.0309369376603341,984,d_vac_new5 ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_018,s_l1,-0.148879271153816,0.0210748696958152,984,0.0209826955034326,984,d_vac_new5 ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_018,s_l2,-0.00797965216282198,0.0209400244130813,984,0.020848439987336,984,d_vac_new5 ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_019,s,0.660001146581435,0.0306253483843749,696,0.0304599537545151,696,d_vac ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_019,s_l1,-0.165383524370414,0.0275697481441875,696,0.0274208555264642,696,d_vac ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_019,s_l2,-0.0599985747795571,0.0239999691643053,696,0.0238703554218995,696,d_vac ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_020,s,0.441114037899035,0.127614529994938,88,0.0959855347823675,56,d_vac ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_020,s_l1,-0.190021716718643,0.240095455957614,88,0.180588297741817,56,d_vac ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_020,s_l2,-0.143856287107492,0.212279378222689,88,0.159666376883428,56,d_vac ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_021,s,0.587432687188027,0.0657723640754601,200,0.06375697544611,200,d_vac ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_021,s_l1,-0.213095298511975,0.0295366460347495,200,0.0286315877871963,200,d_vac ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_021,s_l2,-0.0269152564860155,0.0413240675086745,200,0.0400578205530393,200,d_vac ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_022,s,0.615404126758271,0.0348874117058725,984,0.0347348262310997,984,d_vac ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_022,s_l1,-0.178466289340984,0.0193467717550898,984,0.0192621556655254,984,d_vac ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_022,s_l2,-0.0450543620854207,0.027044418899786,984,0.0269261359634488,984,d_vac ~ s + s_l1 + s_l2 | sigun + ry
+robust_review_023,s,0.172042076587978,0.029638753639365,1230,0.0295381612156313,1230,d_vac_old ~ s + s:g5 | sigun + ry
+robust_review_023,s:g5,-0.0288975581769173,0.00810801780327886,1230,0.00808049960287029,1230,d_vac_old ~ s + s:g5 | sigun + ry
+robust_review_024,s,0.137881895796489,0.024080146926586,1230,0.0239984201315701,1230,d_vac_old ~ s + s:dec5 | sigun + ry
+robust_review_024,s:dec5,0.0536601253257913,0.0286481079075658,1230,0.0285508776851053,1230,d_vac_old ~ s + s:dec5 | sigun + ry
+robust_review_025,s,0.13511588255912,0.024577874677486,1615,0.0245060093930193,1615,d_vac_old ~ s + s:g5 | sigun + ry
+robust_review_025,s:g5,-0.00800537825767364,0.00400677457583852,1615,0.00399505883562643,1615,d_vac_old ~ s + s:g5 | sigun + ry
+robust_review_026,s,0.0993926895154334,0.020427969107415,1615,0.0203682380757353,1615,d_vac_old ~ s + s:dec5 | sigun + ry
+robust_review_026,s:dec5,0.0526612286984751,0.0393580479516809,1615,0.0392429656937877,1615,d_vac_old ~ s + s:dec5 | sigun + ry
+robust_review_027,group::감소,21.1151513263956,6.96120730202857,116,6.96120730202857,116,"out_new_res ~ i(group, ref = ""성장"") + lsize | region"
+robust_review_027,group::정체,-2.59102080270744,10.0658206645232,116,10.0658206645232,116,"out_new_res ~ i(group, ref = ""성장"") + lsize | region"
+robust_review_027,lsize,-0.504219153163172,2.62075489637532,116,2.62075489637532,116,"out_new_res ~ i(group, ref = ""성장"") + lsize | region"
+robust_review_028,group::감소,20.1612076692412,5.21579034867115,116,5.21579034867115,116,"out_new_res ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_028,group::정체,5.26011400955175,6.8749431105497,116,6.8749431105497,116,"out_new_res ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_028,lsize,5.15028891375451,3.08866091127526,116,3.08866091127526,116,"out_new_res ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_028,avail_urb,-0.0991046018543349,0.0923345978363269,116,0.0923345978363269,116,"out_new_res ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_028,old_inA,-0.659907749602564,0.11401565696327,116,0.11401565696327,116,"out_new_res ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_028,gun,6.76996806743522,5.40472672922796,116,5.40472672922796,116,"out_new_res ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_029,group::감소,14.4654425810052,7.62426104678327,120,7.62426104678327,120,"out_ge5 ~ i(group, ref = ""성장"") + lsize | region"
+robust_review_029,group::정체,5.75216027495314,9.35892906913611,120,9.35892906913611,120,"out_ge5 ~ i(group, ref = ""성장"") + lsize | region"
+robust_review_029,lsize,-15.9104864795428,3.29632552605632,120,3.29632552605632,120,"out_ge5 ~ i(group, ref = ""성장"") + lsize | region"
+robust_review_030,group::감소,15.8160341257557,4.88235102402293,120,4.88235102402293,120,"out_ge5 ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_030,group::정체,9.83930949031784,6.54836363698555,120,6.54836363698555,120,"out_ge5 ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_030,lsize,-1.16484222359954,2.65215001152497,120,2.65215001152497,120,"out_ge5 ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_030,avail_urb,-0.32677166859017,0.0898039953240528,120,0.0898039953240528,120,"out_ge5 ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_030,old_inA,-0.34374942292431,0.0723434353850155,120,0.0723434353850155,120,"out_ge5 ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_030,gun,18.6012941335153,4.24803935047849,120,4.24803935047849,120,"out_ge5 ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_031,group::감소,13.0573414586613,11.8661627277743,119,11.8661627277743,119,"out_net ~ i(group, ref = ""성장"") + lsize | region"
+robust_review_031,group::정체,-1.85093598852634,12.1132656090438,119,12.1132656090438,119,"out_net ~ i(group, ref = ""성장"") + lsize | region"
+robust_review_031,lsize,-2.19547372343455,5.02110324202297,119,5.02110324202297,119,"out_net ~ i(group, ref = ""성장"") + lsize | region"
+robust_review_032,group::감소,22.6301923903031,9.96470267658366,119,9.96470267658366,119,"out_net ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_032,group::정체,11.1877833795321,10.2847415239726,119,10.2847415239726,119,"out_net ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_032,lsize,14.1540739425673,5.91907894961054,119,5.91907894961054,119,"out_net ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_032,avail_urb,-0.125144479538765,0.199228220234145,119,0.199228220234145,119,"out_net ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_032,old_inA,-0.513876148393381,0.168133317408033,119,0.168133317408033,119,"out_net ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"
+robust_review_032,gun,38.121260099499,10.7258047057401,119,10.7258047057401,119,"out_net ~ i(group, ref = ""성장"") + lsize + avail_urb + old_inA + gun | region"

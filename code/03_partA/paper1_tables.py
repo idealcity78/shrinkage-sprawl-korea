@@ -46,7 +46,7 @@ def md(header, rows):
 def table_props():
     rows = [["Background: shrinkage sprawl", "Urban land grows without population growth", "Group indicators; equation (5)",
              "Table 2, Figure 2; S3, S4"],
-            ["P1 No supply-led growth", "Supply and industrial designation do not raise later growth",
+            ["P1 No supply-led growth", "Housing supply does not raise later growth; designation follows past growth",
              "Lead and reverse regressions (6–7); designation placebo", "Table 3; S5, S7"],
             ["P2 Locational oversupply", "Supply within household growth, but new dwellings empty older stock",
              "Supply against household growth; vacancy panel (8)", "Table 4; S5 Panel A, S6"],

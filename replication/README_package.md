@@ -8,8 +8,8 @@ This package reproduces every table, figure and number reported in two companion
   decline in Korea's shrinking cities, 2001–2025* (Tables 1–5, Figures 1–5).
 
 One command runs the whole analysis from the data in `data/`, checks every number reported in the two papers
-against the new output (184 numbers in paper 1, 152 in paper 2), and re-estimates every regression independently in
-R (919 and 961 terms):
+against the new output (179 numbers in paper 1, 152 in paper 2), and re-estimates every regression independently in
+R (982 and 961 terms):
 
 ```
 python run_all.py
@@ -62,7 +62,7 @@ The variables of the regression data are described in `replication/data/CODEBOOK
   and census-block event studies of paper 2 (`partB_did`, run inside `export_model_frames.py paper2`); the R step
   takes under a minute. Disk: about 90 MB for `results/`.
 - Tested from a fresh copy of this package with `arcpy` made unavailable: (1) this version, with the Python environment listed
-  above and R 4.4.1 — every step succeeded, every reported number (184 + 151) and every R estimate agreed, and the
+  above and R 4.4.1 — every step succeeded, every reported number (179 + 151) and every R estimate agreed, and the
   tables and figures were byte-identical to those in the papers; (2) the previous build, with Python 3.12, numpy 1.26, pandas 2.2,
   statsmodels 0.14.2, matplotlib 3.8 — all numbers and tables identical; figures differ only in rendering.
   (Paper 2's check has 152 items in the authors' copy; item 131 compares the manuscript's table section with the

@@ -10,6 +10,15 @@
    follow new building persist or are refilled; and the household control by group (2020-2024).
 3. Industrial complexes: sale rate and land-cover measures on the same set of complexes (those matched to the KICOX
    statistics), since the sale rate is only known for matched complexes.
+Added after the final mock review (2026-11-22):
+4. Refilling of recently built vacancies: the lag model of 2 for vacancies in dwellings built in the last five years
+   and for all vacancies.
+5. Decline as it happens rather than by group: pre-2000 vacancies on net additions interacted with the annualised
+   registered-population change of the five years before the panel year (y-6 -> y-1), and with an indicator for decline.
+6. Off-plan models on residential new urban land and on dwellings: the zoning_route.py group models (growing units as
+   reference, log size and region; then the controls of the full model) with the off-plan share of residential new
+   urban land (2022 middle-class map), of dwellings added outside the old core in cells gaining at least 5, and of the
+   net dwelling change outside the old core.
 
 Output: outputs/partA/robust_review.txt, robust_review_models.csv
 Run:  propy.bat code\\03_partA\\robust_review.py
@@ -115,6 +124,63 @@ def main():
         m = smf.ols("d_vac_old ~ s + d_hh + C(sigun) + C(ry)", q).fit(cov_type="cluster", cov_kwds={"groups": q.sigun})
         say(f"   {k}: s {fmt(m, 's')}, d_hh {fmt(m, 'd_hh')}, n={int(m.nobs)}")
         rows.append(["vacancy_hh", k, "s", m.params["s"], m.bse["s"], m.pvalues["s"], int(m.nobs)])
+
+    # 4. refilling of recently built vacancies
+    say("\n4. 시차 모형, 최근 5년 내 지은 주택 빈집과 전체 빈집: y ~ s + s(t-1) + s(t-2), 시군 FE + 권역 x 연도 FE (2018-2025)")
+    for y in ("d_vac_new5", "d_vac"):
+        for k in GROUPS + ["비수도권 도 시군"]:
+            q = v[v.group.isin(GROUPS)] if k == "비수도권 도 시군" else v[v.group == k]
+            q = q.dropna(subset=["s_l1", "s_l2"])
+            m = smf.ols(f"{y} ~ s + s_l1 + s_l2 + C(sigun) + C(ry)", q).fit(cov_type="cluster",
+                                                                          cov_kwds={"groups": q.sigun})
+            tot = m.t_test("s + s_l1 + s_l2 = 0")
+            say(f"   {y} {k}: s {fmt(m, 's')}, s(t-1) {fmt(m, 's_l1')}, s(t-2) {fmt(m, 's_l2')}; 합 "
+                f"{float(tot.effect[0]):+.3f} ({float(tot.sd[0][0]):.3f}){stars(float(tot.pvalue))}, n={int(m.nobs)}")
+            for t_ in ("s", "s_l1", "s_l2"):
+                rows.append([f"vacancy_lags_{y}", k, t_, m.params[t_], m.bse[t_], m.pvalues[t_], int(m.nobs)])
+            rows.append([f"vacancy_lags_{y}", k, "sum", float(tot.effect[0]), float(tot.sd[0][0]), float(tot.pvalue),
+                         int(m.nobs)])
+
+    # 5. decline as it happens: prior five-year registered-population change, varying by year
+    v["g5"] = [100 * ((rp.loc[s, y - 1] / rp.loc[s, y - 6]) ** 0.2 - 1) if s in rp.index else np.nan
+               for s, y in zip(v.sigun, v.year)]
+    v["dec5"] = (v.g5 < 0).astype(int)
+    say("\n5. 2000년 이전 주택 빈집 ~ s + s x 직전 5년 주민등록인구 연 변화율(%) (또는 감소 여부), 시군 FE + 권역 x 연도 FE")
+    for k, smp in [("비수도권 도 시군", v.group.isin(GROUPS)), ("전체 시군", v.group.notna())]:
+        q = v[smp].dropna(subset=["g5"])
+        for x in ("g5", "dec5"):
+            m = smf.ols(f"d_vac_old ~ s + s:{x} + C(sigun) + C(ry)", q).fit(cov_type="cluster",
+                                                                         cov_kwds={"groups": q.sigun})
+            say(f"   {k}, {x}: s {fmt(m, 's')}, s x {x} {fmt(m, f's:{x}')}, n={int(m.nobs)}")
+            for t_ in ("s", f"s:{x}"):
+                rows.append([f"vacancy_decline_{x}", k, t_, m.params[t_], m.bse[t_], m.pvalues[t_], int(m.nobs)])
+    say(f"   직전 5년 인구 변화율 분포 (비수도권 도 시군): 평균 {v[v.group.isin(GROUPS)].g5.mean():+.2f}, "
+        f"사분위 범위 {v[v.group.isin(GROUPS)].g5.quantile(.25):+.2f} ~ {v[v.group.isin(GROUPS)].g5.quantile(.75):+.2f}")
+
+    # 6. off-plan models on residential land and dwellings
+    zr = pd.read_csv(os.path.join(OUT, "zoning_route_sigun.csv"))
+    d = zr[zr.group.isin(GROUPS) & (zr.new_tot > 0.05)].copy()
+    d["lnew"] = np.log(d.new_tot)
+    d["avail_urb"] = d[["avail_A", "avail_B", "avail_C"]].sum(axis=1) / d[[f"avail_{r}" for r in RTS]].sum(axis=1) * 100
+    d["old_inA"] = d.old_A / d[[f"old_{r}" for r in RTS]].sum(axis=1) * 100
+    d["gun"] = d.sigun.str.endswith("군").astype(int)
+    agg = g.groupby("SG_ID")[[f"{c}_{r}" for c in ("new_res", "ge5", "net") for r in RTS]].sum()
+    for c in ("new_res", "ge5", "net"):
+        tot = agg[[f"{c}_{r}" for r in RTS]].sum(axis=1)
+        agg[f"out_{c}"] = np.where(tot > 0, (1 - agg[f"{c}_A"] / tot.where(tot > 0)) * 100, np.nan)
+        agg[f"size_{c}"] = tot
+    d = d.merge(agg[[f"{p_}_{c}" for p_ in ("out", "size") for c in ("new_res", "ge5", "net")]].reset_index(), on="SG_ID")
+    say("\n6. 계획 밖 비중 모형 (비수도권 도 시군, 성장 대비): 주거 신규 시가지, 5호 이상 증가 셀의 새 주택, 순증 주택")
+    k = "C(group, Treatment('성장'))[T.감소]"
+    for c, lab in [("new_res", "주거 신규 시가지 (2022 중분류)"), ("ge5", "새 주택, 5호 이상 증가 셀"), ("net", "새 주택, 순증")]:
+        q = d[d[f"size_{c}"] > 0].dropna(subset=[f"out_{c}"]).copy()
+        q["lsize"] = np.log(q[f"size_{c}"])
+        for spec, f in [("기본", f"out_{c} ~ C(group, Treatment('성장')) + lsize + C(region)"),
+                        ("통제", f"out_{c} ~ C(group, Treatment('성장')) + lsize + avail_urb + old_inA + gun + C(region)")]:
+            m = smf.ols(f, q).fit(cov_type="HC1")
+            say(f"   {lab} {spec}: 감소 {m.params[k]:+.1f}{stars(m.pvalues[k])} (se {m.bse[k]:.1f}), n={int(m.nobs)}, "
+                f"성장 평균 {q[q.group == '성장'][f'out_{c}'].mean():.1f}%")
+            rows.append([f"offplan_{c}", spec, "shrinking", m.params[k], m.bse[k], m.pvalues[k], int(m.nobs)])
 
     # 3. industrial complexes: matched complexes only
     c = pd.read_csv(os.path.join(OUT, "ic_complexes.csv"))

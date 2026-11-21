@@ -308,26 +308,69 @@ def s6_robust():
         d = vg[vg["sample"] == smp].set_index("term")
         rows_g.append([lab] + [cs(d.at[g, "coef"], d.at[g, "se"], d.at[g, "p"]) if np.isfinite(d.at[g, "coef"]) else "–"
                                for g in ("감소", "정체", "성장")])
+    rows_n = []
+    for y, ylab in [("d_vac_new5", "Built in last 5 years"), ("d_vac", "All vacancies")]:
+        lg = m[m.block == f"vacancy_lags_{y}"]
+        for smp in ["감소", "정체", "성장", "비수도권 도 시군"]:
+            d = lg[lg["sample"] == smp].set_index("term")
+            rows_n.append([ylab, EN.get(smp, "Non-capital provincial")]
+                          + [cs(d.at[t, "coef"], d.at[t, "se"], d.at[t, "p"]) for t in ("s", "s_l1", "s_l2", "sum")]
+                          + [int(d.n.iloc[0])])
+    rows_d = []
+    for x, xlab in [("g5", "Prior 5-year population change (%/yr)"), ("dec5", "Prior 5-year population decline (0/1)")]:
+        dd = m[m.block == f"vacancy_decline_{x}"]
+        for smp, slab in [("비수도권 도 시군", "Non-capital provincial"), ("전체 시군", "All si/gun")]:
+            d = dd[dd["sample"] == smp].set_index("term")
+            rows_d.append([xlab, slab, cs(d.at["s", "coef"], d.at["s", "se"], d.at["s", "p"]),
+                           cs(d.at[f"s:{x}", "coef"], d.at[f"s:{x}", "se"], d.at[f"s:{x}", "p"]), int(d.n.iloc[0])])
+    vm = pd.read_csv(os.path.join(A, "vacancy_models.csv"))
+    tr = vm[vm.block == "location"].set_index("sample")
+    ut = vm[vm.block == "location_untrimmed"].set_index("sample")
+    rows_u = []
+    for smp, lab in [("감소", "Shrinking"), ("정체", "Stagnant"), ("성장", "Growing"),
+                     ("광역시+수도권", "Metropolitan and capital region")]:
+        a = tr[tr.y == "d_vac_old"].loc[smp]
+        b = ut.loc[smp]
+        rows_u.append([lab, cs(a.coef, a.se, a.p), int(a.n), cs(b.coef, b.se, b.p), int(b.n)])
     t = read("robust_review.txt")
     ct = re.search(r"All\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)", t)
+    g5 = re.search(r"평균 ([+\-][\d.]+), 사분위 범위 ([+\-][\d.]+) ~ ([+\-][\d.]+)", t)
+    dr = re.search(r"뺀 시군-연도 (\d+): (.+)", read("vacancy.txt"))
+    names = {"과천시": "Gwacheon", "세종시": "Sejong", "하남시": "Hanam"}
+    dropped = ", ".join(f"{names.get(a, a)} {b}" for a, b in re.findall(r"(\S+) (\d{4})", dr.group(2)))
     return ("\n\nPanel F. Persistence: change in pre-2000 vacancies on net additions in the same and the two previous years "
             "(per 1,000 dwellings), 2018–2025.\n\n"
             + md(["Sample", "Net additions, t", "t−1", "t−2", "Sum", "N (si/gun-years)"], rows)
             + "\n\nPanel F (continued). Equation 8 with household change per 1,000 dwellings as a control, 2020–24, by group.\n\n"
             + md(["Group", "Net additions per 1,000 dwellings", "N (si/gun-years)"], rows_h)
+            + "\n\nPanel F (continued). The same lag model for vacancies in dwellings built in the last five years and for all "
+              "vacancies.\n\n"
+            + md(["Outcome", "Sample", "Net additions, t", "t−1", "t−2", "Sum", "N (si/gun-years)"], rows_n)
             + "\n\nPanel G. Equation 8 for pre-2000 vacancies with groups defined from the pre-period.\n\n"
             + md(["Grouping", "Shrinking", "Stagnant", "Growing"], rows_g)
             + f"\n\nPanel G: groups by registered-population change 1992–2000, decline below −2 percent and growth above +2 "
               f"percent (the main rule's ±5 percent over 19 years scaled to 8 years); declining {ct.group(1)}, growing "
               f"{ct.group(2)}, stagnant {ct.group(3)} of {ct.group(4)} si/gun; the model is not estimated for the stagnant group, "
-              "whose few units are absorbed by the fixed effects. Source: `robust_review.txt`, `robust_review_models.csv`.")
+              "whose few units are absorbed by the fixed effects."
+            + "\n\nPanel H. Decline as it happens: change in pre-2000 vacancies on net additions and their interaction with the "
+              "unit's registered-population change over the five years before the panel year, si/gun and region × year "
+              "fixed effects.\n\n"
+            + md(["Interaction variable", "Sample", "Net additions", "Net additions × interaction variable", "N (si/gun-years)"],
+                 rows_d)
+            + "\n\nPanel I. Equation 8 for pre-2000 vacancies with and without the unit-years excluded from the panel.\n\n"
+            + md(["Group", "Panel as estimated", "N", "No exclusion", "N"], rows_u)
+            + f"\n\nPanel H: population change is annualised from year y−6 to y−1 (registered population, December); among "
+              f"non-capital provincial unit-years its mean is {g5.group(1)} percent a year and its interquartile range "
+              f"{g5.group(2)} to {g5.group(3)}. Panel I: the panel excludes unit-years whose net additions lie outside −100 "
+              f"to 200 per 1,000 dwellings, which reflect boundary changes or large redevelopment ({int(dr.group(1))} "
+              f"unit-years: {dropped}). Source: `robust_review.txt`, `robust_review_models.csv`, `vacancy.txt`.")
 
 
 def s9_robust():
     r = pd.read_csv(os.path.join(A, "plan_event_robust.csv"))
     tn = {"adopt": "Any new plan", "res_up": "New plan enlarging the reserve"}
     yn = {"zone": "Urban-use zoning", "devp": "Land-form-change permits"}
-    sn = {"전체": "All si/gun", "계획 있는 시군": "si/gun with a plan vintage"}
+    sn = {"전체": "All si/gun", "계획 있는 시군": "si/gun that adopted a plan in 2006–2025"}
     rows = [[tn[x.treat], yn[x.y], f"{sn[x['sample']]} ({x.units})", cs(x.cum, x.se, x.p), f"{x.mde:.2f}",
              f"{x.mean_y * 6:.2f}", f"{x.pre_p:.2f}", int(x.n)] for _, x in r.iterrows()]
     return ("\n\nPanel F. Robustness: units with a plan vintage only, and minimum detectable cumulative effects.\n\n"
@@ -355,7 +398,20 @@ def s10_robust():
     rows_c = []
     for part, lab in [("composition_all", "all"), ("composition_offplan", "outside res./com./ind.")]:
         rows_c += [[f"{EN[g]} ({lab})"] + [f"{val(part, c, g):.1f}" for c in l2n] for g in G]
+    gr = pd.read_csv(os.path.join(A, "zoning_route_robust_grid.csv"))
+    gr["group"] = gr.SG_ID.map(pd.read_csv(os.path.join(A, "zoning_route_sigun.csv")).set_index("SG_ID").group)
+    rl = {"A": "Res./com./ind. zones", "B": "Natural green", "C": "Other green, unsubdivided urban",
+          "D": "Planned management", "E": "Production/conservation management", "F": "Agricultural/natural conservation, other"}
+    ge = gr.groupby("group")[[f"ge5_{r}" for r in rl]].sum()
+    ge = ge.div(ge.sum(axis=1), axis=0) * 100
+    rows_f5 = [[EN[g]] + [f"{ge.at[g, f'ge5_{r}']:.1f}" for r in rl] for g in G]
     m = pd.read_csv(os.path.join(A, "robust_review_models.csv"))
+    rows_j = []
+    for c, lab in [("new_res", "Residential new urban land 2009–19 (2022 map)"),
+                   ("ge5", "Dwellings added outside the old core 2015–24, cells gaining at least 5"),
+                   ("net", "Dwellings added outside the old core 2015–24, net change")]:
+        d = m[m.block == f"offplan_{c}"].set_index("sample")
+        rows_j.append([lab] + [cs(d.at[s, "coef"], d.at[s, "se"], d.at[s, "p"], 1) for s in ("기본", "통제")] + [int(d.at["기본", "n"])])
     ol = m[m.block == "offplan_land"].set_index("sample")
     od = m[m.block == "offplan_dwellings_ge5"]
     rows_i = [[lab, cs(ol.at[smp, "coef"], ol.at[smp, "se"], ol.at[smp, "p"], 1)]
@@ -366,18 +422,26 @@ def s10_robust():
             + md(["Measure"] + [EN[g] for g in G], rows)
             + "\n\nPanel G (continued). Share of new dwellings 2015–2024 built outside the old core (%), by measure.\n\n"
             + md(["Measure"] + [EN[g] for g in G], rows_o)
+            + "\n\nPanel G (continued). Dwellings added outside the old core 2015–2024 in cells gaining at least 5, by 2026 "
+              "zoning (%; Figure 5b).\n\n"
+            + md(["Group"] + list(rl.values()), rows_f5)
             + "\n\nPanel H. Land use in 2022 of new urban land 2009–2019 (%, middle-class land-cover map).\n\n"
             + md(["Group (new urban land)"] + l2n, rows_c)
             + "\n\nPanel I. Groups defined from the pre-period: shrinking-versus-growing gap in the off-plan share of new "
               "urban land (model of Panel F, row 1) and off-plan share of dwellings in cells gaining at least 5 (%).\n\n"
             + md(["Grouping", "Gap in new urban land (pp)", "Dwellings, shrinking", "Dwellings, stagnant", "Dwellings, growing"],
                  rows_i)
-            + "\n\nPanels G–I: the sum of cell increases counts every cell that gained dwellings, including small counts that "
+            + "\n\nPanel J. Shrinking-versus-growing gap (pp) in the off-plan share of residential land and of dwellings, "
+              "non-capital provincial si/gun; models of Panel F with the measure's log size in place of log new urban land.\n\n"
+            + md(["Off-plan share of", "Region FE and log size", "+ controls of Panel F, row 2", "N (si/gun)"], rows_j)
+            + "\n\nPanels G–J: the sum of cell increases counts every cell that gained dwellings, including small counts that "
               "move in and out of the suppression range (1–4) between years; cells gaining at least 5 remove most of this "
               "noise, and the net change also subtracts dwellings lost in other cells (demolition, abandonment). Each cell of "
               "new urban land is split across the urban classes of the 2022 middle-class map in proportion to their shares "
               "of the cell. Groups in Panel I as in Table S6, Panel G. Source: `zoning_route_robust.txt`, "
-              "`zoning_route_robust_summary.csv`, `robust_review.txt`.")
+              "`zoning_route_robust_summary.csv`, `robust_review.txt`. Totals in Tables S10 and S11 can differ from Table S3 "
+              "and from each other by up to 0.6 percent, because the zoning tables split each 100-metre cell across "
+              "zoning polygons on a 10-metre subgrid, whereas Tables S3 and S11 assign whole cells.")
 
 
 def s5():
@@ -419,7 +483,7 @@ def s5():
 def s6():
     m = pd.read_csv(os.path.join(A, "vacancy_models.csv"))
     yl = {"d_vac": "All vacancies", "d_vac_old": "Pre-2000 dwellings", "d_vac_new5": "Built in last 5 years"}
-    main_, hh = m[m.block != "location_hh"], m[m.block == "location_hh"]
+    main_, hh = m[m.block == "location"], m[m.block == "location_hh"]
     rows = []
     for smp in dict.fromkeys(main_["sample"]):
         d = main_[main_["sample"] == smp].set_index("y")
@@ -474,7 +538,7 @@ def s7():
             rows.append([p[0].replace("-", "–"), p[1][:-2]] + p[2:])   # complex counts as integers
     blk2 = c[c.index("   시군 집단별, 2006년 이후"):c.index("   유형별")]
     rows2 = []
-    sec = "after 2006"
+    sec = "from 2006"
     for line in blk2.splitlines():
         if "2005년 이전" in line:
             sec = "before 2006"
@@ -486,7 +550,7 @@ def s7():
     tot = re.search(r"산업단지 (\d+)개, 지정 면적 (\d+) km2", c)
     h = read("hd_unmet.txt")
     hcols = ["Start", "Districts", "Area km²", "Planned dwellings", "Urban in 1999 (%)", "Urbanised 2019 (%)",
-             "Dwellings 2024", "Realised (% of planned)", "Dwelling increase 2010–24", "Completed (%)"]
+             "Dwellings 2024, all districts", "Realised (% of planned)", "Dwelling increase 2010–24", "Completed (%)"]
     blk = h[h.index("1. 시작 시기별"):h.index("   시군 집단별, 2006년 이후")]
     rows5 = []
     for line in blk.splitlines():
@@ -520,9 +584,12 @@ def s7():
                  "Development Act, the Special Act on Public Housing and the Private Rental Housing Act (source 18). The start "
                  "year is the designation date, or the earliest plan approval where the designation date is missing. "
                  f"Realised = dwellings in the district cells in 2024 (SGIS grid) ÷ planned dwellings, over the districts with "
-                 f"a planned number ({ht.group(4)} districts have none); completed = share of districts with a completion "
+                 f"a planned number ({ht.group(4)} districts have none), so it is not the ratio of the two preceding "
+                 "columns; completed = share of districts with a completion "
                  "date. Panel H models as in Panel C, with the outcome's growth 2000–05, log population 2000, region and the "
-                 "earlier windows as controls. Source: `hd_unmet.txt`, `hd_unmet_models.csv`.")
+                 "earlier windows as controls. Panels E and F leave out the "
+                 f"{int(ht.group(1)) - sum(int(r[1].replace(',', '')) for r in rows5)} districts with neither a designation "
+                 "nor a plan date. Source: `hd_unmet.txt`, `hd_unmet_models.csv`.")
     return ("**Table S7.** Industrial complexes and housing-site districts in non-capital provincial si/gun.\n\n"
             "Panel A. Industrial complexes by designation window (area-weighted).\n\n"
             + md(cols, rows) + "\n\nPanel B. By group.\n\n" + md(["Group (designation)"] + cols[1:], rows2)
@@ -533,7 +600,9 @@ def s7():
               "2000–05 (log ×100), 123 si/gun.\n\n"
             + md(["Model", "Regressor"] + list(IC_Y.values()), rows4)
             + f"\n\n{IC_NOTE} Blank cells: not estimated."
-            + f"\n\nAll windows: {tot.group(1)} complexes, {tot.group(2)} km² designated. Area-weighted shares: urbanised 2019 and "
+            + f"\n\nAll windows: {tot.group(1)} complexes, {tot.group(2)} km² designated; Panel B leaves out the "
+              f"{int(tot.group(1)) - sum(int(r[1].replace(',', '')) for r in rows2)} complexes without a designation year or "
+              "mapped area, which Panel A counts in its first row. Area-weighted shares: urbanised 2019 and "
               "industrial land 2022 are the shares of designated area that are urban land in the 2019 large-class land-cover map "
               "and industrial use in the 2022 middle-class map; urban in 1999 is the share urban in the late-1990s map, which "
               "precedes designation for complexes designated after 2000 but not for many earlier ones. Sale rate = sold ÷ saleable "
@@ -814,7 +883,8 @@ TERM = {"Intercept": "Constant", "gp": "Population growth g (pp)", "neg": "N (ne
         "trend_g": "Prior 5-year trend (%/yr)", "excess_pct": "Planned increase (% of population at adoption)",
         "post": "Adopted 2019 or later", "plan_excess": "2009 overstatement (%)", "reserve_share": "2009 reserve ÷ urbanised land (%)",
         "g_reg": "Realised population change 2009–19 (%)", "C(group, Treatment('성장'))[T.감소]": "Shrinking (vs growing)",
-        "C(group, Treatment('성장'))[T.정체]": "Stagnant (vs growing)", "lnew": "Log new urban land",
+        "C(group, Treatment('성장'))[T.정체]": "Stagnant (vs growing)", "lnew": "Log new urban land", "lsize": "Log size of the measure",
+        "s:g5": "Net additions × prior 5-year population change (%/yr)", "s:dec5": "Net additions × prior 5-year decline (0/1)",
         "avail_urb": "Share of available land in urban areas (%)", "old_inA": "Old core in residential, commercial and industrial zones (%)",
         "gun": "County (0/1)", "reserve_share09": "2009 reserve ÷ urbanised land (%)",
         "Em4": "k ≤ -4", "Em3": "k = -3", "Em2": "k = -2", "E0": "k = 0", "E1": "k = +1", "E2": "k = +2", "E3": "k = +3",
@@ -890,10 +960,24 @@ def s13_where(mid):
             return "S6-G", "Pre-2000 dwellings", g[k - 3]
         if k <= 11:
             return "S6-F", "Pre-2000 dwellings, with lags", ["Shrinking", "Stagnant", "Growing", "Non-capital provincial"][k - 8]
-        return "S6-F", "Pre-2000 dwellings, household control", ["Shrinking", "Stagnant", "Growing"][k - 12]
+        if k <= 14:
+            return "S6-F", "Pre-2000 dwellings, household control", ["Shrinking", "Stagnant", "Growing"][k - 12]
+        smp4 = ["Shrinking", "Stagnant", "Growing", "Non-capital provincial"]
+        if k <= 22:   # lag models for recently built and all vacancies (added 2026-11-22)
+            y, j = divmod(k - 15, 4)
+            return "S6-F", ["Built in last 5 years, with lags", "All vacancies, with lags"][y], smp4[j]
+        if k <= 26:   # decline as it happens
+            s, x = divmod(k - 23, 2)
+            return ("S6-H", "Pre-2000 dwellings",
+                    f"{['Non-capital provincial', 'All si/gun'][s]}; {['× prior population change', '× prior decline'][x]}")
+        m, s = divmod(k - 27, 2)   # off-plan models on residential land and dwellings
+        return ("S10-J", ["Off-plan share of residential new urban land (%)", "Off-plan share of dwellings, cells >= 5 (%)",
+                          "Off-plan share of dwellings, net change (%)"][m], ["Region FE and log size", "+ controls"][s])
     if sc == "vacancy":
         if k == 16:
             return "S6-B", "Pre-2000 dwellings", "Non-capital provincial, 2020–24"
+        if k > 16:   # no exclusion of unit-years
+            return "S6-I", "Pre-2000 dwellings", ["Shrinking", "Stagnant", "Growing", "Metropolitan and capital region"][k - 17]
         s, y = divmod(k - 1, 3)
         return "S6-A", VAC_Y[y], VAC_S[s]
     if sc == "plan_pop":
@@ -905,7 +989,7 @@ def s13_where(mid):
         if k > 45:   # robustness: units with a plan vintage only
             ev = ["Any new plan", "New plan enlarging the reserve"][(k - 46) // 4]
             out = ["Urban-use zoning", "Land-form-change permits"][((k - 46) % 4) // 2]
-            smp = ["All si/gun", "si/gun with a plan vintage"][(k - 46) % 2]
+            smp = ["All si/gun", "si/gun that adopted a plan"][(k - 46) % 2]
             return "S9-F", out, f"{ev}; {smp}"
         e, r = divmod(k - 1, 9)
         y, s = divmod(r, 3)
@@ -927,19 +1011,19 @@ def s13_fe(formula):
 def s13():
     mo = pd.read_csv(os.path.join(REP, "models.csv"))
     es = pd.read_csv(os.path.join(REP, "python_estimates.csv"))
-    order = ["S3-C", "S4", "S5-B", "S5-C", "S5-D", "S5-E", "S5-F", "S6-A", "S6-B", "S6-F", "S6-G", "S7-C", "S7-D", "S7-H", "S8-C", "S8-D", "S8-E", "S8-F",
-             "S9-A", "S9-B", "S9-C", "S9-D", "S9-E", "S9-F", "S10-F", "S10-I", ""]
+    order = ["S3-C", "S4", "S5-B", "S5-C", "S5-D", "S5-E", "S5-F", "S6-A", "S6-B", "S6-F", "S6-G", "S6-H", "S6-I", "S7-C", "S7-D", "S7-H", "S8-C", "S8-D", "S8-E", "S8-F",
+             "S9-A", "S9-B", "S9-C", "S9-D", "S9-E", "S9-F", "S10-F", "S10-I", "S10-J", ""]
     mo["where"] = [s13_where(i) for i in mo.id]
     mo["rank"] = [order.index(w[0]) for w in mo["where"]]
     mo = mo.sort_values(["rank", "id"], kind="stable")
     panels, rows = [], []
     for (src, part) in [(("S3-C", "S4"), "A. Sprawl and the old core (Tables S3, Panel C, and S4)"),
                         (("S5-B", "S5-C", "S5-D", "S5-E", "S5-F"), "B. Housing supply, households and in-migration (Table S5)"),
-                        (("S6-A", "S6-B", "S6-F", "S6-G"), "C. Vacancy panel (Table S6)"),
+                        (("S6-A", "S6-B", "S6-F", "S6-G", "S6-H", "S6-I"), "C. Vacancy panel (Table S6)"),
                         (("S7-C", "S7-D", "S7-H"), "D. Industrial complexes and housing-site districts (Table S7)"),
                         (("S8-C", "S8-D", "S8-E", "S8-F"), "E. Master plans (Table S8)"),
                         (("S9-A", "S9-B", "S9-C", "S9-D", "S9-E", "S9-F"), "F. Event study of plan adoptions (Table S9)"),
-                        (("S10-F", "S10-I"), "G. Off-plan share of new urban land (Table S10, Panels F and I)"),
+                        (("S10-F", "S10-I", "S10-J"), "G. Off-plan shares (Table S10, Panels F, I and J)"),
                         (("",), "H. Models estimated by the analysis scripts but not tabulated")]:
         rows = []
         for _, m in mo[mo["where"].map(lambda w: w[0] in src)].iterrows():

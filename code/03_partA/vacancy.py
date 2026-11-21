@@ -179,6 +179,9 @@ def main():
                  else np.nan for s, y, p_ in zip(p.sigun, p.year, p.units_l)]
     p["ry"] = p.region + "_" + p.year.astype(str)
     p = p.dropna(subset=["s", "d_vac_old"])
+    # unit-years with net additions outside -100..200 per 1,000 (boundary or redevelopment jumps) are left out of the
+    # panel; the untrimmed panel is estimated as a check below
+    p_all = p.copy()
     p = p[p.s.between(-100, 200)]
     p.to_csv(os.path.join(OUT, "vacancy_panel.csv"), index=False, encoding="utf-8-sig")
     say("\n2. 위치의 문제: 주택이 더 늘어난 해에 오래된(2000년 전) 주택의 빈집이 더 늘어나는가 (2016-2025, 시군 연 패널)")
@@ -196,6 +199,17 @@ def main():
                                                                        cov_kwds={"groups": g.sigun})
     say(f"   비수도권 도 시군, 가구 변화 통제 (2020-2024): d_vac_old ~ s {fmt(m, 's')}, d_hh {fmt(m, 'd_hh')}")
     rows.append(["location_hh", "nonmetro", "d_vac_old", m.params["s"], m.bse["s"], m.pvalues["s"], int(m.nobs)])
+    drop = p_all[~p_all.s.between(-100, 200)]
+    say(f"   순증이 천 호당 -100~200 밖이라 뺀 시군-연도 {len(drop)}: "
+        + ", ".join(f"{a} {b}" for a, b in zip(drop.sigun, drop.year)))
+    res = []
+    for grp in [["감소"], ["정체"], ["성장"], ["광역시", "수도권"]]:
+        g = p_all[p_all.group.isin(grp)]
+        m = smf.ols("d_vac_old ~ s + C(sigun) + C(ry)", data=g).fit(cov_type="cluster", cov_kwds={"groups": g.sigun})
+        res.append(f"{'·'.join(grp)} {fmt(m, 's')} (n={int(m.nobs)})")
+        rows.append(["location_untrimmed", "+".join(grp), "d_vac_old", m.params["s"], m.bse["s"], m.pvalues["s"],
+                     int(m.nobs)])
+    say("   제외 없이: d_vac_old ~ s: " + ", ".join(res))
 
     # 3. unsold
     us, uc = mltm("DT_MLTM_2082"), mltm("DT_MLTM_5328")

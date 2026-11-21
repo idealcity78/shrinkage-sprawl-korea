@@ -70,8 +70,8 @@ C = [
     ("2006-10 industrial use 2022 (%)", "13.8", "ic_unmet.txt", r"2006-10\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+([\d.]+)", 1),
     ("post-2006 designations, shrinking (km2)", "127.3", "ic_unmet.txt", r"2006년 이후 지정\n[^\n]*\n[^\n]*\n감소\s+[\d.]+\s+([\d.]+)", 1),
     ("post-2006 designations, growing (km2)", "136.0", "ic_unmet.txt", r"2006년 이후 지정\n(?:[^\n]*\n){4}성장\s+[\d.]+\s+([\d.]+)", 1),
-    ("manufacturing workers/km2 shrinking", "503.8", SUP, r"\| Shrinking \(after 2006\) \|(?: [^|]+ \|){8} ([\d.,]+) \|", 1),
-    ("manufacturing workers/km2 growing", "675.5", SUP, r"\| Growing \(after 2006\) \|(?: [^|]+ \|){8} ([\d.,]+) \|", 1),
+    ("manufacturing workers/km2 shrinking", "503.8", SUP, r"\| Shrinking \(from 2006\) \|(?: [^|]+ \|){8} ([\d.,]+) \|", 1),
+    ("manufacturing workers/km2 growing", "675.5", SUP, r"\| Growing \(from 2006\) \|(?: [^|]+ \|){8} ([\d.,]+) \|", 1),
     ("2006-12 designation -> later manufacturing growth", "1.127", "ic_unmet.txt", r"제조업 종사자  2006-12 지정 \+([\d.]+)", 1),
     ("placebo 2016-24 designation -> 2005-15 growth", "0.982", "ic_unmet.txt", r"제조업 종사자[^\n]*2005-15 성장 \+([\d.]+)", 1),
     ("prior manufacturing growth -> designation", "0.085", "ic_unmet.txt", r"pre_manuf \+([\d.]+)", 1),
@@ -85,7 +85,7 @@ C = [
     ("public-facility share of new urban land, shrinking (%)", "13.8", SUP, r"\| Shrinking \(all\) \|(?: [\d.]+ \|){5} ([\d.]+) \|", 1),
     ("minimum detectable effect, new plan on zoning", "4.41", SUP, r"\| Any new plan \| Urban-use zoning \| All si/gun \(\d+\) \| [^|]+\| ([\d.]+) \|", 1),
     ("minimum detectable effect, reserve-enlarging plan on zoning", "9.54", SUP, r"\| New plan enlarging the reserve \| Urban-use zoning \| All si/gun \(\d+\) \| [^|]+\| ([\d.]+) \|", 1),
-    ("units with a plan vintage, event study", "85", SUP, r"si/gun with a plan vintage \((\d+)\)", 1),
+    ("units that adopted a plan, event study", "85", SUP, r"si/gun that adopted a plan in 2006–2025 \((\d+)\)", 1),
     ("reverse coefficient within one census method", "0.394", SUP, r"\| Next-period housing growth on household growth \| [^|]+\| ([\d.]+) \(", 1),
     ("its s.e.", "0.142", SUP, r"\| Next-period housing growth on household growth \| [^|]+\| [\d.]+ \(([\d.]+)\)", 1),
     ("housing districts 2006-12 -> later household growth", "0.934", "hd_unmet.txt", r"가구\s+2006-12 시작 \+([\d.]+)", 1),
@@ -129,8 +129,6 @@ C = [
     ("2019-25 shrinking plans, count", "48", SUP, r"\| Shrinking \| 2019–25 \| (\d+) \|", 1),
     ("2019-25 shrinking planned growth", "0.95", "plan_pop.txt", r"2019-25\s+48\s+([\d.]+)", 1),
     ("2019-25 shrinking trend", "1.15", "plan_pop.txt", r"2019-25\s+48\s+[\d.]+\s+-([\d.]+)", 1),
-    ("2009 plan overstatement, shrinking (%)", "44", "plan_pop.txt", r"감소 시군 2009 계획 초과 중앙값 (\d+)%", 1),
-    ("2009 plan overstatement, growing (%)", "49", "plan_pop.txt", r"성장 시군 (\d+)%", 1),
     ("new urban on overstatement", "0.014", "plan_pop.txt", r"계획 초과\(2009 계획인구 ÷ 2009 인구 − 1\): -([\d.]+)", 1),
     ("its s.e.", "0.053", "plan_pop.txt", r"계획 초과\(2009.*?\(se ([\d.]+)\)", 1),
     ("new urban on reserve share", "0.033", "plan_pop.txt", r"예정용지 ÷ 시가화용지 \(2009\): -([\d.]+)", 1),
@@ -144,8 +142,6 @@ C = [
     ("new plans 2009-25", "178", "plan_event.txt", r"새 계획 시행 (\d+)건", 1),
     ("reserve-enlarging plans", "70", "plan_event.txt", r"시가화예정용지 증가 (\d+)건", 1),
     ("population-raising plans", "32", "plan_event.txt", r"계획인구 증가 (\d+)건", 1),
-    ("reserve-enlarging plan -> zoning, cumulative", "2.510", SUP, r"Panel B\. New plan enlarging the reserve\.[\s\S]*?\| Urban-use zoning \| All \|(?: [^|]+ \|){10} -([\d.]+) \(", 1),
-    ("its s.e.", "3.408", SUP, r"Panel B\. New plan enlarging the reserve\.[\s\S]*?\| Urban-use zoning \| All \|(?: [^|]+ \|){10} -[\d.]+ \(([\d.]+)\)", 1),
     ("pre-period joint p (zoning)", "0.56", "plan_event.txt", r"\[예정용지를 늘린 새 계획\(0/1\) → 용도지역\(주거·상업·공업\) 증가, 전체\].*?결합검정 p=([\d.]+)", 1),
     ("continuous reserve -> zoning cumulative", "0.002", "plan_event.txt", r"\[예정용지 증가 1%p → 용도지역\(주거·상업·공업\) 증가, 전체\].*?누적 ([\d.]+)", 1),
     ("its s.e.", "0.004", "plan_event.txt", r"\[예정용지 증가 1%p → 용도지역\(주거·상업·공업\) 증가, 전체\].*?\(se ([\d.]+)\)", 1),
@@ -167,10 +163,6 @@ C = [
     ("reserve share -> off-plan, per 10 points", "0.18", "zoning_route.txt", r"10%p: \+([\d.]+)", 1),
     ("its s.e.", "0.18", "zoning_route.txt", r"10%p: \+[\d.]+ \(se ([\d.]+)\)", 1),
     # added for the revised manuscript (paper1_text.md): data, method and sample-size statements
-    ("grid/registered population, all groups, 2010", "0.958", SUP, r"All non-capital provincial and comparison groups \| [\d.]+ \| [\d.]+ \| ([\d.]+) \|", 1),
-    ("grid/registered population, all groups, 2015", "1.014", SUP, r"All non-capital provincial and comparison groups \| [\d.]+ \| [\d.]+ \| [\d.]+ \| ([\d.]+) \|", 1),
-    ("grid/registered population, shrinking, 2010", "0.984", SUP, r"\| Shrinking \| 0\.\d{3} \| [\d.]+ \| ([\d.]+) \|", 1),
-    ("grid/registered population, shrinking, 2015", "1.064", SUP, r"\| Shrinking \| 0\.\d{3} \| [\d.]+ \| [\d.]+ \| ([\d.]+) \|", 1),
     ("shrinking units in the housing panels", "87", "supply_demand.txt", r"감소 (\d+), 정체", 1),
     ("median non-contiguous share of new urban land 2009-19, shrinking (%)", "78.2", "shrink_sprawl.txt", r"비연속 비율 %\s+([\d.]+) \(", 1),
     ("median share > 2 km from old core, shrinking (%)", "10.5", "shrink_sprawl.txt", r"2km 넘는 신규 비율 %\s+([\d.]+) \(", 1),
@@ -186,31 +178,30 @@ C = [
     ("slope 1999-2009", "0.382", SUP, r"census population 2000–2010\) \| New urban land rate \(%\) \| [^|]+\| [^|]+\| ([\d.]+)", 1),
     ("s.e. of the 2009-19 prediction at zero growth", "2.33", SUP, r"registered population 2009–2019\) \| New urban land rate \(%\) \| [\d.]+ \(([\d.]+)\)", 1),
     ("s.e. of the old-core coefficient", "0.080", SUP, r"New dwellings outside the old core 2015–24 \(%\) \| Non-capital provincial \| -[\d.]+ \(([\d.]+)\)", 1),
-    ("housing growth after periods without decline (%/yr)", "1.50", SUP, r"\| No population decline \| ([\d.]+) \|", 1),
-    ("household growth after periods without decline (%/yr)", "1.54", SUP, r"\| No population decline \| [\d.]+ \| ([\d.]+) \|", 1),
-    ("housing growth after prior decline", "0.318", SUP, r"\| Prior-period population decline \(0/1\) \|\s*\| -([\d.]+)", 1),
-    ("same, same-period households controlled", "0.045", SUP, r"\| Prior-period population decline \(0/1\) \|\s*\| [^|]+\| -([\d.]+)", 1),
-    ("its s.e.", "0.057", SUP, r"\| Prior-period population decline \(0/1\) \|\s*\| [^|]+\| -[\d.]+ \(([\d.]+)\)", 1),
     ("next-period net in-migration, 95% lower limit", "4.092", SUP,
      r"Net in-migration: 95% confidence interval \| \[[-\d.]+, [-\d.]+\] \| \[-([\d.]+),", 1),
     ("next-period net in-migration, 95% upper limit", "0.628", SUP,
      r"Net in-migration: 95% confidence interval \| \[[-\d.]+, [-\d.]+\] \| \[[-\d.]+, ([\d.]+)\]", 1),
-    ("household lead, 95% upper limit", "0.217", SUP,
-     r"\| Next-period household growth \| Housing growth \| [^|]+\| [^|]+\| \[[-\d.]+, ([\d.]+)\]", 1),
-    ("population lead, 95% upper limit", "0.270", SUP,
-     r"\| Next-period population growth \| Housing growth \| [^|]+\| [^|]+\| \[[-\d.]+, ([\d.]+)\]", 1),
+    ("vacancy response x prior 5-yr population change, non-capital provincial", "0.029", "robust_review.txt", r"비수도권 도 시군, g5: s [+\-][\d.]+ \([\d.]+\)\*+, s x g5 -([\d.]+)", 1),
+    ("its s.e.", "0.008", "robust_review.txt", r"비수도권 도 시군, g5: s [+\-][\d.]+ \([\d.]+\)\*+, s x g5 -[\d.]+ \(([\d.]+)\)", 1),
+    ("recently built vacancies, 3-year sum, growing", "0.270", "robust_review.txt", r"d_vac_new5 성장: [^\n]*합 \+([\d.]+)", 1),
+    ("recently built vacancies, 3-year sum, shrinking", "0.246", "robust_review.txt", r"d_vac_new5 감소: [^\n]*합 \+([\d.]+)", 1),
+    ("off-plan dwellings, net change, shrinking (%)", "41.7", SUP, r"\| Dwellings added outside the old core, net change \| ([\d.]+) \|", 1),
+    ("off-plan dwellings, net change, growing (%)", "24.8", SUP, r"\| Dwellings added outside the old core, net change \| [\d.]+ \| [\d.]+ \| ([\d.]+) \|", 1),
+    ("off-plan gap, residential land, controls (pp)", "20.2", SUP, r"\| Residential new urban land 2009–19 \(2022 map\) \| [^|]+\| ([\d.]+) \(", 1),
+    ("off-plan gap, dwellings >= 5, controls (pp)", "15.8", SUP, r"\| Dwellings added outside the old core 2015–24, cells gaining at least 5 \| [^|]+\| ([\d.]+) \(", 1),
+    ("share of new urban land > 2 km, growing (%)", "4.6", SUP, r"\| Share of new urban land > 2 km from the old core \(%\) \|(?: [^|]+ \|){2} ([\d.]+) \(", 1),
+    ("continuous reserve -> permits, stagnant and growing", "0.148", SUP, r"Panel D\. Reserve increase, 1 pp\.[\s\S]*?\| Land-form-change permits \| Stagnant and growing \|(?: [^|]+ \|){10} ([\d.]+) \(", 1),
+    ("its s.e.", "0.061", SUP, r"Panel D\. Reserve increase, 1 pp\.[\s\S]*?\| Land-form-change permits \| Stagnant and growing \|(?: [^|]+ \|){10} [\d.]+ \(([\d.]+)\)", 1),
+    ("new-town districts with mapped boundaries", "17", SUP, r"; (\d+) are mapped", 1),
     ("IQR of the 2009 reserve share, off-plan sample (points)", "96.8", SUP, r"interquartile range ([\d.]+) pp: ", 1),
     ("largest off-plan reduction for an IQR difference in reserves (points)", "1.7", SUP,
      r"interquartile range [\d.]+ pp: \[-([\d.]+),", 1),
     ("placebo, all employment, designated 2016-24", "0.383", SUP, r"\| Placebo: growth 2010–24 \| Designated 2016–24 \| [^|]+\| ([\d.]+) \(", 1),
     ("all employment, designated 2006-12", "0.411", SUP, r"\| Growth 2010–24 \| Designated 2006–12 \| [^|]+\| ([\d.]+) \(", 1),
     ("placebo 2005-15 growth, all employment, designated 2016-24", "0.493", SUP, r"\| Placebo: growth 2005–15 \| Designated 2016–24 \| [^|]+\| ([\d.]+) \(", 1),
-    ("2010 long-term vacancy share, shrinking (%)", "50.1", "vacancy.txt", r"12개월 이상 빈 주택 비중 \(%\): 감소 ([\d.]+)", 1),
-    ("2010 long-term vacancy share, capital region (%)", "20.8", "vacancy.txt", r"12개월 이상 빈 주택 비중 \(%\):[^\n]*수도권 ([\d.]+)", 1),
     ("recent-dwelling vacancy per new dwelling, shrinking", "0.376", SUP, r"Panel A\. Change in vacant[\s\S]*?\| Shrinking \| [^|]+\| [^|]+\| ([\d.]+) \(", 1),
     ("recent-dwelling vacancy per new dwelling, growing", "0.356", SUP, r"Panel A\. Change in vacant[\s\S]*?\| Growing \| [^|]+\| [^|]+\| ([\d.]+) \(", 1),
-    ("planned growth, shrinking, adopted 2013-18 (%/yr)", "5.97", SUP, r"\| Shrinking \| 2013–18 \| \d+ \| ([\d.]+)", 1),
-    ("prior trend, same plans", "0.37", SUP, r"\| Shrinking \| 2013–18 \| \d+ \| [\d.]+ \| -([\d.]+)", 1),
     ("reserve share on planned increase", "0.079", SUP, r"Planned increase \(% of population at adoption\) \| -([\d.]+)", 1),
     ("its s.e.", "0.255", SUP, r"Planned increase \(% of population at adoption\) \| -[\d.]+ \(([\d.]+)\)", 1),
     ("event-study si/gun-years", "1,936", "plan_event.txt", r"\[예정용지를 늘린 새 계획\(0/1\) → 용도지역\(주거·상업·공업\) 증가, 전체\] n=(\d+)", 1),
@@ -218,6 +209,8 @@ C = [
 
 # values derived from the checked ones (computed here, not read)
 DERIVED = [
+    ("grid/registered jump 2010->2015, all groups (%), Table S2", "6", lambda v: round((_s2(r"All non-capital provincial and comparison groups", 2) / _s2(r"All non-capital provincial and comparison groups", 1) - 1) * 100)),
+    ("grid/registered jump 2010->2015, shrinking (%), Table S2", "8", lambda v: round((_s2(r"Shrinking", 2) / _s2(r"Shrinking", 1) - 1) * 100)),
     ("study si/gun = 87 + 11 + 25 + 7 + 32 (group counts, shrink_sprawl.txt)", "162", lambda v: 87 + 11 + 25 + 7 + 32),
     ("2019-25 shrinking plans projecting growth, count (89.6% of 48)", "43", lambda v: round(v["89.6"] / 100 * v["48"])),
     ("upper bound of continuous effect, % of 6-yr zoning flow (about 3)", "3",
@@ -241,6 +234,14 @@ CONTEXT = [
     ("new-town share of new urban land, Table S11 note", "and {} percent of new urban land in 2009–2019", "supp", SUP,
      r"\| All \| [\d,]+ \| [\d,]+ \| [\d.]+ \| [\d.]+ \| [\d.]+ \| ([\d.]+) \|"),
 ]
+
+
+def _s2(row, k):
+    """Table S2 ratio of gridded to registered population: k = 1 for 2010, k = 2 for 2015."""
+    t = open(os.path.join(A, SUP), encoding="utf-8").read()
+    t = t[t.index("**Table S2.**"):t.index("**Table S3.**")]
+    m = re.search(r"\| " + row + r" \| ([\d.]+) \| ([\d.]+) \| ([\d.]+) \| ([\d.]+) \|", t)
+    return float(m.group(2 + k))
 
 
 def num(s):

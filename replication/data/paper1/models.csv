@@ -111,6 +111,10 @@ vacancy_013,vacancy,d_vac ~ s + C(sigun) + C(ry),cluster,cluster_id,,385,0.44849
 vacancy_014,vacancy,d_vac_old ~ s + C(sigun) + C(ry),cluster,cluster_id,,385,0.183278808217762,39
 vacancy_015,vacancy,d_vac_new5 ~ s + C(sigun) + C(ry),cluster,cluster_id,,385,0.4393822300449203,39
 vacancy_016,vacancy,d_vac_old ~ s + d_hh + C(sigun) + C(ry),cluster,cluster_id,,615,0.5216294363814472,123
+vacancy_017,vacancy,d_vac_old ~ s + C(sigun) + C(ry),cluster,cluster_id,,870,0.558000477840395,87
+vacancy_018,vacancy,d_vac_old ~ s + C(sigun) + C(ry),cluster,cluster_id,,110,0.6211163815460817,11
+vacancy_019,vacancy,d_vac_old ~ s + C(sigun) + C(ry),cluster,cluster_id,,250,0.366416215840492,25
+vacancy_020,vacancy,d_vac_old ~ s + C(sigun) + C(ry),cluster,cluster_id,,390,0.18255709509881102,39
 plan_pop_001,plan_pop,plan_g ~ trend_g + C(region),cluster,cluster_id,,293,0.06475286270924097,91
 plan_pop_002,plan_pop,reserve_share ~ excess_pct + C(region),cluster,cluster_id,,274,0.046661588512786456,91
 plan_pop_003,plan_pop,new_urb ~ plan_excess + g_reg + C(region),HC1,,,89,0.14661571478008073,
@@ -186,3 +190,21 @@ robust_review_011,robust_review,d_vac_old ~ s + s_l1 + s_l2 + C(sigun) + C(ry),c
 robust_review_012,robust_review,d_vac_old ~ s + d_hh + C(sigun) + C(ry),cluster,cluster_id,,435,0.5737323160743564,87
 robust_review_013,robust_review,d_vac_old ~ s + d_hh + C(sigun) + C(ry),cluster,cluster_id,,55,0.8247797312997879,11
 robust_review_014,robust_review,d_vac_old ~ s + d_hh + C(sigun) + C(ry),cluster,cluster_id,,125,0.6686021514239512,25
+robust_review_015,robust_review,d_vac_new5 ~ s + s_l1 + s_l2 + C(sigun) + C(ry),cluster,cluster_id,,696,0.6331542411454503,87
+robust_review_016,robust_review,d_vac_new5 ~ s + s_l1 + s_l2 + C(sigun) + C(ry),cluster,cluster_id,,88,0.9090627640612194,11
+robust_review_017,robust_review,d_vac_new5 ~ s + s_l1 + s_l2 + C(sigun) + C(ry),cluster,cluster_id,,200,0.6922413225713892,25
+robust_review_018,robust_review,d_vac_new5 ~ s + s_l1 + s_l2 + C(sigun) + C(ry),cluster,cluster_id,,984,0.6113816726799526,123
+robust_review_019,robust_review,d_vac ~ s + s_l1 + s_l2 + C(sigun) + C(ry),cluster,cluster_id,,696,0.7895249657349515,87
+robust_review_020,robust_review,d_vac ~ s + s_l1 + s_l2 + C(sigun) + C(ry),cluster,cluster_id,,88,0.8035728987067661,11
+robust_review_021,robust_review,d_vac ~ s + s_l1 + s_l2 + C(sigun) + C(ry),cluster,cluster_id,,200,0.8316489863456931,25
+robust_review_022,robust_review,d_vac ~ s + s_l1 + s_l2 + C(sigun) + C(ry),cluster,cluster_id,,984,0.7529667576031804,123
+robust_review_023,robust_review,d_vac_old ~ s + s:g5 + C(sigun) + C(ry),cluster,cluster_id,,1230,0.4407735363642473,123
+robust_review_024,robust_review,d_vac_old ~ s + s:dec5 + C(sigun) + C(ry),cluster,cluster_id,,1230,0.4355265514668629,123
+robust_review_025,robust_review,d_vac_old ~ s + s:g5 + C(sigun) + C(ry),cluster,cluster_id,,1615,0.3516948613452521,162
+robust_review_026,robust_review,d_vac_old ~ s + s:dec5 + C(sigun) + C(ry),cluster,cluster_id,,1615,0.34879655418472266,162
+robust_review_027,robust_review,"out_new_res ~ C(group, Treatment('성장')) + lsize + C(region)",HC1,,,116,0.21781966815124676,
+robust_review_028,robust_review,"out_new_res ~ C(group, Treatment('성장')) + lsize + avail_urb + old_inA + gun + C(region)",HC1,,,116,0.4726881893228225,
+robust_review_029,robust_review,"out_ge5 ~ C(group, Treatment('성장')) + lsize + C(region)",HC1,,,120,0.5159340619221442,
+robust_review_030,robust_review,"out_ge5 ~ C(group, Treatment('성장')) + lsize + avail_urb + old_inA + gun + C(region)",HC1,,,120,0.7894287876647341,
+robust_review_031,robust_review,"out_net ~ C(group, Treatment('성장')) + lsize + C(region)",HC1,,,119,0.13188757564117326,
+robust_review_032,robust_review,"out_net ~ C(group, Treatment('성장')) + lsize + avail_urb + old_inA + gun + C(region)",HC1,,,119,0.4117077582526606,

@@ -12,7 +12,7 @@ building does:
 
 The folder `replication/` re-estimates every regression of both papers in R, without the raw data or ArcGIS:
 
-- **Paper 1:** 187 models (Tables 2–4, Figures 2–3, Supplementary Tables S4–S10).
+- **Paper 1:** 209 models (Tables 2–4, Figures 2–3, Supplementary Tables S4–S10).
 - **Paper 2:** 212 models (Tables 3–5 and the robustness checks of Sections 5.3–5.4), plus its two permutation tests.
 
 ```
@@ -41,7 +41,7 @@ Rscript replication/R/02_replicate_paper2.R
 The scripts write `replication/output/paper1_r_vs_python.md` and `paper2_r_vs_python.md`. In the current version every
 estimated term agrees with the published estimates (coefficients, standard errors and N):
 
-- paper 1: 919 terms, largest difference 1.0e-11;
+- paper 1: 982 terms, largest difference 1.0e-11;
 - paper 2: 961 terms, largest difference 2.8e-8.
 
 The permutation p of all 13 outcomes of paper 2 is the same in R, using the placebo draws made in Python.

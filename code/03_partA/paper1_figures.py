@@ -34,7 +34,7 @@ import paths
 
 A = os.path.join(paths.OUTPUTS, "partA")
 OUT = os.path.join(paths.OUTPUTS, "paper1")
-GROUPS = {"감소": "Shrinking", "정체": "Stagnant", "성장": "Growing", "광역시": "Metropolitan cities",
+GROUPS = {"감소": "Shrinking", "정체": "Stagnant", "성장": "Growing", "광역시": "Metropolitan",
           "수도권": "Capital region"}
 COL = {"감소": "#b2182b", "정체": "#ef8a62", "성장": "#2166ac", "광역시": "#7f7f7f", "수도권": "#4d4d4d"}
 plt.rcParams.update({"font.family": "Arial", "font.size": 9, "axes.spines.top": False, "axes.spines.right": False})
@@ -194,7 +194,8 @@ def fig1():
         ax.set_aspect("equal")
         ax.axis("off")
         ax.set_title(title, fontsize=9, loc="left")
-        fig.colorbar(pc, ax=ax, shrink=0.55, orientation="horizontal", pad=0.02)
+        # arrows mark values beyond the colour range (urban land fell in a few units)
+        fig.colorbar(pc, ax=ax, shrink=0.55, orientation="horizontal", pad=0.02, extend="both")
     n_both = int(t.both.sum())
     n_dec = int(((t.g_rp_0919 < 0) & t.group.isin(["감소", "정체", "성장"])).sum())
     fig.text(0.01, 0.01, f"Outlined: population fell and urban land grew, 2009-19 "
