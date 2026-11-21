@@ -209,7 +209,7 @@ C = [
 
 # values derived from the checked ones (computed here, not read)
 DERIVED = [
-    ("grid/registered jump 2010->2015, all groups (%), Table S2", "6", lambda v: round((_s2(r"All non-capital provincial and comparison groups", 2) / _s2(r"All non-capital provincial and comparison groups", 1) - 1) * 100)),
+    ("grid/registered jump 2010->2015, smallest group (%), Table S2", "4", lambda v: round(min(_s2(g, 2) / _s2(g, 1) - 1 for g in ("Shrinking", "Stagnant", "Growing", "Metropolitan", "Capital region")) * 100)),
     ("grid/registered jump 2010->2015, shrinking (%), Table S2", "8", lambda v: round((_s2(r"Shrinking", 2) / _s2(r"Shrinking", 1) - 1) * 100)),
     ("study si/gun = 87 + 11 + 25 + 7 + 32 (group counts, shrink_sprawl.txt)", "162", lambda v: 87 + 11 + 25 + 7 + 32),
     ("2019-25 shrinking plans projecting growth, count (89.6% of 48)", "43", lambda v: round(v["89.6"] / 100 * v["48"])),

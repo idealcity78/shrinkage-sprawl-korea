@@ -51,9 +51,9 @@ def table_props():
             ["P2 Locational oversupply", "Supply within household growth, but new dwellings empty older stock",
              "Supply against household growth; vacancy panel (8)", "Table 4; S5 Panel A, S6"],
             ["P3 Universal growth premise", "Planned growth weakly related to the prior trend",
-             "Plan on trend (2–3); adoption eras and the cap", "Table 5, Figure 3; S8 Panels A–D"],
+             "Plan on trend (2–3); adoption eras and the cap", "Table 5, Figure 3; S8 Panels A–E"],
             ["P4 Non-binding capacity", "Overstatement and revisions do not predict zoning or development",
-             "2009 cross-section; event study (9)", "Figure 4; S8 Panels E–F, S9"],
+             "2009 cross-section; event study (9)", "Figure 4; S8 Panel F, S9"],
             ["P5 Off-plan expansion", "Expansion bypasses the planned route; reserves stay unused",
              "Zoning routes; off-plan regression", "Table 5, Figure 5; S10"]]
     return ("**Table 1.** Propositions, tests and evidence.\n\n"
@@ -71,12 +71,13 @@ def table1():
     dens = {g: grab(s, rf"{g} ([\d,]+ -> [\d,]+ -> [\d,]+)") for g in G}
     both = {g: grab(s, rf"\n{g}\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+([\d.]+)\n") for g in G}
     pop = {g: ("0.0" if v == "-0.0" else v) for g, v in pop.items()}   # rounding artefact
-    rows = [[EN[g], n[g], pop[g], urb[i], pc0[g], pc[g], dens[g].replace(" -> ", " → "), both[g]] for i, g in enumerate(G)]
+    rows = [[EN[g], n[g], pop[g], urb[i], pc0[g], pc[g], dens[g].replace(" -> ", " → "), f"{float(both[g]):.0f}"]
+            for i, g in enumerate(G)]
     return ("**Table 2.** Shrinkage sprawl by group, si/gun medians unless noted.\n\n" + md(
         ["Group", "si/gun", "Registered pop. change 2009–19 (%)", "Urban land change 2009–19 (%)",
          "Δ log urban land per resident ×100, 1999–2009", "Δ log urban land per resident ×100, 2009–19", "Residents per urban km², 2000/1999 → 2009 → 2019 (group total)",
          "Expansion 2009–19 + core and pop. decline 2015–24 (% of si/gun)"], rows)
-        + "\n\nSources: land cover (large class), SGIS 100 m grid, registered population (KOSIS DT_1B040A3).")
+        + "\n\nSources: land cover (large class), SGIS 100 m grid, registered population (Ministry of the Interior and Safety).")
 
 
 def table2():
@@ -109,7 +110,7 @@ def table3():
               "dwellings; si/gun and region × year fixed effects, clustered s.e. Vacancy rates 2015/2019/2024/2025 (%): "
               f"shrinking {rate['감소'].split()[0]}/{rate['감소'].split()[1]}/{rate['감소'].split()[2]}/{rate['감소'].split()[3]}, "
               f"capital region {rate['수도권'].split()[0]}/{rate['수도권'].split()[1]}/{rate['수도권'].split()[2]}/{rate['수도권'].split()[3]}. "
-              "Sources: register-based census vacancy by construction year (KOSIS DT_1JU1512).")
+              "Sources: register-based census vacancy by construction year (Statistics Korea).")
 
 
 def table4():
@@ -125,7 +126,7 @@ def table4():
         ["Group", "Plan vintages", "Planned growth (%/yr)", "Prior 5-yr trend (%/yr)", "Realised growth (%/yr)",
          "Attainment (actual ÷ planned)", "Reserve per planned added resident (m²)", "New urban land 2009–19 outside res./com./ind. zones (%)"], rows)
         + "\n\nPlan vintages adopted since 2000, medians. Attainment for plans whose target year has passed. "
-          "Sources: MOLIT urban-planning statistics (KOSIS TX_315_2009_H1004, H1004A), registered population, "
+          "Sources: MOLIT urban-planning statistics, registered population, "
           "V-World zoning (2026), land cover.")
 
 
